@@ -420,7 +420,7 @@
         </div>
     </section>
 
-    <!-- SATELLITE, RADAR & WIND SECTIONS DISPOSED VERTICALLY (ONE PER LINE) -->
+    <!-- SATELLITE, RADAR, SYNOPTIC & WIND SECTIONS (ONE PER LINE) -->
     <section class="space-y-6">
         
         <!-- 1. RADAR INTERATIVO (Linha Inteira) -->
@@ -501,7 +501,29 @@
             </div>
         </div>
 
-        <!-- 3. DIREÇÃO & INTENSIDADE DO VENTO (Linha Inteira) -->
+        <!-- 3. CARTA SINÓTICA (Linha Inteira) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-map text-indigo-400"></i> Carta Sinótica (Frentes e Centros de Pressão)
+                    </h2>
+                    <span class="text-xs font-mono text-indigo-300 bg-indigo-950/60 px-2.5 py-1 rounded-lg border border-indigo-800">
+                        Marinha do Brasil / INMET
+                    </span>
+                </div>
+
+                <div class="relative w-full h-[450px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 flex items-center justify-center group">
+                    <img src="https://www.marinha.mil.br/chm/sites/www.marinha.mil.br.chm/files/cartas/carta.gif" alt="Carta Sinótica" class="w-full h-full object-contain rounded-xl" onerror="this.src='https://portal.inmet.gov.br/uploads/analise/analise.png'">
+                    <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-300 backdrop-blur-sm z-10">
+                        <span>Análise de Superfície e Frentes Frias</span>
+                        <a href="https://www.marinha.mil.br/chm/dados-do-tempo-cartas-sinoticas" target="_blank" class="hover:text-sky-400 underline">Fonte Oficial</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. DIREÇÃO & INTENSIDADE DO VENTO (Linha Inteira) -->
         <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-3">
