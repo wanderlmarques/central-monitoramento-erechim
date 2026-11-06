@@ -898,6 +898,15 @@
             reloadSatelliteImage();
         }
 
+        function handleSatelliteError(img) {
+            currentSatSourceIndex++;
+            if (currentSatSourceIndex < satSources[currentSatChannel].length) {
+                img.src = satSources[currentSatChannel][currentSatSourceIndex];
+            } else {
+                switchSatChannel('interactive');
+            }
+        }
+
         function reloadSatelliteImage() {
             const img = document.getElementById('satellite-img');
             const iframe = document.getElementById('sat-iframe-view');
@@ -924,15 +933,6 @@
 
             if (label) {
                 label.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Canal: ${currentSatChannel.toUpperCase()}`;
-            }
-        }
-
-        function handleSatelliteError(img) {
-            currentSatSourceIndex++;
-            if (currentSatSourceIndex < satSources[currentSatChannel].length) {
-                img.src = satSources[currentSatChannel][currentSatSourceIndex];
-            } else {
-                switchSatChannel('interactive');
             }
         }
 
