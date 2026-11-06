@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Monitoramento Meteorológico — Erechim / RS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #090d16;
+            color: #f8fafc;
+        }
+        .dark body {
+            background-color: #090d16;
+            color: #f8fafc;
+        }
+        .light body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(12px);
+            transition: all 0.2s ease-in-out;
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .pulse-danger {
+            animation: pulse-danger-anim 2s infinite;
+        }
+        @keyframes pulse-danger-anim {
+            0% { box-shadow: 0 0 0 0px rgba(255, 40, 0, 0.9); }
+            50% { box-shadow: 0 0 0 16px rgba(255, 40, 0, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(255, 40, 0, 0); }
+        }
+
+        .border-blink {
+            animation: blink-border-anim 1.2s infinite ease-in-out;
+        }
+        @keyframes blink-border-anim {
+            0%, 100% { border-color: #ff2800; }
+            50% { border-color: #ffffff; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
+
+    <!-- HEADER BAR -->
+    <header class="border-b dark:border-slate-800 border-slate-200 dark:bg-slate-900/95 bg-white/95 backdrop-blur-md relative z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                
+                <!-- Title & Station Info -->
+                <div class="flex items-center justify-between lg:justify-start gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2.5 bg-sky-500/10 text-sky-500 rounded-2xl border border-sky-500/20 shadow-inner">
+                            <i class="fa-solid fa-shield-halved text-2xl"></i>
+                        </span>
+                        <div>
+                            <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight dark:text-white text-slate-900 flex items-center gap-2">
+                                Central de Monitoramento de Erechim
+                                <span class="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-500 border border-sky-500/20">AO VIVO</span>
+                            </h1>
+                            <p class="text-xs dark:text-slate-400 text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">
+                                <span><i class="fa-solid fa-location-dot text-rose-500"></i> Lat: 27°38'02"S | Lon: 52°16'26"O</span>
+                                <span><i class="fa-solid fa-mountain text-emerald-500"></i> 783m</span>
+                                <span><i class="fa-solid fa-tower-observation text-amber-500"></i> INMET: <strong>A828</strong></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INDICADOR DE TENDÊNCIA E ALERTA DAS PRÓXIMAS 6 HORAS (EM LINHA) -->
+                <div id="header-5h-alert" class="flex-1 max-w-2xl mx-auto lg:mx-4 px-4 py-2.5 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-100 transition shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Próximas 6 horas:
+                            </span>
+                            <span id="label-5h-span" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 uppercase tracking-wide">SEM ALERTA</span>
+                        </div>
+                        <div id="content-5h-alert" class="text-xs text-emerald-100 truncate">
+                            <i class="fa-solid fa-spinner fa-spin text-emerald-300 mr-1"></i>
+                            <span>Carregando projeção meteorológica detalhada...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin & Controls -->
+                <div class="flex items-center justify-between lg:justify-end gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 dark:border-slate-800 border-slate-200">
+                    
+                    <!-- Admin Login / Status Trigger -->
+                    <div id="admin-status-area">
+                        <button onclick="toggleAdminModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                            <i class="fa-solid fa-user-shield text-sky-500"></i>
+                            <span id="admin-btn-text">Área Administrativa</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-xl dark:bg-slate-800 dark:text-amber-400 bg-slate-100 text-slate-700 hover:opacity-80 transition" title="Alternar Tema">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <!-- Refresh Button -->
+                    <button id="btn-refresh" onclick="fetchWeatherData()" class="flex items-center gap-2 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-md transition active:scale-95">
+                        <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
+                        <span class="hidden sm:inline">Atualizar</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- ADMIN MODAL & AUTHENTICATION -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-2xl rounded-2xl p-6 relative border dark:border-slate-700 border-slate-300 shadow-2xl">
+            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Login View -->
+            <div id="admin-login-view" class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20">
+                        <i class="fa-solid fa-lock text-xl"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold dark:text-white text-slate-900">Acesso Restrito — Administrador</h2>
+                        <p class="text-xs text-slate-400">Entre com credenciais autorizadas de gestão do sistema.</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Gestor / Administrador</label>
+                        <input type="text" id="login-name" value="Wander Luís Marques" placeholder="Digite seu nome completo" required class="w-full px-4 py-2.5 rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white bg-slate-50 border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Senha de Acesso Exclusiva</label>
+                        <input type="password" id="login-pass" placeholder="••••••••" required class="w-full px-4 py-2.5 rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white bg-slate-50 border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                        <span class="text-[10px] text-slate-500 mt-1 block"><i class="fa-solid fa-lock text-amber-500 mr-1"></i>Acesso restrito estritamente ao administrador autorizado.</span>
+                    </div>
+                    <div id="login-error" class="hidden text-xs text-red-400 bg-red-950/40 p-2.5 rounded-xl border border-red-800">
+                        Credenciais ou nome de usuário inválidos. Acesso negado.
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-xl transition shadow-lg">
+                        Entrar no Painel Administrativo
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dashboard Controls -->
+            <div id="admin-panel-view" class="hidden space-y-6">
+                <div class="flex items-center justify-between border-b dark:border-slate-800 border-slate-200 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center font-bold">
+                            WM
+                        </div>
+                        <div>
+                            <h3 id="admin-user-disp" class="font-bold text-sm dark:text-white text-slate-900">Wander Luís Marques</h3>
+                            <span class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-circle text-[8px]"></i> Administrador do Sistema Ativo
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="handleAdminLogout()" class="px-3 py-1.5 text-xs bg-red-900/40 hover:bg-red-800/60 text-red-200 rounded-lg border border-red-700 transition">
+                        Sair
+                    </button>
+                </div>
+
+                <!-- Admin Control Tabs -->
+                <div class="space-y-4">
+                    <h4 class="text-xs uppercase tracking-wider font-bold text-slate-400">Controles do Gestor:</h4>
+                    
+                    <!-- Emergency Override Alert -->
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border border-amber-500/30 space-y-3">
+                        <label class="text-xs font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-bullhorn"></i> Emitir Comunicado/Alerta Manual de Emergência
+                        </label>
+                        <textarea id="admin-custom-alert-text" rows="2" placeholder="Digite o aviso de utilidade pública para a população..." class="w-full p-3 rounded-lg dark:bg-slate-950 dark:text-white bg-white text-slate-900 border dark:border-slate-700 border-slate-300 text-xs outline-none"></textarea>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer text-xs">
+                                <input type="checkbox" id="admin-override-active" class="rounded border-slate-700 text-sky-500 focus:ring-0">
+                                Ativar Banner de Emergência Manual
+                            </label>
+                            <button onclick="saveAdminBannerOverride()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs rounded-lg transition">
+                                Publicar Comunicado
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Config threshold metrics -->
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-3">
+                        <h5 class="text-xs font-bold text-slate-300">Ajustar Gatilhos de Alerta Automático</h5>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                                <span class="text-slate-400 block mb-1">Temp Mínima Frio (°C):</span>
+                                <input type="number" id="cfg-temp-min" value="5" class="w-full px-3 py-1.5 rounded dark:bg-slate-950 bg-white border dark:border-slate-700 border-slate-300">
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block mb-1">Temp Máxima Calor (°C):</span>
+                                <input type="number" id="cfg-temp-max" value="28" class="w-full px-3 py-1.5 rounded dark:bg-slate-950 bg-white border dark:border-slate-700 border-slate-300">
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block mb-1">Chuva (mm/12h):</span>
+                                <input type="number" id="cfg-rain-limit" value="30" class="w-full px-3 py-1.5 rounded dark:bg-slate-950 bg-white border dark:border-slate-700 border-slate-300">
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block mb-1">Vento Limite (km/h):</span>
+                                <input type="number" id="cfg-wind-limit" value="40" class="w-full px-3 py-1.5 rounded dark:bg-slate-950 bg-white border dark:border-slate-700 border-slate-300">
+                            </div>
+                        </div>
+                        <button onclick="saveThresholdConfigs()" class="w-full py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg transition mt-2">
+                            Salvar Configurações de Gatilho
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 space-y-6 flex-grow w-full">
+
+        <!-- EMERGENCY PUBLIC ALERT BANNER -->
+        <div id="alert-banner" class="hidden rounded-2xl p-5 sm:p-6 bg-white border-4 border-[#ff2800] text-[#ff2800] flex items-center gap-4 sm:gap-6 shadow-2xl pulse-danger border-blink">
+            <i class="fa-solid fa-triangle-exclamation text-4xl sm:text-5xl text-[#ff2800] shrink-0 animate-bounce"></i>
+            <div class="w-full">
+                <div class="flex items-center justify-between mb-1.5">
+                    <h3 class="font-black text-sm sm:text-base text-[#ff2800] uppercase tracking-wider">Atenção: Evento Extremo / Comunicado Meteorológico</h3>
+                    <span id="alert-type-tag" class="text-xs uppercase font-extrabold px-3 py-1 rounded-full bg-[#ff2800] text-white shadow">Alerta Oficial</span>
+                </div>
+                <p id="alert-banner-text" class="text-lg sm:text-2xl font-black tracking-tight text-[#ff2800] leading-snug">Condições meteorológicas extremas detectadas para o município de Erechim.</p>
+            </div>
+        </div>
+
+        <!-- CURRENT WEATHER METRICS -->
+        <section>
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-400 text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high text-sky-500"></i> Condições em Tempo Real — Estação Erechim
+                </h2>
+                <span class="text-xs dark:text-slate-500 text-slate-400 font-mono" id="last-update-label">Atualizado: --:--</span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                
+                <!-- Temp -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-xs font-semibold uppercase">Temperatura</span>
+                        <i class="fa-solid fa-temperature-half text-amber-500 text-lg"></i>
+                    </div>
+                    <div class="mt-3">
+                        <div id="metric-temp" class="text-2xl sm:text-3xl font-black tracking-tight dark:text-white text-slate-900">--°C</div>
+                        <div id="metric-temp-sub" class="text-xs text-slate-400 mt-1">Sensação: --°C</div>
+                    </div>
+                </div>
+
+                <!-- Umidade -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-xs font-semibold uppercase">Umidade Relativa</span>
+                        <i class="fa-solid fa-droplet text-sky-400 text-lg"></i>
+                    </div>
+                    <div class="mt-3">
+                        <div id="metric-humidity" class="text-2xl sm:text-3xl font-black tracking-tight dark:text-white text-slate-900">--%</div>
+                        <div id="metric-humidity-sub" class="text-xs text-slate-400 mt-1">Ponto Orvalho: --°C</div>
+                    </div>
+                </div>
+
+                <!-- Chuva -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-xs font-semibold uppercase">Chuva (12h)</span>
+                        <i class="fa-solid fa-cloud-showers-heavy text-blue-500 text-lg"></i>
+                    </div>
+                    <div class="mt-3">
+                        <div id="metric-rain" class="text-2xl sm:text-3xl font-black tracking-tight dark:text-white text-slate-900">-- mm</div>
+                        <div id="metric-rain-sub" class="text-xs text-slate-400 mt-1">Acumulado recente</div>
+                    </div>
+                </div>
+
+                <!-- Vento -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-xs font-semibold uppercase">Vento / Rajadas</span>
+                        <i class="fa-solid fa-wind text-teal-400 text-lg"></i>
+                    </div>
+                    <div class="mt-3">
+                        <div id="metric-wind" class="text-2xl sm:text-3xl font-black tracking-tight dark:text-white text-slate-900">-- km/h</div>
+                        <div id="metric-wind-sub" class="text-xs text-slate-400 mt-1">Rajada: -- km/h</div>
+                    </div>
+                </div>
+
+                <!-- Pressão -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between col-span-2 md:col-span-1">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-xs font-semibold uppercase">Pressão Atm.</span>
+                        <i class="fa-solid fa-compress text-purple-400 text-lg"></i>
+                    </div>
+                    <div class="mt-3">
+                        <div id="metric-pressure" class="text-2xl sm:text-3xl font-black tracking-tight dark:text-white text-slate-900">-- hPa</div>
+                        <div id="metric-pressure-sub" class="text-xs text-slate-400 mt-1">Pressão Local</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SATELLITE & WINDY RADAR SECTION -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Windy Radar Embed (Esquerda) -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-earth-americas text-sky-500"></i> Radar Interativo
+                        </h2>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-mono">
+                            Erechim (RS)
+                        </span>
+                    </div>
+                    
+                    <div class="w-full h-[400px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
+                        <iframe 
+                            id="windy-frame"
+                            class="w-full h-full border-0" 
+                            src="https://embed.windy.com/embed.html?lat=-27.634&lon=-52.274&detailLat=-27.634&detailLon=-52.274&width=650&height=400&zoom=9&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" 
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-xs">
+                    <span class="text-slate-400">Camadas:</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="changeWindyLayer('wind')" class="px-2.5 py-1 rounded-lg bg-sky-950 border border-sky-800 text-sky-200 transition text-[11px]">
+                            <i class="fa-solid fa-wind mr-1"></i> Vento
+                        </button>
+                        <button onclick="changeWindyLayer('rain')" class="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-200 transition text-[11px]">
+                            <i class="fa-solid fa-cloud-rain mr-1"></i> Chuva
+                        </button>
+                        <button onclick="changeWindyLayer('thunder')" class="px-2.5 py-1 rounded-lg bg-purple-950 border border-purple-800 text-purple-200 transition text-[11px]">
+                            <i class="fa-solid fa-bolt mr-1"></i> Raios
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GOES-16 Satellite Card (NO MEIO) -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-satellite text-emerald-500"></i> Satélite GOES-16 (Ao Vivo)
+                        </h2>
+                        <span id="sat-mode-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono uppercase">
+                            INFRAVERMELHO
+                        </span>
+                    </div>
+
+                    <div class="relative w-full h-[400px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 flex items-center justify-center group">
+                        <iframe id="sat-iframe-view" class="w-full h-full border-0 hidden" src="about:blank" loading="lazy"></iframe>
+                        <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Satélite GOES-16 Erechim" class="w-full h-full object-cover rounded-xl transition duration-300 group-hover:scale-105" onerror="handleSatelliteError(this)">
+                        
+                        <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-300 backdrop-blur-sm z-10">
+                            <span id="sat-status-label" class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> GOES-16 NOAA / CIRA
+                            </span>
+                            <button onclick="reloadSatelliteImage()" class="hover:text-sky-400 transition" title="Recarregar Imagem">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-1.5 mt-4 text-[11px]">
+                    <button onclick="switchSatChannel('ir')" class="py-1 px-2 rounded bg-sky-950 text-sky-200 border border-sky-800 hover:bg-sky-900 transition font-medium text-center">
+                        Infravermelho
+                    </button>
+                    <button onclick="switchSatChannel('geocolor')" class="py-1 px-2 rounded dark:bg-slate-800 dark:text-slate-200 bg-slate-200 text-slate-700 hover:opacity-80 transition font-medium text-center">
+                        GeoColor
+                    </button>
+                    <button onclick="switchSatChannel('interactive')" class="py-1 px-2 rounded dark:bg-slate-800 dark:text-slate-200 bg-slate-200 text-slate-700 hover:opacity-80 transition font-medium text-center">
+                        Radar Interativo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wind Compass Card (Direita) -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-compass text-teal-400 text-base"></i> Direção & Intensidade do Vento
+                        </h2>
+                        <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-2 py-0.5 rounded">
+                            --° N
+                        </span>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center my-6 relative">
+                        <!-- Compass Rose Visual -->
+                        <div class="w-48 h-48 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
+                            <span class="absolute top-2 text-[11px] font-bold text-slate-400">N</span>
+                            <span class="absolute right-3 text-[11px] font-bold text-slate-400">L</span>
+                            <span class="absolute bottom-2 text-[11px] font-bold text-slate-400">S</span>
+                            <span class="absolute left-3 text-[11px] font-bold text-slate-400">O</span>
+
+                            <!-- Rotating Arrow Indicator -->
+                            <div id="wind-arrow-container" class="w-32 h-32 absolute flex items-center justify-center transition-transform duration-700 ease-out">
+                                <div class="w-2.5 h-24 bg-gradient-to-t from-sky-500 to-rose-500 rounded-full flex flex-col justify-between items-center shadow-lg">
+                                    <i class="fa-solid fa-caret-up text-rose-300 text-xs -mt-1"></i>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-center text-xs mt-2">
+                    <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <span class="text-slate-400 block text-[10px]">Velocidade Atual</span>
+                        <strong id="wind-card-speed" class="text-base font-bold text-teal-300">-- km/h</strong>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <span class="text-slate-400 block text-[10px]">Rajada Máxima</span>
+                        <strong id="wind-card-gust" class="text-base font-bold text-amber-300">-- km/h</strong>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- EVENTOS EXTREMOS - THRESHOLDS CHECK -->
+        <section>
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-400 text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-cat text-rose-500"></i> Status dos Limiares de Severidade Meteorológica
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+                
+                <!-- Frio -->
+                <div id="card-alert-cold" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Frio Extremo</span>
+                        <i class="fa-solid fa-snowflake text-slate-400 text-sm"></i>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-xs text-slate-400">Gatilho: <strong id="lbl-cfg-cold" class="dark:text-slate-300 text-slate-700">&lt; 5.0 °C</strong></span>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span id="badge-cold" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
+                            <span id="val-cold" class="text-xs font-mono text-slate-400">-- °C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calor -->
+                <div id="card-alert-heat" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Calor Extremo</span>
+                        <i class="fa-solid fa-fire text-slate-400 text-sm"></i>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-xs text-slate-400">Gatilho: <strong id="lbl-cfg-heat" class="dark:text-slate-300 text-slate-700">&gt; 28.0 °C</strong></span>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span id="badge-heat" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
+                            <span id="val-heat" class="text-xs font-mono text-slate-400">-- °C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chuva -->
+                <div id="card-alert-rain" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Chuva Intensa</span>
+                        <i class="fa-solid fa-cloud-showers-water text-slate-400 text-sm"></i>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-xs text-slate-400">Gatilho: <strong id="lbl-cfg-rain" class="dark:text-slate-300 text-slate-700">&gt; 30mm / 12h</strong></span>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span id="badge-rain" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
+                            <span id="val-rain" class="text-xs font-mono text-slate-400">-- mm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vento -->
+                <div id="card-alert-wind" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Vento Forte</span>
+                        <i class="fa-solid fa-wind text-slate-400 text-sm"></i>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-xs text-slate-400">Gatilho: <strong id="lbl-cfg-wind" class="dark:text-slate-300 text-slate-700">&gt; 40 km/h</strong></span>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span id="badge-wind" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
+                            <span id="val-wind" class="text-xs font-mono text-slate-400">-- km/h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Granizo -->
+                <div id="card-alert-hail" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Risco Granizo</span>
+                        <i class="fa-solid fa-icicles text-slate-400 text-sm"></i>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-xs text-slate-400">Análise: <strong class="dark:text-slate-300 text-slate-700">Convectivo</strong></span>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span id="badge-hail" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Baixo</span>
+                            <span id="val-hail" class="text-xs font-mono text-slate-400">Índice: --</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- FORECAST 24h & TREND GRAPH -->
+        <section class="glass-card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-indigo-400"></i> Tendência das Próximas 24h (Temperatura & Precipitação)
+                </h2>
+                <span class="text-xs text-slate-400">Modelo Open-Meteo High Precision</span>
+            </div>
+
+            <div class="w-full h-64 sm:h-72">
+                <canvas id="forecastChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 4-DAY GRAPHIC WEATHER FORECAST TIMELINE -->
+        <section class="glass-card rounded-2xl p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline text-sky-400"></i> Escala Temporal Visual: Previsão dos Próximos 4 Dias
+                    </h2>
+                    <p class="text-xs text-slate-400">Linha do tempo gráfica com amplitude térmica, volumes acumulados e intensidade de ventos.</p>
+                </div>
+                <span class="text-xs text-slate-400 font-mono bg-slate-900/60 px-3 py-1 rounded-lg border border-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-week text-sky-400"></i> +4 Dias Pós-Hoje
+                </span>
+            </div>
+
+            <div id="forecast-3days-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 rounded-xl dark:bg-slate-900/60 bg-slate-100 border dark:border-slate-800 border-slate-200 text-center animate-pulse">
+                    <span class="text-xs text-slate-400">Carregando linha do tempo de 4 dias...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATISTICAL CLIMATOLOGY PROBABILITY TABLE -->
+        <section class="glass-card rounded-2xl p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-emerald-400"></i> Probabilidade Estatística & Climatologia Histórica (Erechim / RS)
+                    </h2>
+                    <p class="text-xs text-slate-400">Estimativas e probabilidade percentual baseadas no comportamento climatológico quadrimestral e série histórica local.</p>
+                </div>
+                <span class="text-xs font-mono dark:text-emerald-400 text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
+                    Modelagem Climatológica
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs dark:text-slate-300 text-slate-700">
+                    <thead class="dark:bg-slate-900/90 bg-slate-200/80 dark:text-slate-400 text-slate-600 font-semibold uppercase tracking-wider border-b dark:border-slate-800 border-slate-300">
+                        <tr>
+                            <th class="py-3 px-4">Período / Estação</th>
+                            <th class="py-3 px-4">Chuva Acumulada &gt; 150mm/mês</th>
+                            <th class="py-3 px-4">Probab. Granizo Convectivo</th>
+                            <th class="py-3 px-4">Rajadas de Vento &gt; 50 km/h</th>
+                            <th class="py-3 px-4">Frio Extremo / Geada (&lt; 3°C)</th>
+                            <th class="py-3 px-4">Calor Extremo (&gt; 30°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y dark:divide-slate-800 divide-slate-200 font-mono">
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="py-3 px-4 font-bold text-sky-400">Verão (Dez - Mar)</td>
+                            <td class="py-3 px-4 text-emerald-400">68% <span class="text-[10px] text-slate-400 font-sans block">Chuvas Convectivas</span></td>
+                            <td class="py-3 px-4 text-amber-400">22% <span class="text-[10px] text-slate-400 font-sans block">Risco Moderado</span></td>
+                            <td class="py-3 px-4 text-amber-400">35% <span class="text-[10px] text-slate-400 font-sans block">Temporais de Verão</span></td>
+                            <td class="py-3 px-4 text-slate-500">0% <span class="text-[10px] text-slate-400 font-sans block">Raro</span></td>
+                            <td class="py-3 px-4 text-rose-400 font-bold">78% <span class="text-[10px] text-slate-400 font-sans block">Frequente</span></td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="py-3 px-4 font-bold text-amber-400">Outono (Abr - Jun)</td>
+                            <td class="py-3 px-4 text-emerald-400">74% <span class="text-[10px] text-slate-400 font-sans block">Frentes Frias Frequentes</span></td>
+                            <td class="py-3 px-4 text-slate-400">12% <span class="text-[10px] text-slate-400 font-sans block">Baixo Risco</span></td>
+                            <td class="py-3 px-4 text-slate-300">28% <span class="text-[10px] text-slate-400 font-sans block">Moderado</span></td>
+                            <td class="py-3 px-4 text-sky-400 font-bold">52% <span class="text-[10px] text-slate-400 font-sans block">Início das Geadas</span></td>
+                            <td class="py-3 px-4 text-slate-400">15% <span class="text-[10px] text-slate-400 font-sans block">Veranicos Ocasionais</span></td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="py-3 px-4 font-bold text-indigo-400">Inverno (Jul - Set)</td>
+                            <td class="py-3 px-4 text-emerald-400">82% <span class="text-[10px] text-slate-400 font-sans block">Ciclones & Frentes Extratropicais</span></td>
+                            <td class="py-3 px-4 text-amber-400">18% <span class="text-[10px] text-slate-400 font-sans block">Choque Térmico</span></td>
+                            <td class="py-3 px-4 text-rose-400 font-bold">48% <span class="text-[10px] text-slate-400 font-sans block">Ventos de Quadrante Sul</span></td>
+                            <td class="py-3 px-4 text-sky-400 font-bold">85% <span class="text-[10px] text-slate-400 font-sans block">Elevada Frequência de Geada</span></td>
+                            <td class="py-3 px-4 text-slate-500">2% <span class="text-[10px] text-slate-400 font-sans block">Muito Raro</span></td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="py-3 px-4 font-bold text-rose-400">Primavera (Out - Nov)</td>
+                            <td class="py-3 px-4 text-rose-400 font-bold">89% <span class="text-[10px] text-slate-400 font-sans block">Pico Pluviométrico Anual</span></td>
+                            <td class="py-3 px-4 text-rose-400 font-bold">42% <span class="text-[10px] text-slate-400 font-sans block">Pico Histórico Granizo</span></td>
+                            <td class="py-3 px-4 text-rose-400 font-bold">54% <span class="text-[10px] text-slate-400 font-sans block">Rajadas Severas</span></td>
+                            <td class="py-3 px-4 text-slate-400">14% <span class="text-[10px] text-slate-400 font-sans block">Geadas Tardias</span></td>
+                            <td class="py-3 px-4 text-amber-400">45% <span class="text-[10px] text-slate-400 font-sans block">Elevação Gradual</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- HISTORICAL EXTREME EVENTS IN ERECHIM -->
+        <section class="glass-card rounded-2xl p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Histórico de Eventos Extremos Registrados em Erechim
+                    </h2>
+                    <p class="text-xs text-slate-400">Registros históricos e dados da Estação INMET A828.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs dark:text-slate-300 text-slate-700">
+                    <thead class="dark:bg-slate-900/80 bg-slate-200/80 dark:text-slate-400 text-slate-600 font-semibold uppercase tracking-wider border-b dark:border-slate-800 border-slate-300">
+                        <tr>
+                            <th class="py-3 px-4">Data</th>
+                            <th class="py-3 px-4">Tipo de Evento</th>
+                            <th class="py-3 px-4">Valores Registrados</th>
+                            <th class="py-3 px-4">Impactos / Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y dark:divide-slate-800 divide-slate-200">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t dark:border-slate-900 border-slate-200 dark:bg-slate-950 bg-white py-8 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-6">
+            
+            <div class="glass-card max-w-2xl mx-auto rounded-2xl p-5 border dark:border-slate-800 border-slate-200 shadow-sm text-center">
+                <h3 class="text-xs font-bold uppercase tracking-wider dark:text-slate-300 text-slate-700 mb-3 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-address-card text-sky-500 text-sm"></i> Contatos & Canais Oficiais
+                </h3>
+                
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-medium">
+                    <a href="mailto:wander.l.marques@gmail.com" class="flex items-center gap-2 px-3.5 py-2 rounded-xl dark:bg-slate-900 bg-slate-100 hover:bg-sky-500/10 hover:text-sky-500 dark:text-slate-300 text-slate-700 border dark:border-slate-800 border-slate-200 transition">
+                        <i class="fa-solid fa-envelope text-rose-500"></i>
+                        <span>wander.l.marques@gmail.com</span>
+                    </a>
+                    <a href="https://www.instagram.com/wanderlmarques/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3.5 py-2 rounded-xl dark:bg-slate-900 bg-slate-100 hover:bg-pink-500/10 hover:text-pink-500 dark:text-slate-300 text-slate-700 border dark:border-slate-800 border-slate-200 transition">
+                        <i class="fa-brands fa-instagram text-pink-500"></i>
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://www.facebook.com/WanderLuisMarques" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3.5 py-2 rounded-xl dark:bg-slate-900 bg-slate-100 hover:bg-blue-500/10 hover:text-blue-500 dark:text-slate-300 text-slate-700 border dark:border-slate-800 border-slate-200 transition">
+                        <i class="fa-brands fa-facebook text-blue-600"></i>
+                        <span>Facebook</span>
+                    </a>
+                    <a href="https://www.linkedin.com/in/wander-lu%C3%ADs-marques-71a3651aa/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3.5 py-2 rounded-xl dark:bg-slate-900 bg-slate-100 hover:bg-sky-600/10 hover:text-sky-400 dark:text-slate-300 text-slate-700 border dark:border-slate-800 border-slate-200 transition">
+                        <i class="fa-brands fa-linkedin text-sky-600"></i>
+                        <span>LinkedIn</span>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <p>Central de Monitoramento Climático - Erechim / RS</p>
+                <p class="mt-1">Desenvolvido por: <strong>Wander Luís Marques</strong></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT & LOGIC -->
+    <script>
+        const LAT = -27.634;
+        const LON = -52.274;
+        let chartInstance = null;
+
+        let thresholds = { cold: 5.0, heat: 28.0, rain: 30.0, wind: 40.0 };
+
+        const satSources = {
+            ir: ["https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg"],
+            geocolor: ["https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/GEOCOLOR/1000x1000.jpg"],
+            interactive: ["https://embed.windy.com/embed.html?lat=-27.634&lon=-52.274&detailLat=-27.634&detailLon=-52.274&width=650&height=300&zoom=7&level=surface&overlay=satellite&product=satellite&menu=&message=&marker=true&calendar=now&pressure=false&type=map&location=coordinates&detail=false&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"]
+        };
+
+        let currentSatChannel = 'ir';
+
+        const historicalEvents = [
+            { date: "23/11/2025", type: "Tempestade Severa de Granizo", value: "Pedras > 5 cm", impact: "Danos em telhados e lavouras na área urbana e rural de Erechim." },
+            { date: "02/05/2024", type: "Chuva Torrencial / Alagamento", value: "118.4 mm / 24h", impact: "Transbordamento de córregos no Centro, Rio Tigre e Bairro Esperança." },
+            { date: "16/01/2024", type: "Vendaval Severo", value: "94.2 km/h", impact: "Destelhamento nos bairros Três Vendas e Koller." },
+            { date: "12/10/2023", type: "Queda de Granizo Convectivo", value: "Pedras de 3 a 5 cm", impact: "Danos em coberturas na zona rural e nos bairros São Cristóvão e Copas Verdes." },
+            { date: "13/07/2023", type: "Frio Extremo / Geada Severa", value: "-1.2 °C", impact: "Geada generalizada em todo o município." }
+        ];
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const name = document.getElementById('login-name').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            const err = document.getElementById('login-error');
+            
+            if ((name.includes("wander") || name.includes("marques")) && pass === 'AMinhaSenhaeh@1') {
+                err.classList.add('hidden');
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-panel-view').classList.remove('hidden');
+                document.getElementById('admin-btn-text').innerText = 'Admin Ativo';
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function handleAdminLogout() {
+            document.getElementById('admin-login-view').classList.remove('hidden');
+            document.getElementById('admin-panel-view').classList.add('hidden');
+            document.getElementById('admin-btn-text').innerText = 'Área Administrativa';
+            toggleAdminModal();
+        }
+
+        function changeWindyLayer(layer) {
+            document.getElementById('windy-frame').src = `https://embed.windy.com/embed.html?lat=${LAT}&lon=${LON}&detailLat=${LAT}&detailLon=${LON}&width=650&height=400&zoom=9&level=surface&overlay=${layer}&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
+        }
+
+        function switchSatChannel(channel) {
+            currentSatChannel = channel;
+            reloadSatelliteImage();
+        }
+
+        function handleSatelliteError(img) {
+            if (satSources[currentSatChannel] && satSources[currentSatChannel].length > 1) {
+                img.src = satSources[currentSatChannel][1];
+            } else {
+                switchSatChannel('interactive');
+            }
+        }
+
+        function reloadSatelliteImage() {
+            const img = document.getElementById('satellite-img');
+            const iframe = document.getElementById('sat-iframe-view');
+            if (currentSatChannel === 'interactive') {
+                if (img) img.classList.add('hidden');
+                if (iframe) {
+                    iframe.classList.remove('hidden');
+                    iframe.src = satSources.interactive[0];
+                }
+                return;
+            }
+            if (iframe) iframe.classList.add('hidden');
+            if (img) {
+                img.classList.remove('hidden');
+                img.src = satSources[currentSatChannel][0] + `?t=${new Date().getTime()}`;
+            }
+        }
+
+        function getCardinalDirection(angle) {
+            const directions = ['N', 'NE', 'L', 'SE', 'S', 'SO', 'O', 'NO'];
+            return directions[Math.round(angle / 45) % 8];
+        }
+
+        async function fetchWeatherData() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&hourly=temperature_2m,precipitation,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,precipitation_probability_max&past_hours=12&forecast_days=5&timezone=America%2FSao_Paulo`;
+                const response = await fetch(url);
+                const data = await response.json();
+                const current = data.current;
+
+                document.getElementById('metric-temp').innerText = `${current.temperature_2m.toFixed(1)}°C`;
+                document.getElementById('metric-temp-sub').innerText = `Sensação: ${current.apparent_temperature.toFixed(1)}°C`;
+                document.getElementById('metric-humidity').innerText = `${current.relative_humidity_2m}%`;
+                
+                let rain12h = data.hourly ? data.hourly.precipitation.slice(0, 13).reduce((a, b) => a + (b || 0), 0) : current.precipitation;
+                document.getElementById('metric-rain').innerText = `${rain12h.toFixed(1)} mm`;
+
+                const windSpeed = current.wind_speed_10m;
+                const windGust = current.wind_gusts_10m || (windSpeed * 1.3);
+                const windDegree = current.wind_direction_10m || 0;
+
+                document.getElementById('metric-wind').innerText = `${windSpeed.toFixed(1)} km/h`;
+                document.getElementById('metric-wind-sub').innerText = `Rajada: ${windGust.toFixed(1)} km/h`;
+                document.getElementById('metric-pressure').innerText = `${current.surface_pressure.toFixed(0)} hPa`;
+
+                document.getElementById('wind-dir-text').innerText = `${windDegree}° ${getCardinalDirection(windDegree)}`;
+                document.getElementById('wind-arrow-container').style.transform = `rotate(${windDegree}deg)`;
+                document.getElementById('wind-card-speed').innerText = `${windSpeed.toFixed(1)} km/h`;
+                document.getElementById('wind-card-gust').innerText = `${windGust.toFixed(1)} km/h`;
+
+                renderForecastChart(data.hourly);
+                render3DayForecast(data.daily);
+
+                const now = new Date();
+                document.getElementById('last-update-label').innerText = `Atualizado: ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderForecastChart(hourly) {
+            if (!hourly || !hourly.time) return;
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            const labels = [];
+            const temps = hourly.temperature_2m.slice(0, 24);
+            const rains = hourly.precipitation.slice(0, 24);
+
+            const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+            hourly.time.slice(0, 24).forEach((tStr, index) => {
+                const dateObj = new Date(tStr);
+                const hour = dateObj.getHours().toString().padStart(2, '0');
+                
+                if (hour === '00' && index > 0) {
+                    const dayName = dayNames[dateObj.getDay()];
+                    const dayNum = dateObj.getDate().toString().padStart(2, '0');
+                    const monthNum = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    labels.push(`| 00:00 (${dayName} ${dayNum}/${monthNum})`);
+                } else {
+                    labels.push(`${hour}:00`);
+                }
+            });
+
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { 
+                            type: 'line', 
+                            label: 'Temperatura (°C)', 
+                            data: temps, 
+                            borderColor: '#ef4444', 
+                            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                            borderWidth: 3, 
+                            pointBackgroundColor: '#ef4444',
+                            pointHoverRadius: 6,
+                            tension: 0.35,
+                            fill: true,
+                            yAxisID: 'yTemp' 
+                        },
+                        { 
+                            type: 'bar', 
+                            label: 'Chuva (mm)', 
+                            data: rains, 
+                            backgroundColor: 'rgba(56, 189, 248, 0.7)', 
+                            borderRadius: 4,
+                            yAxisID: 'yRain' 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            ticks: { 
+                                color: function(context) {
+                                    const val = context.tick ? context.tick.label : '';
+                                    return (val && val.includes('|')) ? '#ef4444' : '#94a3b8';
+                                },
+                                font: function(context) {
+                                    const val = context.tick ? context.tick.label : '';
+                                    return (val && val.includes('|')) ? { weight: 'bold' } : {};
+                                }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        yTemp: { 
+                            type: 'linear', 
+                            position: 'left', 
+                            ticks: { color: '#ef4444' },
+                            grid: { color: 'rgba(239, 68, 68, 0.1)' }
+                        },
+                        yRain: { 
+                            type: 'linear', 
+                            position: 'right', 
+                            ticks: { color: '#38bdf8' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHistoricalEvents() {
+            const tbody = document.getElementById('history-table-body');
+            let html = '';
+            historicalEvents.forEach(item => {
+                html += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="py-3 px-4 font-mono font-bold text-sky-400 whitespace-nowrap">${item.date}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-200">${item.type}</td>
+                        <td class="py-3 px-4 font-mono text-amber-300">${item.value}</td>
+                        <td class="py-3 px-4 text-slate-300">${item.impact}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function render3DayForecast(daily) {
+            const container = document.getElementById('forecast-3days-container');
+            if (!daily) return;
+            let html = '';
+            const weekDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            for (let i = 1; i <= 4; i++) {
+                if (!daily.time[i]) break;
+                const d = new Date(daily.time[i] + 'T00:00:00');
+                html += `
+                    <div class="rounded-2xl dark:bg-slate-900 bg-slate-100 border dark:border-slate-800 border-slate-200 p-4 shadow">
+                        <span class="text-[10px] font-bold text-sky-400 block uppercase">Dia +${i}</span>
+                        <h3 class="font-bold text-sm dark:text-white text-slate-900">${weekDays[d.getDay()]} (${d.getDate()}/${d.getMonth()+1})</h3>
+                        <div class="mt-3 text-xs font-mono flex justify-between">
+                            <span class="text-sky-400">Min: ${daily.temperature_2m_min[i].toFixed(1)}°C</span>
+                            <span class="text-rose-400">Máx: ${daily.temperature_2m_max[i].toFixed(1)}°C</span>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-400">Chuva: <strong class="text-sky-300">${daily.precipitation_sum[i].toFixed(1)} mm</strong></div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        window.onload = function() {
+            renderHistoricalEvents();
+            fetchWeatherData();
+        };
+    </script>
+</body>
+</html>
