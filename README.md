@@ -1,4 +1,3 @@
-[central_de_monitoramento_de_erechim.html](https://github.com/user-attachments/files/34495467/central_de_monitoramento_de_erechim.html)
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
@@ -40,7 +39,7 @@
             background-color: #090d16;
             color: #f8fafc;
         }
-        .dark body {
+        .dark body {https://wanderlmarques.github.io/central-monitoramento-erechim/
             background-color: #090d16;
             color: #f8fafc;
         }
@@ -62,7 +61,9 @@
             border: 1px solid rgba(0, 0, 0, 0.08);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
+Aqui está o código completo e 100% atualizado do arquivo **`index.html`** para você copiar e colar diretamente no **Item 5 do Motivo 1** no GitHub:
 
+I will now output the full updated code for `index.html`.
         .pulse-danger {
             animation: pulse-danger-anim 2s infinite;
         }
