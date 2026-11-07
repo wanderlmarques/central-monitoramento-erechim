@@ -124,24 +124,24 @@
                         <span class="p-3 bg-sky-500/10 text-sky-500 rounded-2xl border border-sky-500/20 shadow-inner shrink-0">
                             <i class="fa-solid fa-shield-halved text-3xl"></i>
                         </span>
-                        <div class="flex flex-col items-start gap-2">
+                        <div class="flex flex-col items-start gap-1">
                             <!-- Line 1: Main Title -->
                             <h1 class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight dark:text-white text-slate-900 leading-tight">
                                 Central de Monitoramento Meteorológico de Erechim
                             </h1>
                             
-                            <!-- Line 2: EM TEMPO REAL Badge -->
-                            <div>
-                                <span class="text-xs sm:text-sm font-black px-3.5 py-1 rounded-full bg-sky-500/20 text-sky-400 border-2 border-sky-500/40 uppercase tracking-wider inline-block">EM TEMPO REAL</span>
+                            <!-- Line 2: EM TEMPO REAL Badge (cada uma em sua própria linha) -->
+                            <div class="mt-1">
+                                <span class="text-sm sm:text-base font-black px-4 py-1 rounded-full bg-sky-500/20 text-sky-400 border-2 border-sky-500/40 uppercase tracking-wider inline-block">EM TEMPO REAL</span>
                             </div>
 
-                            <!-- Line 3: ATUALIZADO Badge -->
-                            <div>
-                                <span id="header-update-timestamp" class="text-xs sm:text-sm font-mono font-bold px-3 py-1 rounded-full bg-rose-950/80 text-rose-500 border-2 border-rose-600 shadow-md inline-block">Atualizado às --:--</span>
+                            <!-- Line 3: ATUALIZADO Badge (cada uma em sua própria linha) -->
+                            <div class="mt-1">
+                                <span id="header-update-timestamp" class="text-sm sm:text-base font-mono font-bold px-4 py-1.5 rounded-full bg-rose-950/80 text-rose-500 border-2 border-rose-600 shadow-md inline-block">Atualizado às --:--</span>
                             </div>
 
                             <!-- Station Coordinates Info -->
-                            <p class="text-xs sm:text-sm dark:text-slate-400 text-slate-500 flex flex-wrap gap-x-4 gap-y-1 mt-0.5">
+                            <p class="text-xs sm:text-sm dark:text-slate-400 text-slate-500 flex flex-wrap gap-x-4 gap-y-1 mt-2">
                                 <span><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Lat: 27°38'02"S | Lon: 52°16'26"O</span>
                                 <span><i class="fa-solid fa-mountain text-emerald-500 mr-1"></i> 783m</span>
                                 <span><i class="fa-solid fa-tower-observation text-amber-500 mr-1"></i> INMET: <strong>A828</strong></span>
@@ -165,6 +165,12 @@
                 <!-- Admin & Controls -->
                 <div class="flex items-center justify-between lg:justify-end gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 dark:border-slate-800 border-slate-200">
                     
+                    <!-- New Page / Modal Button for Sources Data -->
+                    <button onclick="toggleSourcesPage(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                        <i class="fa-solid fa-globe text-sky-400"></i>
+                        <span>Fontes</span>
+                    </button>
+
                     <!-- New Page / Modal Button for Historical & Statistical Data -->
                     <button onclick="toggleHistoryPage(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
@@ -298,6 +304,96 @@
                             Salvar Configurações de Gatilho
                         </button>
                     </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- DEDICATED DATA SOURCES MODAL PAGE -->
+    <div id="sources-page-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-4xl mx-auto w-full space-y-6 my-auto">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border dark:border-slate-700 border-slate-300">
+                <div class="flex items-center gap-3">
+                    <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20">
+                        <i class="fa-solid fa-globe text-2xl"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold dark:text-white text-slate-900">Fontes de Dados Utilizadas</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Relação completa de APIs e sistemas oficiais da Central de Erechim</p>
+                    </div>
+                </div>
+                <button onclick="toggleSourcesPage(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition border border-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-xmark text-base"></i> Fechar / Voltar
+                </button>
+            </div>
+
+            <!-- Sources Content Body -->
+            <div class="glass-card rounded-2xl p-6 sm:p-8 border dark:border-slate-700 border-slate-300 space-y-6 text-xs sm:text-sm dark:text-slate-300 text-slate-700">
+                <p class="leading-relaxed">
+                    Para garantir alta precisão, atualizações contínuas e visualizações avançadas em tempo real, a <strong>Central de Monitoramento Meteorológico de Erechim</strong> integra <strong>6 fontes principais de dados globais e oficiais</strong>:
+                </p>
+
+                <div class="space-y-4">
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-2">
+                        <h3 class="font-bold text-sky-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-server"></i> 1. Open-Meteo API (<code class="font-mono text-xs">api.open-meteo.com</code>)
+                        </h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            É a espinha dorsal de dados numéricos da central. Fornece em tempo real os dados instantâneos da estação meteorológica (temperatura, umidade relativa, sensação térmica, pressão atmosférica, direção e velocidade dos ventos, precipitação acumulada das últimas horas) e alimenta toda a projeção dos gráficos analíticos (tendência de 24 horas e linha do tempo de 4 dias).
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-2">
+                        <h3 class="font-bold text-emerald-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-satellite"></i> 2. NOAA / CIRA — Satélite GOES-16 (<code class="font-mono text-xs">cdn.star.nesdis.noaa.gov</code>)
+                        </h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Fornece as imagens de satélite geoestacionário de alta resolução em tempo real nos canais de Infravermelho e GeoColor focados na América do Sul e na região de Erechim, permitindo monitorar o deslocamento de massas de ar, nebulosidade e frentes frias.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-2">
+                        <h3 class="font-bold text-blue-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-radar"></i> 3. Windy / ECMWF Embed (<code class="font-mono text-xs">embed.windy.com</code>)
+                        </h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Fornece o radar interativo integrado e o modelo global de previsão meteorológica de alta resolução do ECMWF. É utilizado para o monitoramento visual interativo de ventos, frentes frias, chuvas e descargas elétricas em camadas geográficas dinâmicas.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-2">
+                        <h3 class="font-bold text-indigo-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-globe"></i> 4. Earth Nullschool (<code class="font-mono text-xs">earth.nullschool.net</code>)
+                        </h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Fornece o globo tridimensional interativo de correntes globais de vento, umidade e temperatura atmosférica em escala global e regional, centralizado diretamente nas coordenadas geográficas de Erechim.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-2">
+                        <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-sun"></i> 5. CPTEC / INPE (<code class="font-mono text-xs">cptec.inpe.br</code>)
+                        </h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Centro de Previsão de Tempo e Estudos Climáticos do INPE. Contribui com acervo de previsões numéricas regionais, avisos de tempo severo e monitoramento climatológico para o território brasileiro e região sul.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl dark:bg-slate-900/80 bg-slate-100 border dark:border-slate-800 border-slate-200 space-y-2">
+                        <h3 class="font-bold text-teal-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-water"></i> 6. Marinha do Brasil — Centro de Hidrografia (<code class="font-mono text-xs">marinha.mil.br</code>)
+                        </h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Fornece avisos de mau tempo, cartas sinóticas oceânicas e monitoramento de ciclones extratropicais e frentes frias que influenciam diretamente as condições meteorológicas e o regime de ventos na Região Sul do Brasil.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t dark:border-slate-800 border-slate-200 text-center text-xs text-slate-500 font-mono">
+                    Acervo integrado e otimizado para a Central de Monitoramento de Erechim / RS.
                 </div>
             </div>
 
@@ -902,6 +998,15 @@
 
         function toggleHistoryPage(show) {
             const modal = document.getElementById('history-page-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function toggleSourcesPage(show) {
+            const modal = document.getElementById('sources-page-modal');
             if (show) {
                 modal.classList.remove('hidden');
             } else {
