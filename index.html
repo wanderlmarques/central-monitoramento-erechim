@@ -121,18 +121,27 @@
                 <!-- Title & Station Info -->
                 <div class="flex items-center justify-between lg:justify-start gap-3">
                     <div class="flex items-center gap-3">
-                        <span class="p-3 bg-sky-500/10 text-sky-500 rounded-2xl border border-sky-500/20 shadow-inner">
+                        <span class="p-3 bg-sky-500/10 text-sky-500 rounded-2xl border border-sky-500/20 shadow-inner shrink-0">
                             <i class="fa-solid fa-shield-halved text-3xl"></i>
                         </span>
-                        <div>
-                            <h1 class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight dark:text-white text-slate-900 flex flex-wrap items-center gap-3">
+                        <div class="flex flex-col items-start gap-2">
+                            <!-- Line 1: Main Title -->
+                            <h1 class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight dark:text-white text-slate-900 leading-tight">
                                 Central de Monitoramento Meteorológico de Erechim
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs sm:text-sm font-black px-3.5 py-1 rounded-full bg-sky-500/20 text-sky-400 border-2 border-sky-500/40 uppercase tracking-wider">EM TEMPO REAL</span>
-                                    <span id="header-update-timestamp" class="text-xs sm:text-sm font-mono font-bold px-3 py-1 rounded-full bg-rose-950/80 text-rose-500 border-2 border-rose-600 shadow-md">Atualizado às --:--</span>
-                                </div>
                             </h1>
-                            <p class="text-xs sm:text-sm dark:text-slate-400 text-slate-500 flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                            
+                            <!-- Line 2: EM TEMPO REAL Badge -->
+                            <div>
+                                <span class="text-xs sm:text-sm font-black px-3.5 py-1 rounded-full bg-sky-500/20 text-sky-400 border-2 border-sky-500/40 uppercase tracking-wider inline-block">EM TEMPO REAL</span>
+                            </div>
+
+                            <!-- Line 3: ATUALIZADO Badge -->
+                            <div>
+                                <span id="header-update-timestamp" class="text-xs sm:text-sm font-mono font-bold px-3 py-1 rounded-full bg-rose-950/80 text-rose-500 border-2 border-rose-600 shadow-md inline-block">Atualizado às --:--</span>
+                            </div>
+
+                            <!-- Station Coordinates Info -->
+                            <p class="text-xs sm:text-sm dark:text-slate-400 text-slate-500 flex flex-wrap gap-x-4 gap-y-1 mt-0.5">
                                 <span><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Lat: 27°38'02"S | Lon: 52°16'26"O</span>
                                 <span><i class="fa-solid fa-mountain text-emerald-500 mr-1"></i> 783m</span>
                                 <span><i class="fa-solid fa-tower-observation text-amber-500 mr-1"></i> INMET: <strong>A828</strong></span>
