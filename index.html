@@ -1095,15 +1095,41 @@
                 const requiredCurrent = ['temperature_2m','relative_humidity_2m','apparent_temperature','surface_pressure','wind_speed_10m'];
                 if (requiredCurrent.some(key => !Number.isFinite(Number(current[key])))) throw new Error('A API não retornou todas as observações necessárias.');
 
-                const temp = current.temperature_2m;
-                const humidity = current.relative_humidity_2m;
-                const currentHourIndex = data.hourly.time.indexOf(current.time);
-                if (currentHourIndex < 0) throw new Error('Não foi possível sincronizar o horário atual com a série horária.');
+                const temp = Number(current.temperature_2m);
+                const humidity = Number(current.relative_humidity_2m);
+
+                // A API pode entregar current.time em intervalos de 15 minutos,
+                // enquanto hourly.time contém somente marcações de hora cheia.
+                // Por isso, não usamos indexOf (que exige igualdade exata).
+                const currentTimeMs = Date.parse(current.time);
+                if (!Number.isFinite(currentTimeMs)) {
+                    throw new Error('A API retornou um horário atual inválido.');
+                }
+
+                const hourlyTimesMs = data.hourly.time.map(value => Date.parse(value));
+                let currentHourIndex = -1;
+                let closestPreviousTime = -Infinity;
+                for (let i = 0; i < hourlyTimesMs.length; i++) {
+                    const hourTimeMs = hourlyTimesMs[i];
+                    if (Number.isFinite(hourTimeMs) && hourTimeMs <= currentTimeMs && hourTimeMs > closestPreviousTime) {
+                        closestPreviousTime = hourTimeMs;
+                        currentHourIndex = i;
+                    }
+                }
+                if (currentHourIndex < 0) {
+                    throw new Error('A série horária não contém um horário igual ou anterior ao horário atual.');
+                }
+
+                if (!Array.isArray(data.hourly.precipitation)) {
+                    throw new Error('A API não retornou a série horária de precipitação.');
+                }
                 const rainStartIndex = Math.max(0, currentHourIndex - 12);
-                const rain12h = data.hourly.precipitation.slice(rainStartIndex, currentHourIndex).reduce((a, b) => a + (Number(b) || 0), 0);
-                const windSpeed = current.wind_speed_10m;
+                const rain12h = data.hourly.precipitation
+                    .slice(rainStartIndex, currentHourIndex)
+                    .reduce((total, value) => total + (Number(value) || 0), 0);
+                const windSpeed = Number(current.wind_speed_10m);
                 const windGust = Number.isFinite(Number(current.wind_gusts_10m)) ? Number(current.wind_gusts_10m) : windSpeed;
-                const windDegree = current.wind_direction_10m || 0;
+                const windDegree = Number.isFinite(Number(current.wind_direction_10m)) ? Number(current.wind_direction_10m) : 0;
 
                 const dataTimeObj = new Date(current.time);
                 const headerDataTime = document.getElementById('header-data-time');
@@ -1276,7 +1302,12 @@
 
                 // PREVISÃO PROGRAMÁTICA DAS PRÓXIMAS 6 HORAS (CÁLCULO E ALERTA)
                 let startIndex = currentHourIndex + 1;
-                if (startIndex >= data.hourly.time.length) throw new Error('A API não forneceu as próximas horas de previsão.');
+                const availableForecastHours = data.hourly.time.length - startIndex;
+                if (availableForecastHours < 6) throw new Error('A API não forneceu seis horas completas de previsão.');
+                const requiredHourlySeries = ['precipitation', 'wind_speed_10m', 'temperature_2m'];
+                if (requiredHourlySeries.some(key => !Array.isArray(data.hourly[key]) || data.hourly[key].length <= startIndex + 5)) {
+                    throw new Error('A API retornou séries horárias incompletas para a projeção de seis horas.');
+                }
 
                 let sumRain6h = 0;
                 let maxWind6h = 0;
@@ -1285,11 +1316,15 @@
 
                 // Loop pelas próximas 6 horas da array de dados
                 for (let i = startIndex; i < startIndex + 6 && i < data.hourly.time.length; i++) {
-                    sumRain6h += data.hourly.precipitation[i] || 0;
-                    if (data.hourly.wind_speed_10m[i] > maxWind6h) maxWind6h = data.hourly.wind_speed_10m[i];
-                    if (data.hourly.temperature_2m[i] > maxTemp6h) maxTemp6h = data.hourly.temperature_2m[i];
-                    if (data.hourly.temperature_2m[i] < minTemp6h) minTemp6h = data.hourly.temperature_2m[i];
+                    sumRain6h += Number(data.hourly.precipitation[i]) || 0;
+                    const hourlyWind = Number(data.hourly.wind_speed_10m[i]);
+                    const hourlyTemp = Number(data.hourly.temperature_2m[i]);
+                    if (Number.isFinite(hourlyWind) && hourlyWind > maxWind6h) maxWind6h = hourlyWind;
+                    if (Number.isFinite(hourlyTemp) && hourlyTemp > maxTemp6h) maxTemp6h = hourlyTemp;
+                    if (Number.isFinite(hourlyTemp) && hourlyTemp < minTemp6h) minTemp6h = hourlyTemp;
                 }
+
+                if (maxTemp6h === -99 || minTemp6h === 99) throw new Error('A API retornou temperaturas inválidas para as próximas seis horas.');
 
                 const content6hEl = document.getElementById('content-6h-alert');
                 const label6hEl = document.getElementById('label-6h-span');
