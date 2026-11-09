@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Painel independente de monitoramento e consulta meteorológica para Erechim, Rio Grande do Sul.">
+    <meta name="theme-color" content="#09090b">
     <title>Painel Meteorológico  — Erechim / RS</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -132,6 +134,108 @@
             transition: transform 0.1s ease;
         }
         .slider-thumb::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    
+
+        /* Centralização visual geral das informações do painel */
+        body { text-align: center !important; }
+        body :is(h1, h2, h3, h4, p, span, label, a, li, th, td, figcaption) {
+            text-align: center !important;
+        }
+        header, main, footer { text-align: center !important; }
+        main section > div:first-child { justify-content: center !important; text-align: center !important; }
+        .glass-card { text-align: center !important; }
+        .glass-card :is(.flex.items-center, .flex.flex-wrap) { justify-content: center !important; }
+        #header-6h-alert, #alert-banner, #alert-banner > div { text-align: center !important; }
+        /* Mantém controles utilizáveis e centralizados sem alterar a lógica */
+        button, select, input, textarea { text-align: center; }
+        @media (max-width: 640px) {
+            header .flex.flex-wrap, footer .flex.flex-wrap { justify-content: center !important; }
+        }
+
+        /* Navegação principal abaixo do cabeçalho, centralizada em uma única faixa flexível. */
+        header #admin-status-area,
+        header > div > div > div:last-child { margin-left: auto; margin-right: auto; }
+        header > div > div > div:last-child {
+            width: 100%;
+            display: flex;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        header > div > div > div:last-child button { margin: 0; }
+        @media (max-width: 640px) {
+            header > div > div > div:last-child { gap: 8px; }
+            header > div > div > div:last-child button { max-width: 100%; }
+        }
+
+        /* Alinhamento uniforme: centraliza textos, grupos, cartões e controles. */
+        header, main, footer { margin-left: auto; margin-right: auto; }
+        header .flex, main .flex, footer .flex {
+            justify-content: center !important;
+            align-items: center !important;
+        }
+        header .flex.flex-col, main .flex.flex-col, footer .flex.flex-col {
+            align-items: center !important;
+        }
+        header .flex.flex-wrap, main .flex.flex-wrap, footer .flex.flex-wrap {
+            justify-content: center !important;
+        }
+        header [class*="max-w-"], main [class*="max-w-"], footer [class*="max-w-"] {
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        main section, main section > div, main .grid > *, footer > div {
+            text-align: center !important;
+        }
+        main .grid > * {
+            justify-items: center;
+        }
+        main .glass-card, main .glass-card > div, main .glass-card p,
+        main .glass-card h1, main .glass-card h2, main .glass-card h3,
+        main .glass-card span, main .glass-card label {
+            text-align: center !important;
+        }
+        header button, main button, footer button {
+            justify-content: center !important;
+        }
+        #header-6h-alert {
+            width: min(100%, 760px) !important;
+            margin: 0 auto !important;
+        }
+        #content-6h-alert { justify-content: center !important; flex-wrap: wrap; }
+        canvas, svg { max-width: 100%; }
+
+        /* Aviso de independência institucional e melhor espaçamento da previsão */
+        .site-independent-notice {
+            max-width: 900px;
+            margin: 12px auto 0;
+            padding: 10px 14px;
+            border: 1px solid rgba(148,163,184,.28);
+            border-radius: 12px;
+            background: rgba(15,23,42,.48);
+            color: #cbd5e1;
+            font-size: 12px;
+            line-height: 1.65;
+            text-align: center;
+        }
+        #forecast-3days-container { gap: 1.5rem !important; }
+        #forecast-3days-container > div {
+            padding: 1.35rem !important;
+            min-height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: .35rem;
+            line-height: 1.6;
+        }
+        #forecast-3days-container > div > div { margin-top: .85rem !important; gap: .75rem; }
+        #forecast-3days-container > div h3 { margin-top: .35rem; margin-bottom: .35rem; }
+        @media (max-width: 640px) {
+            .site-independent-notice { font-size: 11px; padding: 9px 10px; }
+            #forecast-3days-container > div { min-height: 155px; }
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -139,7 +243,7 @@
     <!-- HEADER BAR -->
     <header class="border-b dark:border-slate-800 border-slate-200 dark:bg-slate-900/95 bg-white/95 backdrop-blur-md relative z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4">
+            <div class="flex flex-col items-center justify-center gap-4">
                 
                 <!-- Title & Station Info -->
                 <div class="flex items-center justify-center w-full gap-3">
@@ -148,6 +252,9 @@
                             <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight dark:text-white text-slate-900 flex flex-col sm:flex-row justify-center items-center gap-2">
                                 Central de Monitoramento de Erechim
                             </h1>
+                            <p class="site-independent-notice">
+                                Plataforma independente de monitoramento meteorológico de Erechim/RS, desenvolvida por iniciativa particular. Não constitui órgão público, não possui caráter institucional e não substitui os avisos do INMET nem os alertas da Defesa Civil.
+                            </p>
                             <div class="text-xs font-mono font-bold dark:text-sky-400 text-sky-600 mt-1.5 flex flex-col sm:flex-row justify-center items-center gap-2">
                                 <span id="header-update-timestamp">Atualizado às --:--:--</span>
                             </div>
@@ -160,28 +267,16 @@
                     </div>
                 </div>
 
-                <!-- INDICADOR DE TENDÊNCIA E ALERTA DAS PRÓXIMAS 6 HORAS -->
-                <div id="header-6h-alert" class="flex-1 max-w-xl mx-auto lg:mx-4 px-4 py-3 rounded-xl bg-emerald-600/20 border-2 border-emerald-500 text-emerald-100 transition shadow-lg text-center">
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-1.5 border-b border-emerald-500/30 pb-2">
-                        <span class="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 justify-center">
-                            <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> PREVISÃO P/ PRÓXIMAS 6 HORAS:
-                        </span>
-                        <span id="label-6h-span" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 uppercase">SEM ALERTA</span>
-                    </div>
-                    <div id="content-6h-alert" class="text-xs text-emerald-100 flex justify-center items-center">
-                        <i class="fa-solid fa-spinner fa-spin text-emerald-300 mr-2"></i>
-                        <span>Carregando projeção meteorológica detalhada...</span>
-                    </div>
-                </div>
+
 
                 <!-- Admin & Controls -->
-                <div class="flex items-center justify-between lg:justify-end gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 dark:border-slate-800 border-slate-200 flex-wrap">
+                <div class="flex w-full items-center justify-center gap-3 border-t pt-4 dark:border-slate-800 border-slate-200 flex-wrap">
                     
                     <!-- Admin Status Trigger -->
                     <div id="admin-status-area">
                         <button onclick="toggleAdminModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                             <i class="fa-solid fa-user-shield text-sky-500"></i>
-                            <span id="admin-btn-text">Área Administrativa</span>
+                            <span id="admin-btn-text">Administração (acesso desativado)</span>
                         </button>
                     </div>
 
@@ -225,113 +320,53 @@
         </div>
     </header>
 
-    <!-- ADMIN MODAL -->
-    <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-2xl rounded-2xl p-6 relative border dark:border-slate-700 border-slate-300 shadow-2xl">
-            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <div id="admin-login-view" class="space-y-4">
-                <div class="flex items-center gap-3">
-                    <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20">
-                        <i class="fa-solid fa-lock text-xl"></i>
-                    </span>
-                    <div>
-                        <h2 class="text-xl font-bold dark:text-white text-slate-900">Acesso Restrito — Administrador</h2>
-                        <p class="text-xs text-slate-400">Entre com credenciais autorizadas de gestão do sistema.</p>
-                    </div>
-                </div>
-                <form onsubmit="handleAdminLogin(event)" class="space-y-4 mt-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Gestor / Administrador</label>
-                        <input type="text" id="login-name" value="Wander Luís Marques" placeholder="Digite seu nome completo" required class="w-full px-4 py-2.5 rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white bg-slate-50 border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Senha de Acesso Exclusiva</label>
-                        <input type="password" id="login-pass" placeholder="••••••••" required class="w-full px-4 py-2.5 rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white bg-slate-50 border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-                    <div id="login-error" class="hidden text-xs text-red-400 bg-red-950/40 p-2.5 rounded-xl border border-red-800">
-                        Credenciais ou nome de usuário inválidos. Acesso negado.
-                    </div>
-                    <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-xl transition shadow-lg">
-                        Entrar no Painel Administrativo
-                    </button>
-                </form>
-            </div>
-            <div id="admin-panel-view" class="hidden space-y-6">
-                <div class="flex items-center justify-between border-b dark:border-slate-800 border-slate-200 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center font-bold">WM</div>
-                        <div>
-                            <h3 id="admin-user-disp" class="font-bold text-sm dark:text-white text-slate-900">Wander Luís Marques</h3>
-                            <span class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle text-[8px]"></i> Administrador Ativo</span>
-                        </div>
-                    </div>
-                    <button onclick="handleAdminLogout()" class="px-3 py-1.5 text-xs bg-red-900/40 hover:bg-red-800/60 text-red-200 rounded-lg border border-red-700 transition">Sair</button>
+    <!-- ADMIN MODAL: disabled until a secure server-side authentication service exists -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+        <div class="glass-card w-full max-w-xl rounded-2xl p-6 relative border dark:border-slate-700 border-slate-300 shadow-2xl">
+            <button type="button" onclick="toggleAdminModal()" aria-label="Fechar" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="flex items-center gap-3 mb-4">
+                <span class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-shield-halved text-xl"></i></span>
+                <div>
+                    <h2 id="admin-modal-title" class="text-xl font-bold dark:text-white text-slate-900">Área administrativa indisponível</h2>
+                    <p class="text-xs text-slate-400">Acesso administrativo protegido por segurança.</p>
                 </div>
             </div>
+            <div class="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-100 space-y-2">
+                <p class="font-bold">O painel foi desativado nesta versão pública.</p>
+                <p>Este site é hospedado no GitHub Pages e executa apenas código no navegador. Uma senha gravada no HTML/JavaScript pode ser vista por qualquer visitante e não protege uma área restrita.</p>
+                <p>Para reativar o painel, será necessário implementar autenticação no servidor, controle de sessão e permissões em um serviço de backend. Não insira senhas, tokens ou chaves privadas neste arquivo.</p>
+            </div>
+            <button type="button" onclick="toggleAdminModal()" class="mt-5 w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm rounded-xl">Entendi</button>
         </div>
     </div>
 
-    <!-- MODEL EFFICACY MODAL PAGE -->
-    <div id="model-efficacy-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <div class="max-w-7xl mx-auto w-full space-y-8 my-auto text-slate-100">
-            <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
+    <!-- MODEL VALIDATION: do not publish metrics until they are calculated from archived forecasts and observations -->
+    <div id="model-efficacy-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="efficacy-title">
+        <div class="max-w-4xl mx-auto w-full space-y-6 my-auto text-slate-100">
+            <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-800 gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-chart-column text-white text-2xl"></i>
-                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-700 flex items-center justify-center"><i class="fa-solid fa-chart-column text-white text-2xl"></i></div>
                     <div>
-                        <h2 class="text-xl sm:text-2xl font-extrabold text-white">Eficácia & Validação do Modelo Meteorológico</h2>
-                        <p class="text-xs sm:text-sm text-slate-400">Análise de acurácia, índices estatísticos, confiabilidade de previsões e gráficos de desempenho (Erechim / RS)</p>
+                        <h2 id="efficacy-title" class="text-xl sm:text-2xl font-extrabold text-white">Validação do Modelo Meteorológico</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Transparência sobre a qualidade dos dados e das previsões</p>
                     </div>
                 </div>
-                <button onclick="toggleModelEfficacyModal(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition border border-slate-700 flex items-center gap-2">
-                    <i class="fa-solid fa-xmark text-base"></i> Fechar / Voltar
-                </button>
+                <button type="button" onclick="toggleModelEfficacyModal(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700">Fechar</button>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                    <span class="text-xs text-slate-400 block mb-1">Taxa de Acerto Geral</span>
-                    <div class="text-3xl font-black text-emerald-400">92.4%</div>
-                    <span class="text-[11px] text-slate-500 mt-2 block">Validado contra estações INMET</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                    <span class="text-xs text-slate-400 block mb-1">Índice Brier (BS)</span>
-                    <div class="text-3xl font-black text-sky-400">0.078</div>
-                    <span class="text-[11px] text-slate-500 mt-2 block">Alta confiabilidade probabilística</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                    <span class="text-xs text-slate-400 block mb-1">Acurácia de Precipitação</span>
-                    <div class="text-3xl font-black text-blue-400">89.1%</div>
-                    <span class="text-[11px] text-slate-500 mt-2 block">Janela de 24 horas</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                    <span class="text-xs text-slate-400 block mb-1">Taxa de Falsos Alarmes (FAR)</span>
-                    <div class="text-3xl font-black text-amber-400">4.5%</div>
-                    <span class="text-[11px] text-slate-500 mt-2 block">Baixo índice de alarmes falsos</span>
-                </div>
+            <div class="rounded-2xl border border-amber-500/40 bg-amber-950/20 p-5 space-y-2">
+                <p class="font-bold text-amber-300"><i class="fa-solid fa-circle-info mr-2"></i>Validação estatística ainda não implementada</p>
+                <p class="text-sm text-slate-200 leading-relaxed">A versão atual consulta a API de previsão Open-Meteo, mas não mantém um arquivo próprio de previsões emitidas e observações correspondentes. Portanto, não há base suficiente neste código para afirmar taxa de acerto, Brier Score, FAR, RMSE ou confiabilidade percentual. Os números demonstrativos foram removidos para evitar que sejam interpretados como resultados científicos.</p>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-line text-emerald-400"></i> Eficácia Mensal do Modelo (%)</h3>
-                    <div class="w-full h-64"><canvas id="efficacyChart"></canvas></div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-bullseye text-sky-400"></i> Metodologia de Validação Cruzada</h3>
-                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
-                            O modelo implementado na Central de Erechim utiliza algoritmos de validação cruzada comparando dados horários previstos com as medições reais oficiais da estação automática INMET (A828).
-                        </p>
-                        <div class="space-y-3 font-mono text-xs">
-                            <div class="flex justify-between border-b border-slate-800 pb-2"><span class="text-slate-400 font-sans">RMSE Temperatura:</span><span class="text-white font-bold">± 0.64 °C</span></div>
-                            <div class="flex justify-between border-b border-slate-800 pb-2"><span class="text-slate-400 font-sans">RMSE Vento:</span><span class="text-white font-bold">± 1.8 km/h</span></div>
-                            <div class="flex justify-between border-b border-slate-800 pb-2"><span class="text-slate-400 font-sans">Confiabilidade de Alertas:</span><span class="text-emerald-400 font-bold">Excelente (94.8%)</span></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-3 text-sm text-slate-300">
+                <h3 class="font-bold text-white">O que é necessário para calcular métricas reais</h3>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>Armazenar cada previsão com data/hora de emissão, local, variável, horizonte e valor previsto.</li>
+                    <li>Obter observações verificadas da estação INMET A828, incluindo controle de qualidade e horários compatíveis.</li>
+                    <li>Associar cada previsão à observação correspondente, documentando dados ausentes e mudanças de estação.</li>
+                    <li>Calcular MAE/RMSE para variáveis contínuas e Brier Score, POD, FAR e CSI para eventos, com período e tamanho da amostra explícitos.</li>
+                    <li>Publicar metodologia, período analisado, fonte, quantidade de casos e limitações junto aos resultados.</li>
+                </ol>
+                <p class="text-xs text-slate-400 border-t border-slate-700 pt-3">Até que esse processo exista, esta seção não apresenta índices de desempenho. A previsão exibida no painel é orientação meteorológica automatizada e não substitui alertas oficiais da Defesa Civil ou do INMET.</p>
             </div>
         </div>
     </div>
@@ -346,7 +381,7 @@
                     </div>
                     <div>
                         <h2 class="text-xl sm:text-2xl font-extrabold text-white">Erechim Severe Weather Lab</h2>
-                        <p class="text-xs sm:text-sm text-slate-400">Sistema Avançado de Diagnóstico e Previsão de Tornados (Planalto Gaúcho)</p>
+                        <p class="text-xs sm:text-sm text-slate-400">Simulador didático de parâmetros atmosféricos — não é previsão operacional</p>
                     </div>
                 </div>
                 <button onclick="toggleTornadoLabModal(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition border border-slate-700 flex items-center gap-2">
@@ -358,17 +393,18 @@
                 <section>
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
                         <div>
-                            <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gauge-high text-blue-500"></i> Condições Atuais em Erechim</h3>
-                            <p class="text-xs text-slate-400">Parâmetros termodinâmicos e cinemáticos calculados para a malha de mesoescala local.</p>
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gauge-high text-blue-500"></i> Parâmetros do cenário simulado</h3>
+                            <p class="text-xs text-slate-400">Valores ajustáveis para fins didáticos. Não representam uma sondagem observada nem condições atuais de Erechim.</p>
+                            <p class="mt-2 text-xs font-bold text-amber-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Simulação simplificada: os índices calculados não são probabilidades de tornado e não devem orientar decisões de segurança.</p>
                         </div>
                         <div id="lab-global-status" class="px-4 py-1.5 rounded-xl font-semibold text-xs tracking-wide uppercase transition-all duration-300 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            Risco Baixo / Normal
+                            Simulação: parâmetros abaixo dos limiares definidos
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                            <div class="flex justify-between items-start mb-2"><span class="text-xs font-medium text-slate-400">MLCAPE</span><i class="fa-solid fa-fire text-amber-500 text-sm"></i></div>
+                            <div class="flex justify-between items-start mb-2"><span class="text-xs font-medium text-slate-400">CAPE simplificado</span><i class="fa-solid fa-fire text-amber-500 text-sm"></i></div>
                             <div class="text-2xl font-bold text-white mb-1"><span id="lab-val-cape">1420</span> <span class="text-xs font-normal text-slate-400">J/kg</span></div>
                             <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3"><div id="lab-bar-cape" class="bg-blue-500 h-1.5 rounded-full" style="width: 50%"></div></div>
                             <span class="text-[11px] text-slate-400 mt-2 block">Instabilidade Moderada</span>
@@ -386,13 +422,13 @@
                             <span class="text-[11px] text-slate-400 mt-2 block">Favorável a Supercélulas</span>
                         </div>
                         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                            <div class="flex justify-between items-start mb-2"><span class="text-xs font-medium text-slate-400">EHI (0-3km)</span><i class="fa-solid fa-bolt text-yellow-500 text-sm"></i></div>
+                            <div class="flex justify-between items-start mb-2"><span class="text-xs font-medium text-slate-400">EHI ilustrativo</span><i class="fa-solid fa-bolt text-yellow-500 text-sm"></i></div>
                             <div class="text-2xl font-bold text-white mb-1"><span id="lab-val-ehi">1.64</span> <span class="text-xs font-normal text-slate-400">Ind.</span></div>
                             <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3"><div id="lab-bar-ehi" class="bg-yellow-500 h-1.5 rounded-full" style="width: 40%"></div></div>
                             <span class="text-[11px] text-slate-400 mt-2 block">Potencial Moderado</span>
                         </div>
                         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                            <div class="flex justify-between items-start mb-2"><span class="text-xs font-medium text-slate-400">STP (Fixed)</span><i class="fa-solid fa-triangle-exclamation text-rose-500 text-sm"></i></div>
+                            <div class="flex justify-between items-start mb-2"><span class="text-xs font-medium text-slate-400">STP simplificado</span><i class="fa-solid fa-triangle-exclamation text-rose-500 text-sm"></i></div>
                             <div class="text-2xl font-bold text-white mb-1"><span id="lab-val-stp">0.85</span> <span class="text-xs font-normal text-slate-400">Ind.</span></div>
                             <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3"><div id="lab-bar-stp" class="bg-emerald-500 h-1.5 rounded-full" style="width: 30%"></div></div>
                             <span class="text-[11px] text-slate-400 mt-2 block">Atenção Meteorológica</span>
@@ -445,16 +481,16 @@
 
                         <div id="lab-sim-box" class="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300">
                             <div>
-                                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Diagnóstico em Tempo Real</div>
+                                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Resultado do cenário simulado</div>
                                 <div id="lab-sim-alert-title" class="text-base font-bold text-emerald-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> Situação Sob Controle</div>
                                 <div class="space-y-3 font-mono text-xs">
-                                    <div class="flex justify-between border-b border-slate-900 pb-2"><span class="text-slate-400 font-sans">MLCAPE:</span><span id="lab-sim-cape" class="text-white font-bold">1420 J/kg</span></div>
-                                    <div class="flex justify-between border-b border-slate-900 pb-2"><span class="text-slate-400 font-sans">EHI (0-3km):</span><span id="lab-sim-ehi" class="text-white font-bold">1.64</span></div>
-                                    <div class="flex justify-between border-b border-slate-900 pb-2"><span class="text-slate-400 font-sans">STP (Fixed):</span><span id="lab-sim-stp" class="text-white font-bold">0.85</span></div>
+                                    <div class="flex justify-between border-b border-slate-900 pb-2"><span class="text-slate-400 font-sans">CAPE simplificado:</span><span id="lab-sim-cape" class="text-white font-bold">1420 J/kg</span></div>
+                                    <div class="flex justify-between border-b border-slate-900 pb-2"><span class="text-slate-400 font-sans">EHI ilustrativo:</span><span id="lab-sim-ehi" class="text-white font-bold">1.64</span></div>
+                                    <div class="flex justify-between border-b border-slate-900 pb-2"><span class="text-slate-400 font-sans">STP simplificado:</span><span id="lab-sim-stp" class="text-white font-bold">0.85</span></div>
                                 </div>
                             </div>
                             <div class="mt-6 pt-4 border-t border-slate-900">
-                                <p id="lab-sim-message" class="text-xs text-slate-400 leading-relaxed">Ambiente com instabilidade moderada. Monitoramento de rotina.</p>
+                                <p id="lab-sim-message" class="text-xs text-slate-400 leading-relaxed">Simulação educacional: não utilizar como alerta ou diagnóstico meteorológico operacional.</p>
                             </div>
                         </div>
                     </div>
@@ -477,7 +513,7 @@
                 <button onclick="toggleSourcesPage(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition border border-slate-700 flex items-center gap-2"><i class="fa-solid fa-xmark text-base"></i> Fechar</button>
             </div>
             <div class="glass-card rounded-2xl p-6 sm:p-8 border border-slate-700 space-y-4 text-xs sm:text-sm text-slate-300">
-                <p>Integra 6 fontes principais de dados globais e oficiais (Open-Meteo API, NOAA/CIRA GOES-16, Windy / ECMWF, Earth Nullschool, CPTEC/INPE e Marinha do Brasil).</p>
+                <p>O painel consulta diretamente a API Open-Meteo para os dados meteorológicos numéricos. As demais plataformas listadas são recursos externos de consulta visual e contextual; não significa que todos os seus dados sejam integrados automaticamente ao cálculo do painel.</p>
             </div>
         </div>
     </div>
@@ -499,7 +535,7 @@
                 <ul class="space-y-2.5 font-mono">
                     <li><a href="https://www.windy.com/pt/-Sat%C3%A9lite-satellite?satellite,-27.677,-52.259,5,p:cities" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Windy (Satélite)</a></li>
                     <li><a href="https://meteorors.com.br/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Meteoro RS</a></li>
-                    <li><a href="https://meteostat.net/pt/place/br/erechim?s=86954&t=2026-09-14/2026-09-21" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Meteostat (Erechim)</a></li>
+                    <li><a href="https://meteostat.net/pt/place/br/erechim" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Meteostat (Erechim)</a></li>
                     <li><a href="https://mapainterativo.cemaden.gov.br/#" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Mapa Interativo Cemaden</a></li>
                     <li><a href="https://tempo.inmet.gov.br/TabelaEstacoes/A828" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> INMET (Estação A828 Erechim)</a></li>
                     <li><a href="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.62,-27.10,1568/loc=-52.621,-27.098" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Earth Nullschool (Vento & Superfície)</a></li>
@@ -542,7 +578,21 @@
             </div>
         </div>
 
-        <!-- CURRENT WEATHER METRICS -->
+<!-- INDICADOR DE TENDÊNCIA E ALERTA DAS PRÓXIMAS 6 HORAS -->
+                <div id="header-6h-alert" class="flex-1 max-w-xl mx-auto lg:mx-4 px-4 py-3 rounded-xl bg-emerald-600/20 border-2 border-emerald-500 text-emerald-100 transition shadow-lg text-center">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-1.5 border-b border-emerald-500/30 pb-2">
+                        <span class="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 justify-center">
+                            <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> INDICADOR INTERNO — PRÓXIMAS 6 HORAS:
+                        </span>
+                        <span id="label-6h-span" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 uppercase">SEM ALERTA</span>
+                    </div>
+                    <div id="content-6h-alert" class="text-xs text-emerald-100 flex justify-center items-center">
+                        <i class="fa-solid fa-spinner fa-spin text-emerald-300 mr-2"></i>
+                        <span>Carregando projeção meteorológica detalhada...</span>
+                    </div>
+                </div>
+
+                <!-- CURRENT WEATHER METRICS -->
         <section>
             <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
                 <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-400 text-slate-500 flex items-center justify-center gap-2">
@@ -704,84 +754,46 @@
             </div>
         </section>
 
-        <!-- SATELLITE & WINDY RADAR SECTION -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Windy Radar Embed -->
-            <div class="lg:col-span-2 glass-card rounded-2xl p-5 flex flex-col justify-center items-center">
-                <div class="w-full">
-                    <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
+        <!-- RADAR / EARTH NULLSCHOOL / WIND / SATELLITE -->
+        <section class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                <!-- Earth Nullschool map -->
+                <div class="lg:col-span-2 glass-card rounded-2xl p-5 flex flex-col items-center">
+                    <div class="w-full mb-4 flex flex-col items-center gap-2 text-center">
                         <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-earth-americas text-sky-500"></i> Radar Interativo & Dinâmica Atmosférica
                         </h2>
-                        <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-mono inline-block">
-                            Erechim (RS)
-                        </span>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-mono">Erechim (RS) — Earth Nullschool</span>
                     </div>
-                    
                     <div class="w-full h-[580px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
-                        <iframe 
-                            id="windy-frame"
-                            class="w-full h-full border-0" 
-                            src="https://embed.windy.com/embed.html?lat=-27.634&lon=-52.274&detailLat=-27.634&detailLon=-52.274&width=650&height=600&zoom=9&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" 
-                            loading="lazy">
-                        </iframe>
+                        <iframe title="Earth Nullschool — visualização global de vento e dinâmica atmosférica sobre Erechim" class="w-full h-full border-0" src="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.27,-27.63,3000/loc=-52.27,-27.63" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
+                    <p class="text-xs text-slate-400 mt-3 text-center">Visualização interativa externa. Os dados e a atualização são fornecidos pelo Earth Nullschool.</p>
                 </div>
 
-                <div class="flex flex-col items-center justify-center gap-3 mt-4 text-xs text-center w-full">
-                    <span class="text-slate-400">Camadas Disponíveis:</span>
-                    <div class="flex flex-wrap justify-center gap-2">
-                        <button onclick="changeWindyLayer('wind')" class="px-3 py-1.5 rounded-lg bg-sky-950 border border-sky-800 text-sky-200 transition">
-                            <i class="fa-solid fa-wind mr-1"></i> Vento
-                        </button>
-                        <button onclick="changeWindyLayer('rain')" class="px-3 py-1.5 rounded-lg bg-blue-950 border border-blue-800 text-blue-200 transition">
-                            <i class="fa-solid fa-cloud-rain mr-1"></i> Chuva / Acumulado
-                        </button>
-                        <button onclick="changeWindyLayer('clouds')" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 transition">
-                            <i class="fa-solid fa-cloud mr-1"></i> Satélite / Nuvens
-                        </button>
-                        <button onclick="changeWindyLayer('thunder')" class="px-3 py-1.5 rounded-lg bg-purple-950 border border-purple-800 text-purple-200 transition">
-                            <i class="fa-solid fa-bolt mr-1"></i> Raios
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GOES-16 Satellite Feed & Wind Compass Card -->
-            <div class="space-y-6">
-                <!-- Wind Direction Compass Card -->
-                <div class="glass-card rounded-2xl p-5">
+                <!-- Wind direction card on the side -->
+                <div class="glass-card rounded-2xl p-5 flex flex-col items-center justify-center">
                     <div class="flex flex-col items-center justify-center mb-3 gap-2">
                         <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-compass text-teal-400 text-base"></i> Direção & Intensidade do Vento
                         </h2>
-                        <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-3 py-1 rounded-lg">
-                            --° N
-                        </span>
+                        <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-3 py-1 rounded-lg">--° N</span>
                     </div>
-
                     <div class="flex flex-col items-center justify-center my-5 relative">
-                        <!-- Compass Rose Visual -->
                         <div class="w-40 h-40 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
                             <span class="absolute top-2 text-[11px] font-bold text-slate-400">N</span>
                             <span class="absolute right-3 text-[11px] font-bold text-slate-400">L</span>
                             <span class="absolute bottom-2 text-[11px] font-bold text-slate-400">S</span>
                             <span class="absolute left-3 text-[11px] font-bold text-slate-400">O</span>
-
-                            <!-- Rotating Arrow Indicator -->
                             <div id="wind-arrow-container" class="w-full h-full absolute flex items-center justify-center transition-transform duration-700 ease-out z-10">
                                 <div class="flex flex-col items-center justify-start h-full pt-1.5 relative">
                                     <i class="fa-solid fa-caret-up text-rose-500 text-3xl -mb-1.5 z-20 drop-shadow-md"></i>
-                                    <div class="bg-slate-800 border border-slate-600 text-white text-[9px] font-bold py-3 px-1.5 rounded shadow-lg text-center flex items-center justify-center tracking-widest" style="writing-mode: vertical-rl; transform: rotate(180deg);">
-                                        DIREÇÃO
-                                    </div>
+                                    <div class="bg-slate-800 border border-slate-600 text-white text-[9px] font-bold py-3 px-1.5 rounded shadow-lg text-center flex items-center justify-center tracking-widest" style="writing-mode:vertical-rl;transform:rotate(180deg)">DIREÇÃO</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-center text-xs mt-4">
+                    <div class="grid grid-cols-2 gap-3 text-center text-xs mt-4 w-full">
                         <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
                             <span class="text-slate-400 block text-[11px] mb-1.5">Velocidade</span>
                             <strong id="wind-card-speed" class="text-base font-bold text-teal-300">-- km/h</strong>
@@ -792,45 +804,28 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- GOES-16 Satellite Card -->
-                <div class="glass-card rounded-2xl p-5 flex flex-col justify-center items-center">
-                    <div class="w-full">
-                        <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
-                            <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-satellite text-emerald-500"></i> Imagem de Satélite
-                            </h2>
-                            <span id="sat-mode-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono uppercase inline-block">
-                                INFRAVERMELHO
-                            </span>
-                        </div>
-
-                        <div class="relative w-full h-[220px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 flex items-center justify-center group">
-                            <iframe id="sat-iframe-view" class="w-full h-full border-0 hidden" src="about:blank" loading="lazy"></iframe>
-                            <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Satélite GOES-16 Erechim" class="w-full h-full object-cover rounded-xl transition duration-300 group-hover:scale-105" onerror="handleSatelliteError(this)">
-                            
-                            <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-300 backdrop-blur-sm z-10">
-                                <span id="sat-status-label" class="flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> GOES-16 NOAA / CIRA
-                                </span>
-                                <button onclick="reloadSatelliteImage()" class="hover:text-sky-400 transition" title="Recarregar Imagem">
-                                    <i class="fa-solid fa-rotate-right"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-1.5 mt-3 text-[11px]">
-                            <button onclick="switchSatChannel('ir')" class="py-1 px-2 rounded bg-sky-950 text-sky-200 border border-sky-800 hover:bg-sky-900 transition font-medium text-center">
-                                Infravermelho
-                            </button>
-                            <button onclick="switchSatChannel('geocolor')" class="py-1 px-2 rounded dark:bg-slate-800 dark:text-slate-200 bg-slate-200 text-slate-700 hover:opacity-80 transition font-medium text-center">
-                                GeoColor
-                            </button>
-                            <button onclick="switchSatChannel('interactive')" class="py-1 px-2 rounded dark:bg-slate-800 dark:text-slate-200 bg-slate-200 text-slate-700 hover:opacity-80 transition font-medium text-center">
-                                Radar Interativo
-                            </button>
-                        </div>
+            <!-- Satellite image spans the same full width as the radar area -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col items-center w-full">
+                <div class="w-full flex flex-col items-center justify-center mb-4 text-center gap-2">
+                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-satellite text-emerald-500"></i> Imagem de Satélite
+                    </h2>
+                    <span id="sat-mode-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono uppercase inline-block">INFRAVERMELHO</span>
+                </div>
+                <div class="relative w-full h-[420px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 flex items-center justify-center group">
+                    <iframe title="Visualização interativa de satélite" referrerpolicy="strict-origin-when-cross-origin" id="sat-iframe-view" class="w-full h-full border-0 hidden" src="about:blank" loading="lazy"></iframe>
+                    <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Imagem infravermelha do satélite GOES-16 para a região sul da América do Sul" class="w-full h-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.02]" onerror="handleSatelliteError(this)">
+                    <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-300 backdrop-blur-sm z-10">
+                        <span id="sat-status-label" class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> GOES-16 NOAA / CIRA</span>
+                        <button onclick="reloadSatelliteImage()" class="hover:text-sky-400 transition" title="Recarregar imagem"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-xs w-full max-w-3xl">
+                    <button onclick="switchSatChannel('ir')" class="py-2 px-3 rounded bg-sky-950 text-sky-200 border border-sky-800 hover:bg-sky-900 transition font-medium text-center">Infravermelho</button>
+                    <button onclick="switchSatChannel('geocolor')" class="py-2 px-3 rounded dark:bg-slate-800 dark:text-slate-200 bg-slate-200 text-slate-700 hover:opacity-80 transition font-medium text-center">GeoColor</button>
+                    <button onclick="switchSatChannel('interactive')" class="py-2 px-3 rounded dark:bg-slate-800 dark:text-slate-200 bg-slate-200 text-slate-700 hover:opacity-80 transition font-medium text-center">Radar Interativo</button>
                 </div>
             </div>
         </section>
@@ -841,7 +836,7 @@
                 <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-chart-line text-indigo-400"></i> Tendência das Próximas 24h (Temperatura & Precipitação)
                 </h2>
-                <span class="text-xs text-slate-400">Modelo Open-Meteo High Precision</span>
+                <span class="text-xs text-slate-400">Previsão numérica consultada via Open-Meteo</span>
             </div>
 
             <div class="w-full h-64 sm:h-72">
@@ -892,6 +887,9 @@
                     <a href="https://www.linkedin.com/in/wander-lu%C3%ADs-marques-71a3651aa/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3.5 py-2 rounded-xl dark:bg-slate-900 bg-slate-100 text-slate-300 border border-slate-800"><i class="fa-brands fa-linkedin text-sky-600"></i><span>LinkedIn</span></a>
                 </div>
             </div>
+            <div class="max-w-3xl mx-auto text-[11px] leading-relaxed text-slate-500 border-t border-slate-800 pt-4">
+                <p><strong>Aviso:</strong> painel independente de caráter informativo. Não é serviço oficial de alerta, não substitui INMET, Defesa Civil ou autoridades locais e pode apresentar atrasos, indisponibilidade ou diferenças entre modelos e observações. Em emergência, siga os canais oficiais.</p>
+            </div>
             <div class="space-y-1">
                 <p>Central de Monitoramento Climático - Erechim / RS</p>
                 <p>Desenvolvido por: <strong>Wander Luís Marques</strong></p>
@@ -907,6 +905,9 @@
         let chartInstance = null;
         let efficacyChartInstance = null;
         let currentSatChannel = 'ir';
+        let weatherRefreshTimer = null;
+        let weatherLastSuccess = null;
+        let weatherRequestInProgress = false;
 
         const satSources = {
             ir: ["https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg"],
@@ -928,7 +929,7 @@
             }
         }
 
-        function toggleAdminModal() { document.getElementById('admin-modal').classList.toggle('hidden'); }
+        function toggleAdminModal() { const modal = document.getElementById('admin-modal'); if (modal) modal.classList.toggle('hidden'); }
         function toggleHistoryPage(show) { const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSourcesPage(show) { const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSitesModal(show) { const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
@@ -949,35 +950,16 @@
             reloadSatelliteImage();
         }
 
-        function handleAdminLogin(event) {
-            event.preventDefault();
-            const name = document.getElementById('login-name').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
-            const err = document.getElementById('login-error');
-            if ((name.includes("wander") || name.includes("marques")) && pass === 'AMinhaSenhaeh@1') {
-                err.classList.add('hidden');
-                document.getElementById('admin-login-view').classList.add('hidden');
-                document.getElementById('admin-panel-view').classList.remove('hidden');
-                document.getElementById('admin-btn-text').innerText = 'Admin Ativo';
-            } else { err.classList.remove('hidden'); }
-        }
-        function handleAdminLogout() {
-            document.getElementById('admin-login-view').classList.remove('hidden');
-            document.getElementById('admin-panel-view').classList.add('hidden');
-            document.getElementById('admin-btn-text').innerText = 'Área Administrativa';
-            toggleAdminModal();
-        }
+        // A autenticação administrativa foi intencionalmente removida do front-end.
+        // Nunca valide senhas nem autorize ações privilegiadas em JavaScript público.
+        function handleAdminLogin(event) { if (event) event.preventDefault(); toggleAdminModal(); }
+        function handleAdminLogout() { toggleAdminModal(); }
 
         function updateClock() {
             const now = new Date();
             const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const dateString = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-            const headerStr = `Atualizado às ${timeString} (${dateString})`;
-            
-            const headerTimestamp = document.getElementById('header-update-timestamp');
-            if (headerTimestamp) {
-                headerTimestamp.innerText = headerStr;
-            }
+            const headerStr = `Horário local: ${timeString} (${dateString})`;
             
             const lastUpdateLabel = document.getElementById('last-update-label');
             if (lastUpdateLabel) {
@@ -1043,33 +1025,33 @@
             const alertMsg = document.getElementById('lab-sim-message');
             const globalBadge = document.getElementById('lab-global-status');
 
-            let tornadoProbPercent = Math.min(98, Math.max(5, Math.round((stp * 45) + (ehi * 15))));
+            let tornadoProbPercent = null; // Não calcular probabilidade de tornado a partir desta fórmula simplificada.
             const probTextEl = document.getElementById('header-tornado-prob-text');
             const probBadgeEl = document.getElementById('header-tornado-prob-badge');
             const tornadoRiskBox = document.getElementById('header-tornado-risk-box');
 
             if (stp >= 1.5 || ehi >= 2.5) {
                 simBox.className = "bg-slate-950 border border-rose-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 bg-rose-950/10";
-                alertTitle.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-500 animate-bounce"></i> Risco Crítico de Tornado';
-                alertMsg.textContent = 'ATENÇÃO MÁXIMA: Condições extremas para formação de tornados em Erechim.';
-                globalBadge.innerHTML = '<span class="px-3 py-1 rounded-xl text-xs bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse font-bold">ALERTA CRÍTICO</span>';
-                if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-rose-400 animate-pulse"; probTextEl.innerText = `Crítica (${tornadoProbPercent}%)`; }
+                alertTitle.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-500 animate-bounce"></i> Cenário simulado crítico';
+                alertMsg.textContent = 'Cenário simulado com índices elevados. Isto não indica probabilidade real de tornado em Erechim.';
+                globalBadge.innerHTML = '<span class="px-3 py-1 rounded-xl text-xs bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse font-bold">SIMULAÇÃO CRÍTICA</span>';
+                if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-rose-400 animate-pulse"; probTextEl.innerText = `Índice simulado elevado`; }
                 if (probBadgeEl) { probBadgeEl.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-rose-500/30 text-rose-300 border border-rose-500/60 animate-pulse"; probBadgeEl.innerText = "CRÍTICO"; }
                 if (tornadoRiskBox) tornadoRiskBox.className = "w-full px-4 py-2.5 rounded-xl bg-rose-950/40 border border-rose-500/60 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg";
             } else if (stp >= 0.7 || ehi >= 1.2) {
                 simBox.className = "bg-slate-950 border border-amber-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 bg-amber-950/10";
-                alertTitle.innerHTML = '<i class="fa-solid fa-cloud-bolt text-amber-500"></i> Risco Severo';
-                alertMsg.textContent = 'Ambiente favorável a tempestades severas e ventos destrutivos.';
-                globalBadge.innerHTML = '<span class="px-3 py-1 rounded-xl text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold">ALERTA SEVERO</span>';
-                if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-amber-400"; probTextEl.innerText = `Elevada (${tornadoProbPercent}%)`; }
+                alertTitle.innerHTML = '<i class="fa-solid fa-cloud-bolt text-amber-500"></i> Cenário simulado severo';
+                alertMsg.textContent = 'O cenário simulado apresenta parâmetros associados a convecção organizada. Não é um alerta meteorológico.';
+                globalBadge.innerHTML = '<span class="px-3 py-1 rounded-xl text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold">SIMULAÇÃO SEVERA</span>';
+                if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-amber-400"; probTextEl.innerText = `Índice simulado moderado`; }
                 if (probBadgeEl) { probBadgeEl.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40"; probBadgeEl.innerText = "SEVERO"; }
                 if (tornadoRiskBox) tornadoRiskBox.className = "w-full px-4 py-2.5 rounded-xl bg-amber-950/30 border border-amber-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md";
             } else {
                 simBox.className = "bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300";
                 alertTitle.innerHTML = '<i class="fa-solid fa-shield-halved text-emerald-400"></i> Situação Sob Controle';
-                alertMsg.textContent = 'Parâmetros abaixo do limiar crítico para tornados na região.';
-                globalBadge.innerHTML = '<span class="px-3 py-1 rounded-xl text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">RISCO BAIXO</span>';
-                if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-emerald-400"; probTextEl.innerText = `Baixa (${tornadoProbPercent}%)`; }
+                alertMsg.textContent = 'Os parâmetros inseridos ficaram abaixo dos limiares definidos nesta simulação didática.';
+                globalBadge.innerHTML = '<span class="px-3 py-1 rounded-xl text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">SIMULAÇÃO BAIXA</span>';
+                if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-emerald-400"; probTextEl.innerText = `Índice simulado baixo`; }
                 if (probBadgeEl) { probBadgeEl.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"; probBadgeEl.innerText = "NORMAL"; }
                 if (tornadoRiskBox) tornadoRiskBox.className = "w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md";
             }
@@ -1089,17 +1071,38 @@
         }
 
         async function fetchWeatherData() {
+            if (weatherRequestInProgress) return;
+            weatherRequestInProgress = true;
+            const refreshButton = document.getElementById('btn-refresh');
+            const refreshIcon = document.getElementById('refresh-icon');
+            if (refreshButton) refreshButton.disabled = true;
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+            const headerTimestamp = document.getElementById('header-update-timestamp');
+            if (headerTimestamp && !weatherLastSuccess) headerTimestamp.textContent = 'Buscando dados meteorológicos...';
             try {
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,precipitation,wind_speed_10m,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&past_hours=12&forecast_days=5&timezone=America%2FSao_Paulo`;
-                const response = await fetch(url);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                let response;
+                try { response = await fetch(url, { signal: controller.signal, headers: { 'Accept': 'application/json' } }); }
+                finally { clearTimeout(timeoutId); }
+                if (!response.ok) throw new Error(`Open-Meteo respondeu com HTTP ${response.status}`);
                 const data = await response.json();
+                if (!data || !data.current || !data.hourly || !data.daily || !Array.isArray(data.hourly.time)) {
+                    throw new Error('A resposta da API está incompleta ou em formato inesperado.');
+                }
                 const current = data.current;
+                const requiredCurrent = ['temperature_2m','relative_humidity_2m','apparent_temperature','surface_pressure','wind_speed_10m'];
+                if (requiredCurrent.some(key => !Number.isFinite(Number(current[key])))) throw new Error('A API não retornou todas as observações necessárias.');
 
                 const temp = current.temperature_2m;
                 const humidity = current.relative_humidity_2m;
-                let rain12h = data.hourly ? data.hourly.precipitation.slice(0, 13).reduce((a, b) => a + (b || 0), 0) : current.precipitation;
+                const currentHourIndex = data.hourly.time.indexOf(current.time);
+                if (currentHourIndex < 0) throw new Error('Não foi possível sincronizar o horário atual com a série horária.');
+                const rainStartIndex = Math.max(0, currentHourIndex - 12);
+                const rain12h = data.hourly.precipitation.slice(rainStartIndex, currentHourIndex).reduce((a, b) => a + (Number(b) || 0), 0);
                 const windSpeed = current.wind_speed_10m;
-                const windGust = current.wind_gusts_10m || (windSpeed * 1.3);
+                const windGust = Number.isFinite(Number(current.wind_gusts_10m)) ? Number(current.wind_gusts_10m) : windSpeed;
                 const windDegree = current.wind_direction_10m || 0;
 
                 const dataTimeObj = new Date(current.time);
@@ -1143,13 +1146,12 @@
                 const windCardGustEl = document.getElementById('wind-card-gust');
                 if (windCardGustEl) windCardGustEl.innerText = `${windGust.toFixed(1)} km/h`;
 
-                // Atualizar Limiares de Severidade Meteorológica com Valores Reais e Porcentagens de Risco
+                // Comparação de observações com limiares orientativos; não representa probabilidade estatística de impacto
                 // 1. Frio Extremo (< 10°C)
-                const coldRisk = Math.max(0, Math.min(100, Math.round(Math.max(0, (12 - temp) / 12) * 100)));
                 const valColdEl = document.getElementById('val-cold');
                 if (valColdEl) valColdEl.innerText = `${temp.toFixed(1)} °C`;
                 const riskColdEl = document.getElementById('risk-cold');
-                if (riskColdEl) riskColdEl.innerText = `Risco: ${coldRisk}%`;
+                if (riskColdEl) riskColdEl.innerText = temp <= 5 ? 'Faixa crítica' : temp <= 10 ? 'Faixa de atenção' : 'Abaixo do limiar';
                 
                 const badgeCold = document.getElementById('badge-cold');
                 const cardAlertCold = document.getElementById('card-alert-cold');
@@ -1175,11 +1177,10 @@
                 }
 
                 // 2. Calor Extremo (> 28°C)
-                const heatRisk = Math.max(0, Math.min(100, Math.round(Math.max(0, (temp - 24) / 14) * 100)));
                 const valHeatEl = document.getElementById('val-heat');
                 if (valHeatEl) valHeatEl.innerText = `${temp.toFixed(1)} °C`;
                 const riskHeatEl = document.getElementById('risk-heat');
-                if (riskHeatEl) riskHeatEl.innerText = `Risco: ${heatRisk}%`;
+                if (riskHeatEl) riskHeatEl.innerText = temp >= 32 ? 'Faixa crítica' : temp >= 28 ? 'Faixa de atenção' : 'Abaixo do limiar';
                 
                 const badgeHeat = document.getElementById('badge-heat');
                 const cardAlertHeat = document.getElementById('card-alert-heat');
@@ -1205,11 +1206,10 @@
                 }
 
                 // 3. Chuva Intensa (> 30mm)
-                const rainRisk = Math.max(0, Math.min(100, Math.round((rain12h / 50) * 100)));
                 const valRainEl = document.getElementById('val-rain');
                 if (valRainEl) valRainEl.innerText = `${rain12h.toFixed(1)} mm`;
                 const riskRainEl = document.getElementById('risk-rain');
-                if (riskRainEl) riskRainEl.innerText = `Risco: ${rainRisk}%`;
+                if (riskRainEl) riskRainEl.innerText = rain12h >= 40 ? 'Faixa crítica' : rain12h >= 20 ? 'Faixa de atenção' : 'Abaixo do limiar';
                 
                 const badgeRain = document.getElementById('badge-rain');
                 const cardAlertRain = document.getElementById('card-alert-rain');
@@ -1235,11 +1235,10 @@
                 }
 
                 // 4. Vento Forte & Alertas de Rajadas (Amarelo: 30-35, Vermelho: 35-40, Piscante > 43)
-                const windRisk = Math.max(0, Math.min(100, Math.round((windGust / 50) * 100)));
                 const valWindEl = document.getElementById('val-wind');
                 if (valWindEl) valWindEl.innerText = `${windGust.toFixed(1)} km/h`;
                 const riskWindEl = document.getElementById('risk-wind');
-                if (riskWindEl) riskWindEl.innerText = `Risco: ${windRisk}%`;
+                if (riskWindEl) riskWindEl.innerText = windGust > 43 ? 'Faixa crítica' : windGust >= 30 ? 'Faixa de atenção' : 'Abaixo do limiar';
                 
                 const cardWindEl = document.getElementById('card-alert-wind');
                 const badgeWindEl = document.getElementById('badge-wind');
@@ -1276,9 +1275,8 @@
                 }
 
                 // PREVISÃO PROGRAMÁTICA DAS PRÓXIMAS 6 HORAS (CÁLCULO E ALERTA)
-                const nowTime = new Date().getTime();
-                let startIndex = data.hourly.time.findIndex(t => new Date(t).getTime() >= nowTime);
-                if (startIndex === -1) startIndex = 12; // Backup caso não encontre
+                let startIndex = currentHourIndex + 1;
+                if (startIndex >= data.hourly.time.length) throw new Error('A API não forneceu as próximas horas de previsão.');
 
                 let sumRain6h = 0;
                 let maxWind6h = 0;
@@ -1336,19 +1334,40 @@
 
                 renderForecastChart(data.hourly);
                 render3DayForecast(data.daily);
-                updateClock();
-            } catch (err) { console.error(err); }
+                weatherLastSuccess = new Date();
+                const updateText = `Dados meteorológicos recebidos às ${weatherLastSuccess.toLocaleTimeString('pt-BR')} (${weatherLastSuccess.toLocaleDateString('pt-BR')})`;
+                const lastUpdateLabel = document.getElementById('last-update-label');
+                if (lastUpdateLabel) lastUpdateLabel.textContent = updateText;
+                if (headerTimestamp) headerTimestamp.textContent = updateText;
+                const status = document.getElementById('data-status-label');
+                if (status) status.textContent = 'Dados carregados';
+            } catch (err) {
+                console.error('Falha ao atualizar dados meteorológicos:', err);
+                const status = document.getElementById('data-status-label');
+                if (status) status.textContent = 'Falha na atualização';
+                if (headerTimestamp) headerTimestamp.textContent = weatherLastSuccess
+                    ? `Falha na atualização. Últimos dados recebidos às ${weatherLastSuccess.toLocaleTimeString('pt-BR')}`
+                    : 'Não foi possível carregar os dados meteorológicos';
+                const content6h = document.getElementById('content-6h-alert');
+                if (content6h) content6h.textContent = 'Previsão temporariamente indisponível. Tente atualizar novamente.';
+                const label6h = document.getElementById('label-6h-span');
+                if (label6h) label6h.textContent = 'SEM DADOS';
+            } finally {
+                weatherRequestInProgress = false;
+                if (refreshButton) refreshButton.disabled = false;
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+            }
         }
 
         function renderForecastChart(hourly) {
             if (!hourly || !hourly.time) return;
             const ctx = document.getElementById('forecastChart').getContext('2d');
             const labels = hourly.time.slice(0, 24).map(t => {
-                const date = new Date(t);
-                if (date.getHours() === 0) {
-                    return ['00:00', `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`];
-                }
-                return `${date.getHours().toString().padStart(2, '0')}:00`;
+                const [datePart, timePart] = t.split('T');
+                const [year, month, day] = datePart.split('-');
+                const hourLabel = (timePart || '').slice(0, 5);
+                if (hourLabel === '00:00') return ['00:00', `${day}/${month}`];
+                return hourLabel;
             });
             const temps = hourly.temperature_2m.slice(0, 24);
             const rains = hourly.precipitation.slice(0, 24);
@@ -1403,32 +1422,8 @@
         }
 
         function renderEfficacyChart() {
-            const ctx = document.getElementById('efficacyChart');
-            if (!ctx) return;
-            if (efficacyChartInstance) efficacyChartInstance.destroy();
-            efficacyChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                    datasets: [{
-                        label: 'Taxa de Acerto (%)',
-                        data: [91.2, 90.5, 92.1, 93.4, 91.8, 92.9, 93.8, 92.0, 91.5, 93.2, 92.4, 93.0],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { min: 85, max: 100, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
-                }
-            });
+            // Não há histórico pareado de previsões e observações; nenhum gráfico sintético será exibido.
+            return;
         }
 
         function render3DayForecast(daily) {
@@ -1443,7 +1438,7 @@
                 const willRain = rainSum > 0 ? "Sim" : "Não";
                 
                 html += `
-                    <div class="rounded-2xl dark:bg-slate-900 bg-slate-100 border border-slate-800 p-4 shadow">
+                    <div class="rounded-2xl dark:bg-slate-900 bg-slate-100 border border-slate-800 p-5 shadow">
                         <span class="text-[10px] font-bold text-sky-400 block uppercase">Dia +${i}</span>
                         <h3 class="font-bold text-sm text-white">${weekDays[d.getDay()]} (${d.getDate()}/${d.getMonth()+1})</h3>
                         <div class="mt-3 text-xs font-mono flex justify-between">
@@ -1464,9 +1459,12 @@
             document.getElementById('windy-frame').src = `https://embed.windy.com/embed.html?lat=${LAT}&lon=${LON}&detailLat=${LAT}&detailLon=${LON}&width=650&height=600&zoom=9&level=surface&overlay=${layer}&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
         }
 
-        window.onload = function() {
+        window.addEventListener('DOMContentLoaded', function() {
+            updateLabSimulation();
             fetchWeatherData();
-        };
+            if (weatherRefreshTimer) clearInterval(weatherRefreshTimer);
+            weatherRefreshTimer = setInterval(fetchWeatherData, 10 * 60 * 1000);
+        });
     </script>
 </body>
 </html>
