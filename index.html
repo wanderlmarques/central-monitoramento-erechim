@@ -149,9 +149,7 @@
                                 Central de Monitoramento de Erechim
                             </h1>
                             <div class="text-xs font-mono font-bold dark:text-sky-400 text-sky-600 mt-1.5 flex flex-col sm:flex-row justify-center items-center gap-2">
-                                <span id="header-access-time">Acesso: --:--:--</span>
-                                <span class="hidden sm:inline text-slate-500">|</span>
-                                <span id="header-data-time">Dados: --:--</span>
+                                <span id="header-update-timestamp">Atualizado às --:--:--</span>
                             </div>
                             <p class="text-xs dark:text-slate-400 text-slate-500 flex flex-wrap justify-center gap-x-3 gap-y-0.5 mt-2">
                                 <span><i class="fa-solid fa-location-dot text-rose-500"></i> Lat: 27°38'02"S | Lon: 52°16'26"O</span>
@@ -209,6 +207,12 @@
                     <button onclick="toggleSourcesPage(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-globe text-sky-400"></i>
                         <span>Fontes</span>
+                    </button>
+
+                    <!-- Sites Utilizados Modal Button -->
+                    <button onclick="toggleSitesModal(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                        <i class="fa-solid fa-external-link-alt text-emerald-400"></i>
+                        <span>Sites Utilizados</span>
                     </button>
 
                     <!-- Theme Toggle -->
@@ -478,6 +482,36 @@
         </div>
     </div>
 
+    <!-- SITES UTILIZADOS MODAL PAGE -->
+    <div id="sites-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-4xl mx-auto w-full space-y-6 my-auto">
+            <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-700">
+                <div class="flex items-center gap-3">
+                    <span class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20"><i class="fa-solid fa-external-link-alt text-2xl"></i></span>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-white">Sites Utilizados & Plataformas de Monitoramento</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Acesse diretamente as bases de dados e ferramentas meteorológicas consultadas</p>
+                    </div>
+                </div>
+                <button onclick="toggleSitesModal(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition border border-slate-700 flex items-center gap-2"><i class="fa-solid fa-xmark text-base"></i> Fechar</button>
+            </div>
+            <div class="glass-card rounded-2xl p-6 sm:p-8 border border-slate-700 space-y-3 text-xs sm:text-sm text-slate-300">
+                <ul class="space-y-2.5 font-mono">
+                    <li><a href="https://www.windy.com/pt/-Sat%C3%A9lite-satellite?satellite,-27.677,-52.259,5,p:cities" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Windy (Satélite)</a></li>
+                    <li><a href="https://meteorors.com.br/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Meteoro RS</a></li>
+                    <li><a href="https://meteostat.net/pt/place/br/erechim?s=86954&t=2026-09-14/2026-09-21" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Meteostat (Erechim)</a></li>
+                    <li><a href="https://mapainterativo.cemaden.gov.br/#" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Mapa Interativo Cemaden</a></li>
+                    <li><a href="https://tempo.inmet.gov.br/TabelaEstacoes/A828" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> INMET (Estação A828 Erechim)</a></li>
+                    <li><a href="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.62,-27.10,1568/loc=-52.621,-27.098" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Earth Nullschool (Vento & Superfície)</a></li>
+                    <li><a href="https://satelite.cptec.inpe.br/home/index.jsp" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> CPTEC / INPE (Satélite)</a></li>
+                    <li><a href="https://www.climaeradar.com.br/radarclima?center=-13.5,-54&zoom=4.52&layer=wr" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Clima e Radar</a></li>
+                    <li><a href="https://tempo.inmet.gov.br/AnaliseSituacaoAtual" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> INMET (Análise da Situação Atual)</a></li>
+                    <li><a href="https://www.marinha.mil.br/chm/dados-do-smm-cartas-sinoticas/cartas-sinoticas" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> Marinha do Brasil (Cartas Sinóticas)</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- HISTORY MODAL PAGE -->
     <div id="history-page-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div class="max-w-7xl mx-auto w-full space-y-6 my-auto">
@@ -586,20 +620,20 @@
         <section>
             <div class="flex items-center justify-center mb-4 text-center">
                 <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-400 text-slate-500 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-shield-cat text-rose-500"></i> Status dos Limiares de Severidade Meteorológica
+                    <i class="fa-solid fa-shield-cat text-rose-500"></i> Indicadores de severidade meteorológica
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                 
                 <!-- Frio -->
-                <div id="card-alert-cold" class="glass-card rounded-2xl p-4 border-t-4 border-t-slate-600 flex flex-col justify-center items-center text-center">
-                    <div class="flex flex-col items-center justify-center gap-1">
+                <div id="card-alert-cold" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex flex-col items-center justify-center gap-1 text-center w-full">
                         <i class="fa-solid fa-snowflake text-slate-400 text-sm"></i>
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Frio Extremo</span>
                     </div>
-                    <div class="mt-2 w-full">
-                        <span class="text-xs text-slate-400 block mb-2">Gatilho: <strong id="lbl-cfg-cold" class="dark:text-slate-300 text-slate-700">&lt; 5.0 °C</strong></span>
+                    <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-cold" class="dark:text-slate-300 text-slate-700">&lt; 5.0 °C</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-cold" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-cold" class="text-xs font-mono text-slate-400">-- °C</span>
@@ -608,13 +642,13 @@
                 </div>
 
                 <!-- Calor -->
-                <div id="card-alert-heat" class="glass-card rounded-2xl p-4 border-t-4 border-t-slate-600 flex flex-col justify-center items-center text-center">
-                    <div class="flex flex-col items-center justify-center gap-1">
+                <div id="card-alert-heat" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex flex-col items-center justify-center gap-1 text-center w-full">
                         <i class="fa-solid fa-fire text-slate-400 text-sm"></i>
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Calor Extremo</span>
                     </div>
-                    <div class="mt-2 w-full">
-                        <span class="text-xs text-slate-400 block mb-2">Gatilho: <strong id="lbl-cfg-heat" class="dark:text-slate-300 text-slate-700">&gt; 28.0 °C</strong></span>
+                    <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-heat" class="dark:text-slate-300 text-slate-700">&gt; 28.0 °C</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-heat" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-heat" class="text-xs font-mono text-slate-400">-- °C</span>
@@ -623,13 +657,13 @@
                 </div>
 
                 <!-- Chuva -->
-                <div id="card-alert-rain" class="glass-card rounded-2xl p-4 border-t-4 border-t-slate-600 flex flex-col justify-center items-center text-center">
-                    <div class="flex flex-col items-center justify-center gap-1">
+                <div id="card-alert-rain" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex flex-col items-center justify-center gap-1 text-center w-full">
                         <i class="fa-solid fa-cloud-showers-water text-slate-400 text-sm"></i>
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Chuva Intensa</span>
                     </div>
-                    <div class="mt-2 w-full">
-                        <span class="text-xs text-slate-400 block mb-2">Gatilho: <strong id="lbl-cfg-rain" class="dark:text-slate-300 text-slate-700">&gt; 30mm / 12h</strong></span>
+                    <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-rain" class="dark:text-slate-300 text-slate-700">&gt; 30mm / 12h</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-rain" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-rain" class="text-xs font-mono text-slate-400">-- mm</span>
@@ -638,13 +672,13 @@
                 </div>
 
                 <!-- Vento -->
-                <div id="card-alert-wind" class="glass-card rounded-2xl p-4 border-t-4 border-t-slate-600 flex flex-col justify-center items-center text-center">
-                    <div class="flex flex-col items-center justify-center gap-1">
+                <div id="card-alert-wind" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex flex-col items-center justify-center gap-1 text-center w-full">
                         <i class="fa-solid fa-wind text-slate-400 text-sm"></i>
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Vento Forte</span>
                     </div>
-                    <div class="mt-2 w-full">
-                        <span class="text-xs text-slate-400 block mb-2">Gatilho: <strong id="lbl-cfg-wind" class="dark:text-slate-300 text-slate-700">&gt; 40 km/h</strong></span>
+                    <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-wind" class="dark:text-slate-300 text-slate-700">&gt; 40 km/h</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-wind" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-wind" class="text-xs font-mono text-slate-400">-- km/h</span>
@@ -653,12 +687,12 @@
                 </div>
 
                 <!-- Granizo -->
-                <div id="card-alert-hail" class="glass-card rounded-2xl p-4 border-t-4 border-t-slate-600 flex flex-col justify-center items-center text-center">
-                    <div class="flex flex-col items-center justify-center gap-1">
+                <div id="card-alert-hail" class="glass-card rounded-2xl p-4 border-l-4 border-l-slate-600">
+                    <div class="flex flex-col items-center justify-center gap-1 text-center w-full">
                         <i class="fa-solid fa-icicles text-slate-400 text-sm"></i>
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Risco Granizo</span>
                     </div>
-                    <div class="mt-2 w-full">
+                    <div class="mt-2 w-full text-center">
                         <span class="text-xs text-slate-400 block mb-2">Análise: <strong class="dark:text-slate-300 text-slate-700">Convectivo</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-hail" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Baixo</span>
@@ -718,28 +752,28 @@
             <div class="space-y-6">
                 <!-- Wind Direction Compass Card -->
                 <div class="glass-card rounded-2xl p-5">
-                    <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
+                    <div class="flex flex-col items-center justify-center mb-3 gap-2">
                         <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-compass text-teal-400 text-base"></i> Direção & Intensidade do Vento
                         </h2>
-                        <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-2 py-0.5 rounded inline-block">
+                        <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-3 py-1 rounded-lg">
                             --° N
                         </span>
                     </div>
 
-                    <div class="flex flex-col items-center justify-center my-4 relative">
+                    <div class="flex flex-col items-center justify-center my-5 relative">
                         <!-- Compass Rose Visual -->
-                        <div class="w-36 h-36 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
-                            <span class="absolute top-1 text-[11px] font-bold text-slate-400">N</span>
-                            <span class="absolute right-2 text-[11px] font-bold text-slate-400">L</span>
-                            <span class="absolute bottom-1 text-[11px] font-bold text-slate-400">S</span>
-                            <span class="absolute left-2 text-[11px] font-bold text-slate-400">O</span>
+                        <div class="w-40 h-40 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
+                            <span class="absolute top-2 text-[11px] font-bold text-slate-400">N</span>
+                            <span class="absolute right-3 text-[11px] font-bold text-slate-400">L</span>
+                            <span class="absolute bottom-2 text-[11px] font-bold text-slate-400">S</span>
+                            <span class="absolute left-3 text-[11px] font-bold text-slate-400">O</span>
 
                             <!-- Rotating Arrow Indicator -->
-                            <div id="wind-arrow-container" class="w-24 h-24 absolute flex items-center justify-center transition-transform duration-700 ease-out z-10">
-                                <div class="flex flex-col items-center justify-center relative">
-                                    <i class="fa-solid fa-caret-up text-rose-500 text-4xl -mb-1 z-20 drop-shadow-md"></i>
-                                    <div class="bg-slate-800 border border-slate-600 text-white text-[9px] font-bold py-3 px-1 rounded shadow-lg text-center flex items-center justify-center tracking-widest" style="writing-mode: vertical-rl; transform: rotate(180deg);">
+                            <div id="wind-arrow-container" class="w-full h-full absolute flex items-center justify-center transition-transform duration-700 ease-out z-10">
+                                <div class="flex flex-col items-center justify-start h-full pt-1.5 relative">
+                                    <i class="fa-solid fa-caret-up text-rose-500 text-3xl -mb-1.5 z-20 drop-shadow-md"></i>
+                                    <div class="bg-slate-800 border border-slate-600 text-white text-[9px] font-bold py-3 px-1.5 rounded shadow-lg text-center flex items-center justify-center tracking-widest" style="writing-mode: vertical-rl; transform: rotate(180deg);">
                                         DIREÇÃO
                                     </div>
                                 </div>
@@ -747,28 +781,14 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 text-center text-xs mt-3">
-                        <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
-                            <span class="text-slate-400 block text-[10px] mb-1">Velocidade</span>
-                            <strong id="wind-card-speed" class="text-sm font-bold text-teal-300">-- km/h</strong>
+                    <div class="grid grid-cols-2 gap-3 text-center text-xs mt-4">
+                        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <span class="text-slate-400 block text-[11px] mb-1.5">Velocidade</span>
+                            <strong id="wind-card-speed" class="text-base font-bold text-teal-300">-- km/h</strong>
                         </div>
-                        <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
-                            <span class="text-slate-400 block text-[10px] mb-1">Rajada Máx</span>
-                            <strong id="wind-card-gust" class="text-sm font-bold text-amber-300">-- km/h</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Earth Nullschool Card -->
-                <div class="glass-card rounded-2xl p-5 flex flex-col justify-center items-center">
-                    <div class="w-full">
-                        <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
-                            <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-globe text-blue-400 text-base"></i> Fluxo Atmosférico
-                            </h2>
-                        </div>
-                        <div class="w-full h-[220px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
-                            <iframe src="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.274,-27.634,1500" class="w-full h-full border-0" loading="lazy"></iframe>
+                        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <span class="text-slate-400 block text-[11px] mb-1.5">Rajada Máx</span>
+                            <strong id="wind-card-gust" class="text-base font-bold text-amber-300">-- km/h</strong>
                         </div>
                     </div>
                 </div>
@@ -778,7 +798,7 @@
                     <div class="w-full">
                         <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
                             <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-satellite text-emerald-500"></i> Satélite GOES-16 (Ao Vivo)
+                                <i class="fa-solid fa-satellite text-emerald-500"></i> Imagem de Satélite
                             </h2>
                             <span id="sat-mode-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono uppercase inline-block">
                                 INFRAVERMELHO
@@ -834,7 +854,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                     <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center gap-2">
-                        <i class="fa-solid fa-timeline text-sky-400"></i> Escala Temporal Visual: Previsão dos Próximos 4 Dias
+                        <i class="fa-solid fa-timeline text-sky-400"></i> Previsão dos Próximos 4 Dias
                     </h2>
                     <p class="text-xs text-slate-400 mt-1">Linha do tempo gráfica com amplitude térmica, volumes acumulados e intensidade de ventos.</p>
                 </div>
@@ -911,6 +931,7 @@
         function toggleAdminModal() { document.getElementById('admin-modal').classList.toggle('hidden'); }
         function toggleHistoryPage(show) { const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSourcesPage(show) { const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
+        function toggleSitesModal(show) { const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleTornadoLabModal(show) { const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         
         function toggleModelEfficacyModal(show) {
@@ -1088,20 +1109,39 @@
                 }
 
                 // Atualizar Métricas Principais
-                document.getElementById('metric-temp').innerText = `${temp.toFixed(1)}°C`;
-                document.getElementById('metric-temp-sub').innerText = `Sensação: ${current.apparent_temperature.toFixed(1)}°C`;
-                document.getElementById('metric-humidity').innerText = `${humidity}%`;
-                document.getElementById('metric-rain').innerText = `${rain12h.toFixed(1)} mm`;
-                document.getElementById('metric-wind').innerText = `${windSpeed.toFixed(1)} km/h`;
-                document.getElementById('metric-wind-sub').innerText = `Rajada: ${windGust.toFixed(1)} km/h`;
-                document.getElementById('metric-pressure').innerText = `${current.surface_pressure.toFixed(0)} hPa`;
+                const metricTempEl = document.getElementById('metric-temp');
+                if (metricTempEl) metricTempEl.innerText = `${temp.toFixed(1)}°C`;
+                
+                const metricTempSubEl = document.getElementById('metric-temp-sub');
+                if (metricTempSubEl) metricTempSubEl.innerText = `Sensação: ${current.apparent_temperature.toFixed(1)}°C`;
+                
+                const metricHumidityEl = document.getElementById('metric-humidity');
+                if (metricHumidityEl) metricHumidityEl.innerText = `${humidity}%`;
+                
+                const metricRainEl = document.getElementById('metric-rain');
+                if (metricRainEl) metricRainEl.innerText = `${rain12h.toFixed(1)} mm`;
+                
+                const metricWindEl = document.getElementById('metric-wind');
+                if (metricWindEl) metricWindEl.innerText = `${windSpeed.toFixed(1)} km/h`;
+                
+                const metricWindSubEl = document.getElementById('metric-wind-sub');
+                if (metricWindSubEl) metricWindSubEl.innerText = `Rajada: ${windGust.toFixed(1)} km/h`;
+                
+                const metricPressureEl = document.getElementById('metric-pressure');
+                if (metricPressureEl) metricPressureEl.innerText = `${current.surface_pressure.toFixed(0)} hPa`;
 
                 // Vento Compass
-                document.getElementById('wind-dir-text').innerText = `${windDegree}° ${getCardinalDirection(windDegree)}`;
+                const windDirTextEl = document.getElementById('wind-dir-text');
+                if (windDirTextEl) windDirTextEl.innerText = `${windDegree}° ${getCardinalDirection(windDegree)}`;
+                
                 const windArrow = document.getElementById('wind-arrow-container');
                 if (windArrow) windArrow.style.transform = `rotate(${windDegree}deg)`;
-                document.getElementById('wind-card-speed').innerText = `${windSpeed.toFixed(1)} km/h`;
-                document.getElementById('wind-card-gust').innerText = `${windGust.toFixed(1)} km/h`;
+                
+                const windCardSpeedEl = document.getElementById('wind-card-speed');
+                if (windCardSpeedEl) windCardSpeedEl.innerText = `${windSpeed.toFixed(1)} km/h`;
+                
+                const windCardGustEl = document.getElementById('wind-card-gust');
+                if (windCardGustEl) windCardGustEl.innerText = `${windGust.toFixed(1)} km/h`;
 
                 // Atualizar Limiares de Severidade Meteorológica com Valores Reais e Porcentagens de Risco
                 // 1. Frio Extremo (< 10°C)
@@ -1399,6 +1439,9 @@
             for (let i = 1; i <= 4; i++) {
                 if (!daily.time[i]) break;
                 const d = new Date(daily.time[i] + 'T00:00:00');
+                const rainSum = daily.precipitation_sum[i] || 0;
+                const willRain = rainSum > 0 ? "Sim" : "Não";
+                
                 html += `
                     <div class="rounded-2xl dark:bg-slate-900 bg-slate-100 border border-slate-800 p-4 shadow">
                         <span class="text-[10px] font-bold text-sky-400 block uppercase">Dia +${i}</span>
@@ -1406,6 +1449,10 @@
                         <div class="mt-3 text-xs font-mono flex justify-between">
                             <span class="text-sky-400">Min: ${daily.temperature_2m_min[i].toFixed(1)}°C</span>
                             <span class="text-rose-400">Máx: ${daily.temperature_2m_max[i].toFixed(1)}°C</span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t dark:border-slate-800 border-slate-200 text-[11px] sm:text-xs flex justify-between items-center">
+                            <span class="text-slate-500 dark:text-slate-400">Chuva: <strong class="${rainSum > 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}">${willRain}</strong></span>
+                            <span class="text-slate-500 dark:text-slate-400"><strong class="${rainSum > 0 ? 'text-sky-500 dark:text-sky-300' : 'text-slate-400 dark:text-slate-500'}">${rainSum.toFixed(1)} mm</strong></span>
                         </div>
                     </div>
                 `;
