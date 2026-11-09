@@ -442,9 +442,17 @@
                             <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-sliders text-blue-500"></i> Simulador Interativo de Sondagem</h3>
                             <p class="text-xs text-slate-400">Ajuste os parâmetros atmosféricos para simular diferentes cenários de instabilidade em Erechim.</p>
                         </div>
-                        <button onclick="resetLabSliders()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-all flex items-center gap-2 border border-slate-700">
-                            <i class="fa-solid fa-rotate-right"></i> Restaurar Padrão
-                        </button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="lab-load-current-btn" onclick="loadCurrentErechimData()" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-sky-400/30">
+                                <i id="lab-load-current-icon" class="fa-solid fa-cloud-arrow-down"></i> Inserir dados atuais de Erechim
+                            </button>
+                            <button onclick="resetLabSliders()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-all flex items-center gap-2 border border-slate-700">
+                                <i class="fa-solid fa-rotate-right"></i> Restaurar Padrão
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lab-current-data-status" role="status" aria-live="polite" class="mb-5 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-slate-400">
+                        Dados atuais ainda não carregados. Use “Inserir dados atuais de Erechim” para consultar a Open-Meteo.
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -454,14 +462,14 @@
                                     <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-temperature-high text-rose-400"></i> Temp. Superfície (T)</label>
                                     <span class="font-mono text-sm font-bold text-blue-400"><span id="lab-txt-temp">28.0</span> °C</span>
                                 </div>
-                                <input id="lab-slider-temp" type="range" min="15" max="38" step="0.5" value="28.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <input id="lab-slider-temp" type="range" min="0" max="45" step="0.5" value="28.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
                                 <div class="flex justify-between items-center mb-2">
                                     <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-droplet text-cyan-400"></i> Ponto de Orvalho (Td)</label>
                                     <span class="font-mono text-sm font-bold text-blue-400"><span id="lab-txt-td">21.0</span> °C</span>
                                 </div>
-                                <input id="lab-slider-td" type="range" min="8" max="26" step="0.5" value="21.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <input id="lab-slider-td" type="range" min="-10" max="35" step="0.5" value="21.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
                                 <div class="flex justify-between items-center mb-2">
@@ -472,10 +480,10 @@
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
                                 <div class="flex justify-between items-center mb-2">
-                                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-wind text-teal-400"></i> Cisalhamento (0-6km)</label>
+                                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-wind text-teal-400"></i> Cisalhamento (superfície–500 hPa, aprox.)</label>
                                     <span class="font-mono text-sm font-bold text-blue-400"><span id="lab-txt-shear">24.5</span> m/s</span>
                                 </div>
-                                <input id="lab-slider-shear" type="range" min="5" max="45" step="0.5" value="24.5" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <input id="lab-slider-shear" type="range" min="0" max="60" step="0.5" value="24.5" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
                             </div>
                         </div>
 
@@ -1054,6 +1062,134 @@
                 if (probTextEl) { probTextEl.className = "text-xs sm:text-sm font-mono font-black text-emerald-400"; probTextEl.innerText = `Índice simulado baixo`; }
                 if (probBadgeEl) { probBadgeEl.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"; probBadgeEl.innerText = "NORMAL"; }
                 if (tornadoRiskBox) tornadoRiskBox.className = "w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md";
+            }
+        }
+
+        async function loadCurrentErechimData() {
+            const button = document.getElementById('lab-load-current-btn');
+            const icon = document.getElementById('lab-load-current-icon');
+            const status = document.getElementById('lab-current-data-status');
+            if (button) button.disabled = true;
+            if (icon) icon.classList.add('fa-spin');
+            if (status) {
+                status.className = 'mb-5 rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-sky-300';
+                status.textContent = 'Consultando dados meteorológicos atuais de Erechim na Open-Meteo...';
+            }
+
+            try {
+                const params = new URLSearchParams({
+                    latitude: String(LAT),
+                    longitude: String(LON),
+                    current: 'temperature_2m,dew_point_2m,wind_speed_10m,wind_direction_10m',
+                    hourly: 'temperature_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,wind_speed_500hPa,wind_direction_500hPa,cape',
+                    past_hours: '6',
+                    forecast_hours: '1',
+                    timezone: 'America/Sao_Paulo',
+                    wind_speed_unit: 'ms'
+                });
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                let response;
+                try {
+                    response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+                        signal: controller.signal,
+                        headers: { 'Accept': 'application/json' }
+                    });
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+                if (!response.ok) throw new Error(`Open-Meteo respondeu com HTTP ${response.status}`);
+                const data = await response.json();
+                if (!data || !data.current || !data.hourly || !Array.isArray(data.hourly.time)) {
+                    throw new Error('A resposta da API está incompleta.');
+                }
+
+                const currentTime = Date.parse(data.current.time);
+                if (!Number.isFinite(currentTime)) throw new Error('Horário dos dados atuais inválido.');
+
+                let hourIndex = -1;
+                let bestTime = -Infinity;
+                data.hourly.time.forEach((time, index) => {
+                    const parsed = Date.parse(time);
+                    if (Number.isFinite(parsed) && parsed <= currentTime && parsed > bestTime) {
+                        bestTime = parsed;
+                        hourIndex = index;
+                    }
+                });
+                if (hourIndex < 0) throw new Error('Não foi possível localizar a hora correspondente na série atmosférica.');
+
+                const pick = (currentKey, hourlyKey) => {
+                    const currentValue = Number(data.current[currentKey]);
+                    if (Number.isFinite(currentValue)) return currentValue;
+                    const hourlyValue = Number(data.hourly[hourlyKey]?.[hourIndex]);
+                    return Number.isFinite(hourlyValue) ? hourlyValue : null;
+                };
+
+                const temperature = pick('temperature_2m', 'temperature_2m');
+                const dewPoint = pick('dew_point_2m', 'dew_point_2m');
+                const wind10Speed = Number(data.hourly.wind_speed_10m?.[hourIndex]);
+                const wind10Direction = Number(data.hourly.wind_direction_10m?.[hourIndex]);
+                const wind500Speed = Number(data.hourly.wind_speed_500hPa?.[hourIndex]);
+                const wind500Direction = Number(data.hourly.wind_direction_500hPa?.[hourIndex]);
+
+                if (![temperature, dewPoint].every(Number.isFinite)) {
+                    throw new Error('A API não forneceu temperatura e ponto de orvalho válidos.');
+                }
+
+                // O cisalhamento é estimado pela diferença vetorial entre o vento próximo à superfície
+                // e o vento em 500 hPa. É uma aproximação de camada profunda, não uma sondagem observada.
+                let shearEstimate = null;
+                if ([wind10Speed, wind10Direction, wind500Speed, wind500Direction].every(Number.isFinite)) {
+                    const toUV = (speed, direction) => {
+                        const radians = direction * Math.PI / 180;
+                        return {
+                            u: -speed * Math.sin(radians),
+                            v: -speed * Math.cos(radians)
+                        };
+                    };
+                    const low = toUV(wind10Speed, wind10Direction);
+                    const upper = toUV(wind500Speed, wind500Direction);
+                    shearEstimate = Math.hypot(upper.u - low.u, upper.v - low.v);
+                }
+
+                const tempSlider = document.getElementById('lab-slider-temp');
+                const tdSlider = document.getElementById('lab-slider-td');
+                const shearSlider = document.getElementById('lab-slider-shear');
+                const clampToSlider = (value, slider) => Math.min(Number(slider.max), Math.max(Number(slider.min), value));
+
+                tempSlider.value = clampToSlider(temperature, tempSlider);
+                tdSlider.value = clampToSlider(dewPoint, tdSlider);
+                if (shearEstimate !== null && shearSlider) {
+                    shearSlider.value = clampToSlider(shearEstimate, shearSlider);
+                }
+
+                // SRH não é estimado aqui: depende do hodógrafo e do movimento da tempestade.
+                // O controle permanece com o valor escolhido pelo usuário.
+                updateLabSimulation();
+
+                const cape = Number(data.hourly.cape?.[hourIndex]);
+                const capeText = Number.isFinite(cape) ? ` CAPE do modelo Open-Meteo: ${cape.toFixed(0)} J/kg (referência separada; o CAPE exibido no simulador continua sendo simplificado).` : '';
+                const shearText = shearEstimate !== null
+                    ? ` Cisalhamento vetorial superfície–500 hPa estimado: ${shearEstimate.toFixed(1)} m/s.`
+                    : ' O cisalhamento não foi atualizado porque o modelo não forneceu vento válido em 500 hPa.';
+                const timeLabel = new Date(data.current.time).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo'
+                });
+
+                if (status) {
+                    status.className = 'mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs text-emerald-300 leading-relaxed';
+                    status.textContent = `Dados do modelo carregados para Erechim em ${timeLabel}: temperatura ${temperature.toFixed(1)} °C e ponto de orvalho ${dewPoint.toFixed(1)} °C.${shearText} SRH (0–1 km) permaneceu inalterado e deve ser ajustado manualmente com base em uma sondagem/hodógrafo confiável.${capeText} Fonte: Open-Meteo.`;
+                }
+            } catch (error) {
+                console.error('Falha ao inserir dados atuais de Erechim no Lab Tornado:', error);
+                if (status) {
+                    status.className = 'mb-5 rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-3 text-xs text-rose-300';
+                    status.textContent = `Não foi possível carregar os dados atuais: ${error.message}. Os controles não foram atualizados; tente novamente em instantes.`;
+                }
+            } finally {
+                if (button) button.disabled = false;
+                if (icon) icon.classList.remove('fa-spin');
             }
         }
 
