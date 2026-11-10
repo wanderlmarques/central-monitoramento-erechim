@@ -276,7 +276,7 @@
                     <div id="admin-status-area">
                         <button onclick="toggleAdminModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                             <i class="fa-solid fa-user-shield text-sky-500"></i>
-                            <span id="admin-btn-text">Administração (acesso desativado)</span>
+                            <span id="admin-btn-text">Administração</span>
                         </button>
                     </div>
 
@@ -320,24 +320,65 @@
         </div>
     </header>
 
-    <!-- ADMIN MODAL: disabled until a secure server-side authentication service exists -->
-    <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
-        <div class="glass-card w-full max-w-xl rounded-2xl p-6 relative border dark:border-slate-700 border-slate-300 shadow-2xl">
-            <button type="button" onclick="toggleAdminModal()" aria-label="Fechar" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <div class="flex items-center gap-3 mb-4">
-                <span class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-shield-halved text-xl"></i></span>
-                <div>
-                    <h2 id="admin-modal-title" class="text-xl font-bold dark:text-white text-slate-900">Área administrativa indisponível</h2>
-                    <p class="text-xs text-slate-400">Acesso administrativo protegido por segurança.</p>
-                </div>
-            </div>
-            <div class="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-100 space-y-2">
-                <p class="font-bold">O painel foi desativado nesta versão pública.</p>
-                <p>Este site é hospedado no GitHub Pages e executa apenas código no navegador. Uma senha gravada no HTML/JavaScript pode ser vista por qualquer visitante e não protege uma área restrita.</p>
-                <p>Para reativar o painel, será necessário implementar autenticação no servidor, controle de sessão e permissões em um serviço de backend. Não insira senhas, tokens ou chaves privadas neste arquivo.</p>
-            </div>
-            <button type="button" onclick="toggleAdminModal()" class="mt-5 w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm rounded-xl">Entendi</button>
+
+    <!-- ADMIN PANEL: autenticação Supabase; permissões aplicadas também no banco (RLS) -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+      <div class="glass-card w-full max-w-5xl rounded-2xl p-5 sm:p-7 relative border dark:border-slate-700 border-slate-300 shadow-2xl my-auto">
+        <button type="button" onclick="toggleAdminModal()" aria-label="Fechar" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="flex items-center gap-3 mb-5">
+          <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-user-shield text-xl"></i></span>
+          <div><h2 id="admin-modal-title" class="text-xl font-bold dark:text-white text-slate-900">Área administrativa</h2><p class="text-xs text-slate-400">Acesso autenticado e permissões verificadas no banco de dados.</p></div>
         </div>
+        <div id="admin-config-warning" class="hidden rounded-xl border border-amber-500/40 bg-amber-950/30 p-4 mb-4 text-sm text-amber-100">
+          <strong>Configuração necessária.</strong> Configure a URL e a chave pública (anon/publishable) do seu projeto Supabase nas constantes <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> deste arquivo. Nunca coloque a chave <code>service_role</code> no HTML.
+        </div>
+        <div id="admin-auth-view" class="max-w-md mx-auto py-3">
+          <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="space-y-3">
+            <label class="block text-xs font-semibold text-slate-400">E-mail administrativo</label>
+            <input id="admin-email" type="email" autocomplete="username" required class="w-full rounded-xl p-3 bg-slate-900 border border-slate-700 text-white" placeholder="seu@email.com">
+            <label class="block text-xs font-semibold text-slate-400">Senha</label>
+            <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-xl p-3 bg-slate-900 border border-slate-700 text-white" placeholder="Senha da conta Supabase">
+            <button id="admin-login-button" type="submit" class="w-full rounded-xl p-3 bg-sky-600 hover:bg-sky-500 text-white font-bold">Entrar com segurança</button>
+            <p id="admin-auth-message" role="status" class="text-xs text-slate-400"></p>
+          </form>
+        </div>
+        <div id="admin-dashboard" class="hidden space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 pb-3">
+            <div><p class="text-sm font-bold text-white" id="admin-user-email"></p><p class="text-xs text-emerald-400">Sessão autenticada • perfil administrador</p></div>
+            <button onclick="handleAdminLogout()" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold"><i class="fa-solid fa-right-from-bracket mr-1"></i> Sair</button>
+          </div>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Estado do painel</p><p class="font-bold text-emerald-400 mt-1">Autenticado</p></div>
+            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Última consulta meteorológica</p><p id="admin-weather-status" class="font-bold text-white mt-1">Verificando…</p></div>
+            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Fontes configuradas</p><p class="font-bold text-white mt-1">Open-Meteo / fontes públicas</p></div>
+            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Permissões</p><p class="font-bold text-sky-300 mt-1">Administrador</p></div>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-4">
+            <section class="rounded-xl border border-slate-700 p-4 space-y-3">
+              <h3 class="font-bold text-white"><i class="fa-solid fa-sliders text-sky-400 mr-2"></i>Configurações gerais</h3>
+              <label class="block text-xs text-slate-400">Nome de exibição da Central</label>
+              <input id="admin-site-title" class="w-full rounded-lg p-2.5 bg-slate-900 border border-slate-700 text-white" maxlength="100">
+              <label class="block text-xs text-slate-400">Aviso administrativo / comunicado</label>
+              <textarea id="admin-announcement" rows="3" class="w-full rounded-lg p-2.5 bg-slate-900 border border-slate-700 text-white" maxlength="1000"></textarea>
+              <button onclick="saveAdminSettings()" class="rounded-lg px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">Salvar configurações</button>
+            </section>
+            <section class="rounded-xl border border-slate-700 p-4 space-y-3">
+              <h3 class="font-bold text-white"><i class="fa-solid fa-cloud-arrow-down text-sky-400 mr-2"></i>Fontes e monitoramento</h3>
+              <p class="text-xs text-slate-400">Consulta de conectividade da fonte meteorológica principal. O painel não altera dados fornecidos por serviços externos.</p>
+              <button onclick="checkAdminWeatherSource()" class="rounded-lg px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold">Testar Open-Meteo agora</button>
+              <p id="admin-source-result" class="text-xs text-slate-300" role="status">Aguardando teste.</p>
+              <p class="text-[11px] text-amber-300">Ajustes de coordenadas, chaves privadas e credenciais de terceiros não são armazenados neste painel público.</p>
+            </section>
+          </div>
+          <section class="rounded-xl border border-slate-700 p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-bold text-white"><i class="fa-solid fa-users-gear text-sky-400 mr-2"></i>Usuários administrativos</h3><span class="text-[11px] text-slate-400">Gerenciamento restrito ao proprietário do projeto Supabase</span></div>
+            <p class="text-xs text-slate-400">Para adicionar ou remover administradores, utilize o Supabase Dashboard (Authentication → Users) e a tabela <code>admin_users</code>. Não é seguro criar usuários privilegiados diretamente pelo navegador.</p>
+            <button onclick="loadAdminAudit()" class="rounded-lg px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold">Atualizar registro de atividades</button>
+            <div id="admin-audit-list" class="text-xs text-slate-400">Registro de atividades ainda não consultado.</div>
+          </section>
+          <p id="admin-dashboard-message" class="text-xs text-slate-400" role="status"></p>
+        </div>
+      </div>
     </div>
 
     <!-- MODEL VALIDATION: do not publish metrics until they are calculated from archived forecasts and observations -->
@@ -762,6 +803,43 @@
             </div>
         </section>
 
+        <!-- WINDY RADAR + TEMPERATURA DO DIA -->
+        <section class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-center sm:text-left">
+                <div>
+                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center sm:justify-start gap-2">
+                        <i class="fa-solid fa-satellite-dish text-sky-400"></i> Radar Meteorológico — Windy
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Erechim (RS) • Camada de radar e precipitação</p>
+                </div>
+                <a href="https://www.windy.com/-Radar-radar?radar,-27.634,-52.274,7" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:underline">Abrir no Windy ↗</a>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="lg:col-span-2 rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 min-h-[320px]">
+                    <iframe title="Radar meteorológico Windy sobre Erechim" class="w-full h-[360px] border-0" src="https://embed.windy.com/embed.html?lat=-27.634&lon=-52.274&detailLat=-27.634&detailLon=-52.274&width=650&height=360&zoom=7&level=surface&overlay=radar&product=radar&menu=&message=&marker=true&calendar=now&pressure=false&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                    <div class="rounded-xl p-4 bg-slate-900/60 border border-slate-800 flex flex-col justify-center">
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400">Temperatura agora</span>
+                        <strong id="windy-day-current-temp" class="text-3xl font-bold text-rose-400 mt-1">--°C</strong>
+                        <span id="windy-day-feels-like" class="text-xs text-slate-400 mt-1">Sensação: --°C</span>
+                    </div>
+                    <div class="rounded-xl p-4 bg-slate-900/60 border border-slate-800">
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400">Hoje — temperatura</span>
+                        <div class="flex items-center justify-between gap-2 mt-2">
+                            <div><span class="text-[10px] text-sky-400 block">MÍNIMA</span><strong id="windy-day-min" class="text-xl text-sky-300">--°C</strong></div>
+                            <div class="text-right"><span class="text-[10px] text-rose-400 block">MÁXIMA</span><strong id="windy-day-max" class="text-xl text-rose-300">--°C</strong></div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-700 flex items-center justify-between gap-2">
+                            <span class="text-[11px] text-slate-400">Chuva prevista</span><strong id="windy-day-rain" class="text-sm text-teal-300">-- mm</strong>
+                        </div>
+                    </div>
+                    <p id="windy-day-date" class="col-span-2 lg:col-span-1 text-[11px] text-slate-500 text-center lg:text-left">Aguardando atualização meteorológica…</p>
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500">Radar e mapa fornecidos pelo Windy. Temperaturas e precipitação diária consultadas via Open-Meteo para as coordenadas de Erechim; valores de previsão podem mudar.</p>
+        </section>
+
         <!-- RADAR / EARTH NULLSCHOOL / WIND / SATELLITE -->
         <section class="space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
@@ -906,6 +984,8 @@
         </div>
     </footer>
 
+    <!-- Supabase JS: biblioteca pública; a autorização real é aplicada por RLS no banco -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- SCRIPTS -->
     <script>
         const LAT = -27.634;
@@ -937,7 +1017,162 @@
             }
         }
 
-        function toggleAdminModal() { const modal = document.getElementById('admin-modal'); if (modal) modal.classList.toggle('hidden'); }
+        // Configure apenas a URL e a chave PUBLICA anon/publishable do Supabase.
+        // A chave service_role jamais deve ser publicada neste HTML.
+        const SUPABASE_URL = 'COLE_AQUI_A_URL_DO_PROJETO_SUPABASE';
+        const SUPABASE_ANON_KEY = 'COLE_AQUI_A_CHAVE_PUBLICA_ANON';
+        let adminSupabase = null;
+        let adminSession = null;
+        let adminProfile = null;
+
+        function initAdminSupabase() {
+            if (adminSupabase) return adminSupabase;
+            const configured = window.supabase && SUPABASE_URL.startsWith('https://') &&
+                !SUPABASE_URL.includes('COLE_AQUI') && SUPABASE_ANON_KEY.length > 30 &&
+                !SUPABASE_ANON_KEY.includes('COLE_AQUI');
+            if (!configured) return null;
+            adminSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+            });
+            return adminSupabase;
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (!modal) return;
+            const opening = modal.classList.contains('hidden');
+            modal.classList.toggle('hidden');
+            if (opening) initializeAdminPanel();
+        }
+
+        async function initializeAdminPanel() {
+            const client = initAdminSupabase();
+            const warning = document.getElementById('admin-config-warning');
+            if (!client) {
+                warning.classList.remove('hidden');
+                return;
+            }
+            warning.classList.add('hidden');
+            const { data: { session }, error } = await client.auth.getSession();
+            if (error) { setAdminAuthMessage('Não foi possível verificar a sessão: ' + error.message); return; }
+            adminSession = session;
+            if (session) await verifyAdminAccess();
+            else showAdminLogin();
+        }
+
+        function setAdminAuthMessage(message) {
+            const el = document.getElementById('admin-auth-message');
+            if (el) el.textContent = message || '';
+        }
+
+        function showAdminLogin() {
+            document.getElementById('admin-auth-view').classList.remove('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('admin-user-email').textContent = '';
+        }
+
+        async function verifyAdminAccess() {
+            const client = initAdminSupabase();
+            if (!client || !adminSession) { showAdminLogin(); return; }
+            const { data, error } = await client.from('admin_users')
+                .select('user_id, role, active').eq('user_id', adminSession.user.id).eq('active', true).maybeSingle();
+            if (error || !data || !['owner', 'admin'].includes(data.role)) {
+                await client.auth.signOut();
+                adminSession = null;
+                showAdminLogin();
+                setAdminAuthMessage(error ? 'Falha ao verificar permissões. Confira a configuração RLS.' : 'Esta conta não possui permissão administrativa.');
+                return;
+            }
+            adminProfile = data;
+            document.getElementById('admin-auth-view').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            document.getElementById('admin-user-email').textContent = adminSession.user.email || 'Administrador autenticado';
+            document.getElementById('admin-dashboard-message').textContent = 'Acesso autorizado pelo banco de dados.';
+            await loadAdminSettings();
+            await checkAdminWeatherSource();
+        }
+
+        async function handleAdminLogin(event) {
+            if (event) event.preventDefault();
+            const client = initAdminSupabase();
+            if (!client) { setAdminAuthMessage('Configure primeiro o projeto Supabase.'); return; }
+            const button = document.getElementById('admin-login-button');
+            button.disabled = true; button.textContent = 'Autenticando…';
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const { data, error } = await client.auth.signInWithPassword({ email, password });
+            button.disabled = false; button.textContent = 'Entrar com segurança';
+            document.getElementById('admin-password').value = '';
+            if (error) { setAdminAuthMessage('Não foi possível entrar: ' + error.message); return; }
+            adminSession = data.session;
+            setAdminAuthMessage('');
+            await verifyAdminAccess();
+        }
+
+        async function handleAdminLogout() {
+            const client = initAdminSupabase();
+            if (client) await client.auth.signOut();
+            adminSession = null; adminProfile = null;
+            showAdminLogin();
+            setAdminAuthMessage('Sessão encerrada.');
+        }
+
+        async function loadAdminSettings() {
+            const client = initAdminSupabase();
+            const { data, error } = await client.from('admin_settings').select('setting_key, setting_value');
+            if (error) { document.getElementById('admin-dashboard-message').textContent = 'Não foi possível carregar configurações: ' + error.message; return; }
+            const settings = Object.fromEntries((data || []).map(row => [row.setting_key, row.setting_value]));
+            document.getElementById('admin-site-title').value = settings.site_title || 'Central de Monitoramento de Erechim';
+            document.getElementById('admin-announcement').value = settings.announcement || '';
+        }
+
+        async function saveAdminSettings() {
+            const client = initAdminSupabase();
+            if (!client || !adminProfile) return;
+            const values = [
+                { setting_key: 'site_title', setting_value: document.getElementById('admin-site-title').value.trim() },
+                { setting_key: 'announcement', setting_value: document.getElementById('admin-announcement').value.trim() }
+            ];
+            const { error } = await client.from('admin_settings').upsert(values, { onConflict: 'setting_key' });
+            document.getElementById('admin-dashboard-message').textContent = error ?
+                'Erro ao salvar: ' + error.message : 'Configurações salvas com sucesso.';
+            if (!error) {
+                await client.from('admin_audit').insert({ action: 'settings_updated', details: { keys: values.map(v => v.setting_key) } });
+            }
+        }
+
+        async function checkAdminWeatherSource() {
+            const result = document.getElementById('admin-source-result');
+            const status = document.getElementById('admin-weather-status');
+            result.textContent = 'Consultando Open-Meteo…'; status.textContent = 'Verificando…';
+            try {
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=-27.634&longitude=-52.274&current=temperature_2m,relative_humidity_2m&timezone=America%2FSao_Paulo';
+                const response = await fetch(url, { cache: 'no-store' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const payload = await response.json();
+                if (!payload.current || typeof payload.current.temperature_2m !== 'number') throw new Error('Resposta sem dados atuais válidos');
+                const stamp = new Date(payload.current.time).toLocaleString('pt-BR');
+                result.textContent = 'Conexão OK • ' + payload.current.temperature_2m.toFixed(1) + ' °C • ' + stamp;
+                status.textContent = 'OK • ' + stamp;
+            } catch (error) {
+                result.textContent = 'Falha na consulta: ' + error.message;
+                status.textContent = 'Falha na fonte';
+            }
+        }
+
+        async function loadAdminAudit() {
+            const client = initAdminSupabase();
+            const target = document.getElementById('admin-audit-list');
+            target.textContent = 'Carregando…';
+            const { data, error } = await client.from('admin_audit').select('action, details, created_at').order('created_at', { ascending: false }).limit(20);
+            if (error) { target.textContent = 'Não foi possível consultar o registro: ' + error.message; return; }
+            if (!data || !data.length) { target.textContent = 'Nenhuma atividade registrada.'; return; }
+            target.innerHTML = data.map(item => `<div class="border-b border-slate-800 py-2"><strong class="text-slate-200">${escapeAdminText(item.action)}</strong><span class="text-slate-500"> • ${new Date(item.created_at).toLocaleString('pt-BR')}</span></div>`).join('');
+        }
+
+        function escapeAdminText(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+        }
         function toggleHistoryPage(show) { const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSourcesPage(show) { const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSitesModal(show) { const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
@@ -958,10 +1193,7 @@
             reloadSatelliteImage();
         }
 
-        // A autenticação administrativa foi intencionalmente removida do front-end.
-        // Nunca valide senhas nem autorize ações privilegiadas em JavaScript público.
-        function handleAdminLogin(event) { if (event) event.preventDefault(); toggleAdminModal(); }
-        function handleAdminLogout() { toggleAdminModal(); }
+        // A autenticação é fornecida pelo Supabase Auth; a autorização é reforçada por RLS.
 
         function updateClock() {
             const now = new Date();
@@ -1276,6 +1508,21 @@
                 // Atualizar Métricas Principais
                 const metricTempEl = document.getElementById('metric-temp');
                 if (metricTempEl) metricTempEl.innerText = `${temp.toFixed(1)}°C`;
+
+                // Temperatura e precipitação previstas para o dia local de Erechim
+                const todayKey = String(current.time || '').slice(0, 10);
+                const todayIndex = Array.isArray(data.daily.time) ? data.daily.time.indexOf(todayKey) : -1;
+                const dayMin = todayIndex >= 0 ? Number(data.daily.temperature_2m_min?.[todayIndex]) : NaN;
+                const dayMax = todayIndex >= 0 ? Number(data.daily.temperature_2m_max?.[todayIndex]) : NaN;
+                const dayRain = todayIndex >= 0 ? Number(data.daily.precipitation_sum?.[todayIndex]) : NaN;
+                const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+                setText('windy-day-current-temp', `${temp.toFixed(1)}°C`);
+                setText('windy-day-feels-like', `Sensação: ${Number(current.apparent_temperature).toFixed(1)}°C`);
+                setText('windy-day-min', Number.isFinite(dayMin) ? `${dayMin.toFixed(1)}°C` : '--°C');
+                setText('windy-day-max', Number.isFinite(dayMax) ? `${dayMax.toFixed(1)}°C` : '--°C');
+                setText('windy-day-rain', Number.isFinite(dayRain) ? `${dayRain.toFixed(1)} mm` : '-- mm');
+                const todayDate = todayKey ? new Date(`${todayKey}T12:00:00`) : new Date();
+                setText('windy-day-date', `Previsão para ${todayDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} • Atualizado às ${new Date(current.time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
                 
                 const metricTempSubEl = document.getElementById('metric-temp-sub');
                 if (metricTempSubEl) metricTempSubEl.innerText = `Sensação: ${current.apparent_temperature.toFixed(1)}°C`;
