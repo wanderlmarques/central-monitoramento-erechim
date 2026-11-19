@@ -963,12 +963,19 @@
            Ative Email + Phone em Authentication > Providers; habilite cadastro público.
            Configure provedor de SMS. Para WhatsApp, use provedor/integração que entregue OTP por WhatsApp.
            Ative confirmação de e-mail e defina URLs de redirecionamento em Authentication > URL Configuration.
+           ADMIN: crie o usuário wander.l.marques@gmail.com em Authentication > Users; depois atribua
+           app_metadata.role='admin' via Supabase Dashboard/Admin API (service_role somente no servidor).
+           Não coloque senha administrativa nem service_role neste HTML.
         */
         const SUPABASE_URL = 'COLE_AQUI_A_PROJECT_URL_DO_SUPABASE';
         const SUPABASE_ANON_KEY = 'COLE_AQUI_A_ANON_PUBLIC_KEY_DO_SUPABASE';
+        // Conta administrativa autorizada. A função admin também precisa ser atribuída
+        // no app_metadata pelo Supabase (nunca pelo navegador).
+        const ADMIN_EMAIL = 'wander.l.marques@gmail.com';
         let supabaseAuthClient = null;
         let pendingRecoveryPhone = '';
         window.__siteAuthenticated = false;
+        window.__siteIsAdmin = false;
 
         function authMessage(id, text) { const el=document.getElementById(id); if(el) el.textContent=text; }
         function normalizePhone(value) { let v=String(value||'').trim().replace(/[()\s-]/g,''); if(v.startsWith('00')) v='+'+v.slice(2); if(!v.startsWith('+')) v='+55'+v.replace(/^0/,''); return v; }
@@ -986,8 +993,11 @@
             if(!supabaseAuthClient) authMessage('login-message','Configuração pendente: insira a Project URL e a anon/public key do Supabase.');
         }
         function closeLoginModal() { document.getElementById('login-modal')?.classList.add('hidden'); }
-        function setAuthenticatedView(isAuthenticated, email) {
+        function setAuthenticatedView(isAuthenticated, email, user=null) {
             window.__siteAuthenticated=!!isAuthenticated;
+            const normalizedEmail=String(email||'').trim().toLowerCase();
+            // Exige e-mail confirmado + papel administrativo definido no servidor.
+            window.__siteIsAdmin=!!(isAuthenticated && user?.email_confirmed_at && normalizedEmail===ADMIN_EMAIL && user?.app_metadata?.role==='admin');
             const privateContent=document.getElementById('private-content');
             const privateFooter=document.getElementById('private-footer');
             if(privateContent){privateContent.classList.toggle('hidden',!isAuthenticated);privateContent.setAttribute('aria-hidden',String(!isAuthenticated));}
@@ -996,7 +1006,7 @@
             document.getElementById('login-open-button')?.classList.toggle('hidden',!!isAuthenticated);
             document.getElementById('logout-button')?.classList.toggle('hidden',!isAuthenticated);
             const label=document.getElementById('auth-user-label');
-            if(label){label.textContent=isAuthenticated?`Conectado: ${email||'usuário autenticado'}`:'';label.classList.toggle('hidden',!isAuthenticated);}
+            if(label){label.textContent=isAuthenticated?`${window.__siteIsAdmin?'Administrador':'Conectado'}: ${email||'usuário autenticado'}`:'';label.classList.toggle('hidden',!isAuthenticated);}
             if(isAuthenticated) closeLoginModal();
             else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
         }
@@ -1006,7 +1016,7 @@
             authMessage('login-message','Validando credenciais...');
             const {data,error}=await supabaseAuthClient.auth.signInWithPassword({email,password});
             if(error){authMessage('login-message','Não foi possível entrar. Confira e-mail e senha e confirme seu cadastro.');return;}
-            setAuthenticatedView(true,data.user?.email||email);
+            setAuthenticatedView(true,data.user?.email||email,data.user);
             const user=data.user;
             if(user && !user.phone_confirmed_at && user.user_metadata?.phone){
                 openLoginModal(); document.getElementById('phone-verify-panel')?.classList.remove('hidden');
@@ -1088,17 +1098,17 @@
         }
         (function initializeSupabaseAuth(){
             const configured=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('COLE_AQUI')&&SUPABASE_ANON_KEY.length>30&&!SUPABASE_ANON_KEY.includes('COLE_AQUI');
-            if(!configured||!window.supabase?.createClient){setAuthenticatedView(false,'');return;}
+            if(!configured||!window.supabase?.createClient){setAuthenticatedView(false,''); authMessage('login-message','Autenticação ainda não configurada: informe a URL e a chave pública do projeto Supabase no código.'); return;}
             supabaseAuthClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
             supabaseAuthClient.auth.onAuthStateChange((event,session)=>{
-                setAuthenticatedView(!!session?.user,session?.user?.email||'');
+                setAuthenticatedView(!!session?.user,session?.user?.email||'',session?.user||null);
                 if(event==='PASSWORD_RECOVERY'){
                     openLoginModal(); showAuthPanel('recover-email');
                     const form=document.getElementById('recover-email-form');
                     form.innerHTML='<label class="block text-left text-xs font-semibold text-slate-300" for="recovery-new-password-email">Nova senha</label><input id="recovery-new-password-email" type="password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Nova senha"><button type="button" onclick="completeEmailPasswordRecovery()" class="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold">Salvar nova senha</button><p id="email-password-update-message" class="text-xs text-amber-300 text-center"></p>';
                 }
             });
-            supabaseAuthClient.auth.getSession().then(({data})=>setAuthenticatedView(!!data.session?.user,data.session?.user?.email||''));
+            supabaseAuthClient.auth.getSession().then(({data})=>setAuthenticatedView(!!data.session?.user,data.session?.user?.email||'',data.session?.user||null));
         })();
         async function completeEmailPasswordRecovery(){
             const password=document.getElementById('recovery-new-password-email')?.value||'';
@@ -1299,10 +1309,24 @@
 
                 const temp = current.temperature_2m;
                 const humidity = current.relative_humidity_2m;
-                const currentHourIndex = data.hourly.time.indexOf(current.time);
-                if (currentHourIndex < 0) throw new Error('Não foi possível sincronizar o horário atual com a série horária.');
+                // A API pode devolver current.time com pequena diferença de formatação/fuso.
+                // Primeiro tenta igualdade exata; depois procura a hora mais próxima (janela de 60 min).
+                let currentHourIndex = data.hourly.time.indexOf(current.time);
+                if (currentHourIndex < 0 && current.time) {
+                    const targetTime = Date.parse(current.time);
+                    if (Number.isFinite(targetTime)) {
+                        let bestDelta = Infinity;
+                        data.hourly.time.forEach((hour, index) => {
+                            const delta = Math.abs(Date.parse(hour) - targetTime);
+                            if (Number.isFinite(delta) && delta < bestDelta) { bestDelta = delta; currentHourIndex = index; }
+                        });
+                        if (bestDelta > 60 * 60 * 1000) currentHourIndex = -1;
+                    }
+                }
+                if (currentHourIndex < 0) throw new Error('Horário atual não encontrado na série horária da Open-Meteo.');
+                const rainValues = Array.isArray(data.hourly.precipitation) ? data.hourly.precipitation : [];
                 const rainStartIndex = Math.max(0, currentHourIndex - 12);
-                const rain12h = data.hourly.precipitation.slice(rainStartIndex, currentHourIndex).reduce((a, b) => a + (Number(b) || 0), 0);
+                const rain12h = rainValues.slice(rainStartIndex, currentHourIndex + 1).reduce((a, b) => a + (Number(b) || 0), 0);
                 const windSpeed = current.wind_speed_10m;
                 const windGust = Number.isFinite(Number(current.wind_gusts_10m)) ? Number(current.wind_gusts_10m) : windSpeed;
                 const windDegree = current.wind_direction_10m || 0;
@@ -1534,8 +1558,11 @@
                 }
                 // FIM DO CÁLCULO DE 6 HORAS
 
-                renderForecastChart(data.hourly);
-                render3DayForecast(data.daily);
+                // Falhas de visualização não devem invalidar os dados meteorológicos já recebidos.
+                try { renderForecastChart(data.hourly); }
+                catch (chartError) { console.error('Falha ao montar gráfico de previsão:', chartError); }
+                try { render3DayForecast(data.daily); }
+                catch (forecastError) { console.error('Falha ao montar cartões da previsão:', forecastError); }
                 weatherLastSuccess = new Date();
                 const updateText = `Dados meteorológicos recebidos às ${weatherLastSuccess.toLocaleTimeString('pt-BR')} (${weatherLastSuccess.toLocaleDateString('pt-BR')})`;
                 const lastUpdateLabel = document.getElementById('last-update-label');
@@ -1549,7 +1576,7 @@
                 if (status) status.textContent = 'Falha na atualização';
                 if (headerTimestamp) headerTimestamp.textContent = weatherLastSuccess
                     ? `Falha na atualização. Últimos dados recebidos às ${weatherLastSuccess.toLocaleTimeString('pt-BR')}`
-                    : 'Não foi possível carregar os dados meteorológicos';
+                    : 'Não foi possível carregar os dados meteorológicos. Verifique a conexão e tente novamente.';
                 const content6h = document.getElementById('content-6h-alert');
                 if (content6h) content6h.textContent = 'Previsão temporariamente indisponível. Tente atualizar novamente.';
                 const label6h = document.getElementById('label-6h-span');
