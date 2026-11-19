@@ -332,20 +332,17 @@
             <div class="flex flex-col items-center gap-2 mb-5">
                 <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-lock text-2xl"></i></span>
                 <h2 id="login-modal-title" class="text-xl font-bold text-white">Acesso restrito</h2>
-                <p class="text-xs text-slate-400">Cadastre-se com e-mail e celular. O celular precisa ser verificado para recuperação por código.</p>
+                <p class="text-xs text-slate-400">Acesso demonstrativo temporário para apresentação do site.</p>
             </div>
-            <div class="flex flex-wrap justify-center gap-2 mb-4">
-                <button type="button" onclick="showAuthPanel('login')" class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Entrar</button>
-                <button type="button" onclick="showAuthPanel('register')" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold">Criar cadastro</button>
-                <button type="button" onclick="showAuthPanel('recover-email')" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold">Recuperar por e-mail</button>
-                <button type="button" onclick="showAuthPanel('recover-phone')" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold">Recuperar por celular</button>
+            <div class="flex justify-center mb-4">
+                <span class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Login de demonstração</span>
             </div>
-            <form id="login-form" class="space-y-3" onsubmit="handleSupabaseLogin(event)">
+            <form id="login-form" class="space-y-3" onsubmit="handleDemoLogin(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="login-email">E-mail</label>
-                <input id="login-email" type="email" autocomplete="username" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="seuemail@exemplo.com">
+                <input id="login-email" type="email" autocomplete="username" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="wander.l.marques@gmail.com">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="login-password">Senha</label>
                 <input id="login-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Sua senha">
-                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Entre ou crie seu cadastro para acessar as informações restritas.</p>
+                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Informe o e-mail e a senha temporária de demonstração.</p>
                 <button id="login-submit" type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Entrar</button>
             </form>
             <form id="register-form" class="hidden space-y-3" onsubmit="handleSupabaseRegister(event)">
@@ -955,167 +952,89 @@
         </div>
     </footer>
 
-    <!-- ATENÇÃO: o login controla a interface. Em hospedagem estática, o HTML pode ser inspecionado; conteúdo realmente confidencial e dados privados devem ficar em Edge Functions/APIs com validação JWT e políticas RLS. -->
-    <!-- SCRIPTS -->
+    <!-- LOGIN TEMPORÁRIO DE DEMONSTRAÇÃO
+         IMPORTANTE: autenticação somente visual, sem segurança real.
+         Remover/substituir por Supabase antes de usar com dados privados. -->
     <script>
-        /* CONFIGURAÇÃO SUPABASE
-           Configure Project URL e anon/public key. Nunca use service_role no navegador.
-           Ative Email + Phone em Authentication > Providers; habilite cadastro público.
-           Configure provedor de SMS. Para WhatsApp, use provedor/integração que entregue OTP por WhatsApp.
-           Ative confirmação de e-mail e defina URLs de redirecionamento em Authentication > URL Configuration.
-           ADMIN: crie o usuário wander.l.marques@gmail.com em Authentication > Users; depois atribua
-           app_metadata.role='admin' via Supabase Dashboard/Admin API (service_role somente no servidor).
-           Não coloque senha administrativa nem service_role neste HTML.
-        */
-        const SUPABASE_URL = 'COLE_AQUI_A_PROJECT_URL_DO_SUPABASE';
-        const SUPABASE_ANON_KEY = 'COLE_AQUI_A_ANON_PUBLIC_KEY_DO_SUPABASE';
-        // Conta administrativa autorizada. A função admin também precisa ser atribuída
-        // no app_metadata pelo Supabase (nunca pelo navegador).
         const ADMIN_EMAIL = 'wander.l.marques@gmail.com';
-        let supabaseAuthClient = null;
-        let pendingRecoveryPhone = '';
+        // Credencial temporária para a apresentação. Não reutilize esta senha em outros serviços.
+        const DEMO_PASSWORD = 'ErechimDemo2026!';
+        const DEMO_SESSION_KEY = 'centralErechimDemoAuth';
         window.__siteAuthenticated = false;
         window.__siteIsAdmin = false;
 
-        function authMessage(id, text) { const el=document.getElementById(id); if(el) el.textContent=text; }
-        function normalizePhone(value) { let v=String(value||'').trim().replace(/[()\s-]/g,''); if(v.startsWith('00')) v='+'+v.slice(2); if(!v.startsWith('+')) v='+55'+v.replace(/^0/,''); return v; }
+        function authMessage(id, message) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = message;
+        }
         function showAuthPanel(panel) {
-            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
-            document.getElementById('phone-verify-panel')?.classList.add('hidden');
-            const map={login:'login-form',register:'register-form','recover-email':'recover-email-form','recover-phone':'recover-phone-form'};
-            document.getElementById(map[panel])?.classList.remove('hidden');
-            const titles={login:'Acesso restrito',register:'Criar cadastro','recover-email':'Recuperar senha por e-mail','recover-phone':'Recuperar senha pelo celular'};
-            document.getElementById('login-modal-title').textContent=titles[panel]||'Acesso restrito';
+            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form'].forEach(id => {
+                document.getElementById(id)?.classList.add('hidden');
+            });
+            document.getElementById('login-form')?.classList.remove('hidden');
+            const title = document.getElementById('login-modal-title');
+            if (title) title.textContent = 'Acesso demonstrativo';
         }
         function openLoginModal() {
-            const modal=document.getElementById('login-modal'); if(modal) modal.classList.remove('hidden');
+            document.getElementById('login-modal')?.classList.remove('hidden');
             showAuthPanel('login');
-            if(!supabaseAuthClient) authMessage('login-message','Configuração pendente: insira a Project URL e a anon/public key do Supabase.');
+            authMessage('login-message', 'Login temporário habilitado para a apresentação.');
         }
-        function closeLoginModal() { document.getElementById('login-modal')?.classList.add('hidden'); }
-        function setAuthenticatedView(isAuthenticated, email, user=null) {
-            window.__siteAuthenticated=!!isAuthenticated;
-            const normalizedEmail=String(email||'').trim().toLowerCase();
-            // Exige e-mail confirmado + papel administrativo definido no servidor.
-            window.__siteIsAdmin=!!(isAuthenticated && user?.email_confirmed_at && normalizedEmail===ADMIN_EMAIL && user?.app_metadata?.role==='admin');
-            const privateContent=document.getElementById('private-content');
-            const privateFooter=document.getElementById('private-footer');
-            if(privateContent){privateContent.classList.toggle('hidden',!isAuthenticated);privateContent.setAttribute('aria-hidden',String(!isAuthenticated));}
-            if(privateFooter) privateFooter.classList.toggle('hidden',!isAuthenticated);
-            document.querySelectorAll('[data-auth-required="true"]').forEach(el=>el.classList.toggle('hidden',!isAuthenticated));
-            document.getElementById('login-open-button')?.classList.toggle('hidden',!!isAuthenticated);
-            document.getElementById('logout-button')?.classList.toggle('hidden',!isAuthenticated);
-            const label=document.getElementById('auth-user-label');
-            if(label){label.textContent=isAuthenticated?`${window.__siteIsAdmin?'Administrador':'Conectado'}: ${email||'usuário autenticado'}`:'';label.classList.toggle('hidden',!isAuthenticated);}
-            if(isAuthenticated) closeLoginModal();
-            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+        function closeLoginModal() {
+            document.getElementById('login-modal')?.classList.add('hidden');
         }
-        async function handleSupabaseLogin(event) {
-            event.preventDefault(); if(!supabaseAuthClient){authMessage('login-message','Supabase ainda não configurado.');return;}
-            const email=document.getElementById('login-email').value.trim(), password=document.getElementById('login-password').value;
-            authMessage('login-message','Validando credenciais...');
-            const {data,error}=await supabaseAuthClient.auth.signInWithPassword({email,password});
-            if(error){authMessage('login-message','Não foi possível entrar. Confira e-mail e senha e confirme seu cadastro.');return;}
-            setAuthenticatedView(true,data.user?.email||email,data.user);
-            const user=data.user;
-            if(user && !user.phone_confirmed_at && user.user_metadata?.phone){
-                openLoginModal(); document.getElementById('phone-verify-panel')?.classList.remove('hidden');
-                document.getElementById('verify-account-phone').value=user.user_metadata.phone;
-                authMessage('phone-verify-message','Confirme seu celular para habilitar a recuperação por telefone.');
+        function setAuthenticatedView(isAuthenticated, email) {
+            window.__siteAuthenticated = !!isAuthenticated;
+            window.__siteIsAdmin = !!isAuthenticated && String(email || '').trim().toLowerCase() === ADMIN_EMAIL;
+            const privateContent = document.getElementById('private-content');
+            const privateFooter = document.getElementById('private-footer');
+            if (privateContent) {
+                privateContent.classList.toggle('hidden', !isAuthenticated);
+                privateContent.setAttribute('aria-hidden', String(!isAuthenticated));
             }
-            document.getElementById('login-password').value='';
-        }
-        async function handleSupabaseRegister(event) {
-            event.preventDefault(); if(!supabaseAuthClient){authMessage('register-message','Supabase ainda não configurado.');return;}
-            const email=document.getElementById('register-email').value.trim();
-            const phone=normalizePhone(document.getElementById('register-phone').value);
-            const password=document.getElementById('register-password').value;
-            const confirm=document.getElementById('register-password-confirm').value;
-            if(password.length<8 || password!==confirm){authMessage('register-message','As senhas devem ser iguais e ter pelo menos 8 caracteres.');return;}
-            authMessage('register-message','Criando cadastro...');
-            const {data,error}=await supabaseAuthClient.auth.signUp({email,password,options:{data:{phone}}});
-            if(error){authMessage('register-message','Não foi possível criar a conta. Verifique os dados ou se o e-mail já está cadastrado.');return;}
-            if(data.session){
-                const {error:phoneError}=await supabaseAuthClient.auth.updateUser({phone});
-                if(phoneError){authMessage('register-message','Conta criada, mas não foi possível enviar a verificação do celular. Entre e tente verificar o número novamente.');return;}
-                authMessage('register-message','Cadastro criado. Enviamos um código ao celular; confirme o número após entrar.');
-            } else {
-                authMessage('register-message','Cadastro criado. Confira sua caixa de entrada e confirme o e-mail. Depois entre para validar seu celular.');
+            if (privateFooter) privateFooter.classList.toggle('hidden', !isAuthenticated);
+            document.querySelectorAll('[data-auth-required="true"]').forEach(el => el.classList.toggle('hidden', !isAuthenticated));
+            document.getElementById('login-open-button')?.classList.toggle('hidden', !!isAuthenticated);
+            document.getElementById('logout-button')?.classList.toggle('hidden', !isAuthenticated);
+            const label = document.getElementById('auth-user-label');
+            if (label) {
+                label.textContent = isAuthenticated ? `Administrador (demonstração): ${email || ADMIN_EMAIL}` : '';
+                label.classList.toggle('hidden', !isAuthenticated);
             }
-            document.getElementById('register-password').value=''; document.getElementById('register-password-confirm').value='';
-        }
-        async function sendAccountPhoneVerification(){
-            if(!supabaseAuthClient||!window.__siteAuthenticated)return;
-            const phone=normalizePhone(document.getElementById('verify-account-phone').value);
-            authMessage('phone-verify-message','Enviando código...');
-            const {error}=await supabaseAuthClient.auth.updateUser({phone});
-            authMessage('phone-verify-message',error?'Não foi possível enviar o código. Confira o número e a configuração do provedor.':'Código enviado. Confira as mensagens do celular.');
-        }
-        async function confirmAccountPhoneVerification(){
-            if(!supabaseAuthClient)return;
-            const phone=normalizePhone(document.getElementById('verify-account-phone').value);
-            const token=document.getElementById('verify-account-phone-token').value.trim();
-            const {error}=await supabaseAuthClient.auth.verifyOtp({phone,token,type:'phone_change'});
-            authMessage('phone-verify-message',error?'Código inválido ou expirado. Solicite outro código.':'Celular verificado com sucesso. Ele poderá ser usado para recuperar a senha.');
-            if(!error) document.getElementById('phone-verify-panel')?.classList.add('hidden');
-        }
-        async function handleEmailRecovery(event){
-            event.preventDefault(); if(!supabaseAuthClient){authMessage('recover-email-message','Supabase ainda não configurado.');return;}
-            const email=document.getElementById('recover-email').value.trim();
-            const redirectTo=window.location.origin+window.location.pathname;
-            const {error}=await supabaseAuthClient.auth.resetPasswordForEmail(email,{redirectTo});
-            authMessage('recover-email-message',error?'Não foi possível enviar o link. Confira o e-mail e as configurações de recuperação.':'Se o endereço estiver cadastrado, você receberá um link para redefinir a senha.');
-        }
-        async function handlePhoneRecoveryRequest(event){
-            event.preventDefault(); if(!supabaseAuthClient){authMessage('recover-phone-message','Supabase ainda não configurado.');return;}
-            const phone=normalizePhone(document.getElementById('recover-phone').value); pendingRecoveryPhone=phone;
-            authMessage('recover-phone-message','Solicitando código...');
-            const channel=document.getElementById('recover-phone-channel')?.value||'sms';
-            const {error}=await supabaseAuthClient.auth.signInWithOtp({phone,options:{shouldCreateUser:false,channel}});
-            if(error){authMessage('recover-phone-message','Não foi possível enviar o código. Confirme se o celular foi verificado e se a autenticação por telefone está configurada.');return;}
-            document.getElementById('recover-phone-form').classList.add('hidden');
-            document.getElementById('recover-phone-verify-form').classList.remove('hidden');
-            authMessage('recover-phone-verify-message','Código enviado. Digite o código e sua nova senha.');
-        }
-        async function handlePhoneRecoveryVerify(event){
-            event.preventDefault(); if(!supabaseAuthClient)return;
-            const token=document.getElementById('recover-phone-token').value.trim();
-            const password=document.getElementById('recover-new-password').value;
-            if(password.length<8){authMessage('recover-phone-verify-message','A nova senha deve ter pelo menos 8 caracteres.');return;}
-            authMessage('recover-phone-verify-message','Validando código...');
-            const {error:otpError}=await supabaseAuthClient.auth.verifyOtp({phone:pendingRecoveryPhone,token,type:'sms'});
-            if(otpError){authMessage('recover-phone-verify-message','Código inválido ou expirado. Solicite outro.');return;}
-            const {error:passwordError}=await supabaseAuthClient.auth.updateUser({password});
-            if(passwordError){authMessage('recover-phone-verify-message','Código validado, mas não foi possível alterar a senha. Tente novamente.');return;}
-            authMessage('recover-phone-verify-message','Senha alterada com sucesso. Você já pode entrar com a nova senha.');
-            document.getElementById('recover-new-password').value='';
-            setAuthenticatedView(false,''); await supabaseAuthClient.auth.signOut();
-            showAuthPanel('login');
-        }
-        async function handleSupabaseLogout(){
-            if(!supabaseAuthClient)return; const {error}=await supabaseAuthClient.auth.signOut();
-            if(error){alert('Não foi possível encerrar a sessão. Tente novamente.');return;} setAuthenticatedView(false,'');
-        }
-        (function initializeSupabaseAuth(){
-            const configured=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('COLE_AQUI')&&SUPABASE_ANON_KEY.length>30&&!SUPABASE_ANON_KEY.includes('COLE_AQUI');
-            if(!configured||!window.supabase?.createClient){setAuthenticatedView(false,''); authMessage('login-message','Autenticação ainda não configurada: informe a URL e a chave pública do projeto Supabase no código.'); return;}
-            supabaseAuthClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-            supabaseAuthClient.auth.onAuthStateChange((event,session)=>{
-                setAuthenticatedView(!!session?.user,session?.user?.email||'',session?.user||null);
-                if(event==='PASSWORD_RECOVERY'){
-                    openLoginModal(); showAuthPanel('recover-email');
-                    const form=document.getElementById('recover-email-form');
-                    form.innerHTML='<label class="block text-left text-xs font-semibold text-slate-300" for="recovery-new-password-email">Nova senha</label><input id="recovery-new-password-email" type="password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Nova senha"><button type="button" onclick="completeEmailPasswordRecovery()" class="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold">Salvar nova senha</button><p id="email-password-update-message" class="text-xs text-amber-300 text-center"></p>';
-                }
+            if (isAuthenticated) closeLoginModal();
+            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal'].forEach(id => {
+                document.getElementById(id)?.classList.add('hidden');
             });
-            supabaseAuthClient.auth.getSession().then(({data})=>setAuthenticatedView(!!data.session?.user,data.session?.user?.email||'',data.session?.user||null));
-        })();
-        async function completeEmailPasswordRecovery(){
-            const password=document.getElementById('recovery-new-password-email')?.value||'';
-            if(password.length<8){authMessage('email-password-update-message','A senha deve ter pelo menos 8 caracteres.');return;}
-            const {error}=await supabaseAuthClient.auth.updateUser({password});
-            authMessage('email-password-update-message',error?'Não foi possível alterar a senha. Tente novamente.':'Senha alterada com sucesso.');
         }
+        function handleDemoLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            if (email !== ADMIN_EMAIL || password !== DEMO_PASSWORD) {
+                authMessage('login-message', 'E-mail ou senha incorretos. Confira os dados de demonstração.');
+                return;
+            }
+            try { sessionStorage.setItem(DEMO_SESSION_KEY, email); } catch (e) {}
+            setAuthenticatedView(true, ADMIN_EMAIL);
+            document.getElementById('login-password').value = '';
+        }
+        function handleSupabaseLogout() {
+            try { sessionStorage.removeItem(DEMO_SESSION_KEY); } catch (e) {}
+            setAuthenticatedView(false, '');
+            openLoginModal();
+            authMessage('login-message', 'Sessão encerrada.');
+        }
+        // Recupera a sessão somente nesta aba do navegador, inclusive após atualizar a página.
+        (function initializeDemoAuth() {
+            let savedEmail = '';
+            try { savedEmail = sessionStorage.getItem(DEMO_SESSION_KEY) || ''; } catch (e) {}
+            if (savedEmail.toLowerCase() === ADMIN_EMAIL) {
+                setAuthenticatedView(true, ADMIN_EMAIL);
+            } else {
+                setAuthenticatedView(false, '');
+                authMessage('login-message', 'Login temporário habilitado para a apresentação.');
+            }
+        })();
 
         const LAT = -27.634;
         const LON = -52.274;
