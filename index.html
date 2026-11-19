@@ -6,6 +6,8 @@
     <meta name="description" content="Painel independente de monitoramento e consulta meteorológica para Erechim, Rio Grande do Sul.">
     <meta name="theme-color" content="#09090b">
     <title>Painel Meteorológico  — Erechim / RS</title>
+    <!-- Supabase Auth client (login) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -272,40 +274,43 @@
                 <!-- Admin & Controls -->
                 <div class="flex w-full items-center justify-center gap-3 border-t pt-4 dark:border-slate-800 border-slate-200 flex-wrap">
                     
-                    <!-- Admin Status Trigger -->
-                    <div id="admin-status-area">
-                        <button onclick="toggleAdminModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
-                            <i class="fa-solid fa-user-shield text-sky-500"></i>
-                            <span id="admin-btn-text">Administração</span>
+                    <!-- Login público / logout autenticado -->
+                    <div id="admin-status-area" class="flex items-center justify-center gap-2">
+                        <button id="login-open-button" type="button" onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition bg-sky-700 border-sky-600 hover:bg-sky-600 text-white">
+                            <i class="fa-solid fa-right-to-bracket"></i><span>Entrar / Acesso restrito</span>
                         </button>
+                        <button id="logout-button" type="button" onclick="handleSupabaseLogout()" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 text-slate-700">
+                            <i class="fa-solid fa-right-from-bracket"></i><span>Sair</span>
+                        </button>
+                        <span id="auth-user-label" class="hidden text-xs text-emerald-400 font-semibold"></span>
                     </div>
 
                     <!-- Tornado Lab Modal Button -->
-                    <button onclick="toggleTornadoLabModal(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleTornadoLabModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-tornado text-blue-400"></i>
                         <span>Lab Tornado</span>
                     </button>
 
                     <!-- Model Efficacy Modal Button -->
-                    <button onclick="toggleModelEfficacyModal(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleModelEfficacyModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-chart-column text-emerald-400"></i>
                         <span>Eficácia do Modelo</span>
                     </button>
 
                     <!-- History Modal Button -->
-                    <button onclick="toggleHistoryPage(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleHistoryPage(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
                         <span>Séries & Histórico</span>
                     </button>
 
                     <!-- Sources Modal Button -->
-                    <button onclick="toggleSourcesPage(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleSourcesPage(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-globe text-sky-400"></i>
                         <span>Fontes</span>
                     </button>
 
                     <!-- Sites Utilizados Modal Button -->
-                    <button onclick="toggleSitesModal(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleSitesModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-external-link-alt text-emerald-400"></i>
                         <span>Sites Utilizados</span>
                     </button>
@@ -320,69 +325,77 @@
         </div>
     </header>
 
-
-    <!-- ADMIN PANEL: autenticação Supabase; permissões aplicadas também no banco (RLS) -->
-    <div id="admin-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
-      <div class="glass-card w-full max-w-5xl rounded-2xl p-5 sm:p-7 relative border dark:border-slate-700 border-slate-300 shadow-2xl my-auto">
-        <button type="button" onclick="toggleAdminModal()" aria-label="Fechar" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
-        <div class="flex items-center gap-3 mb-5">
-          <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-user-shield text-xl"></i></span>
-          <div><h2 id="admin-modal-title" class="text-xl font-bold dark:text-white text-slate-900">Área administrativa</h2><p class="text-xs text-slate-400">Acesso autenticado e permissões verificadas no banco de dados.</p></div>
+    <!-- LOGIN / CADASTRO / RECUPERAÇÃO: Supabase Auth -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[80] hidden flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl my-auto">
+            <button type="button" onclick="closeLoginModal()" aria-label="Fechar" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="flex flex-col items-center gap-2 mb-5">
+                <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-lock text-2xl"></i></span>
+                <h2 id="login-modal-title" class="text-xl font-bold text-white">Acesso restrito</h2>
+                <p class="text-xs text-slate-400">Cadastre-se com e-mail e celular. O celular precisa ser verificado para recuperação por código.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 mb-4">
+                <button type="button" onclick="showAuthPanel('login')" class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Entrar</button>
+                <button type="button" onclick="showAuthPanel('register')" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold">Criar cadastro</button>
+                <button type="button" onclick="showAuthPanel('recover-email')" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold">Recuperar por e-mail</button>
+                <button type="button" onclick="showAuthPanel('recover-phone')" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold">Recuperar por celular</button>
+            </div>
+            <form id="login-form" class="space-y-3" onsubmit="handleSupabaseLogin(event)">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="login-email">E-mail</label>
+                <input id="login-email" type="email" autocomplete="username" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="seuemail@exemplo.com">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="login-password">Senha</label>
+                <input id="login-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Sua senha">
+                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Entre ou crie seu cadastro para acessar as informações restritas.</p>
+                <button id="login-submit" type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Entrar</button>
+            </form>
+            <form id="register-form" class="hidden space-y-3" onsubmit="handleSupabaseRegister(event)">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="register-email">E-mail</label>
+                <input id="register-email" type="email" autocomplete="email" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="seuemail@exemplo.com">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="register-phone">Celular / WhatsApp com DDI</label>
+                <input id="register-phone" type="tel" autocomplete="tel" required pattern="^\+?[0-9 ()-]{10,20}$" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="+55 54 99999-9999">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="register-password">Criar senha (mínimo 8 caracteres)</label>
+                <input id="register-password" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Crie uma senha segura">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="register-password-confirm">Confirmar senha</label>
+                <input id="register-password-confirm" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Repita a senha">
+                <p id="register-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Após o cadastro, confirme seu e-mail e valide o celular por código.</p>
+                <button id="register-submit" type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">Criar cadastro</button>
+            </form>
+            <form id="recover-email-form" class="hidden space-y-3" onsubmit="handleEmailRecovery(event)">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="recover-email">E-mail cadastrado</label>
+                <input id="recover-email" type="email" autocomplete="email" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="seuemail@exemplo.com">
+                <p id="recover-email-message" class="text-xs text-amber-300 text-center" role="status">Enviaremos um link para redefinir sua senha.</p>
+                <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Enviar link de recuperação</button>
+            </form>
+            <form id="recover-phone-form" class="hidden space-y-3" onsubmit="handlePhoneRecoveryRequest(event)">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="recover-phone">Celular verificado com DDI</label>
+                <input id="recover-phone" type="tel" autocomplete="tel" required pattern="^\+?[0-9 ()-]{10,20}$" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="+55 54 99999-9999">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="recover-phone-channel">Onde deseja receber o código?</label>
+                <select id="recover-phone-channel" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left"><option value="sms">SMS</option><option value="whatsapp">WhatsApp</option></select>
+                <p id="recover-phone-message" class="text-xs text-amber-300 text-center" role="status">Enviaremos um código ao número verificado.</p>
+                <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Enviar código</button>
+            </form>
+            <form id="recover-phone-verify-form" class="hidden space-y-3" onsubmit="handlePhoneRecoveryVerify(event)">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="recover-phone-token">Código recebido</label>
+                <input id="recover-phone-token" inputmode="numeric" autocomplete="one-time-code" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Código de verificação">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="recover-new-password">Nova senha (mínimo 8 caracteres)</label>
+                <input id="recover-new-password" type="password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Nova senha">
+                <p id="recover-phone-verify-message" class="text-xs text-amber-300 text-center" role="status">Informe o código recebido e escolha uma nova senha.</p>
+                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">Confirmar código e alterar senha</button>
+            </form>
+            <div id="phone-verify-panel" class="hidden mt-4 pt-4 border-t border-slate-700 space-y-3">
+                <p class="text-xs text-slate-300">Verifique seu celular para habilitar a recuperação de senha por código.</p>
+                <input id="verify-account-phone" type="tel" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="+55 54 99999-9999">
+                <button type="button" onclick="sendAccountPhoneVerification()" class="w-full py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold">Enviar código para verificar celular</button>
+                <input id="verify-account-phone-token" inputmode="numeric" autocomplete="one-time-code" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Código recebido">
+                <button type="button" onclick="confirmAccountPhoneVerification()" class="w-full py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold">Confirmar celular</button>
+                <p id="phone-verify-message" class="text-xs text-amber-300 text-center" role="status"></p>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-4">O envio de códigos ao celular depende da configuração de autenticação por telefone e do provedor de mensagens no Supabase. O canal WhatsApp requer Twilio ou Twilio Verify configurado no Supabase; os demais provedores usam SMS.</p>
         </div>
-        <div id="admin-config-warning" class="hidden rounded-xl border border-amber-500/40 bg-amber-950/30 p-4 mb-4 text-sm text-amber-100">
-          <strong>Configuração necessária.</strong> Configure a URL e a chave pública (anon/publishable) do seu projeto Supabase nas constantes <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> deste arquivo. Nunca coloque a chave <code>service_role</code> no HTML.
-        </div>
-        <div id="admin-auth-view" class="max-w-md mx-auto py-3">
-          <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="space-y-3">
-            <label class="block text-xs font-semibold text-slate-400">E-mail administrativo</label>
-            <input id="admin-email" type="email" autocomplete="username" required class="w-full rounded-xl p-3 bg-slate-900 border border-slate-700 text-white" placeholder="seu@email.com">
-            <label class="block text-xs font-semibold text-slate-400">Senha</label>
-            <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-xl p-3 bg-slate-900 border border-slate-700 text-white" placeholder="Senha da conta Supabase">
-            <button id="admin-login-button" type="submit" class="w-full rounded-xl p-3 bg-sky-600 hover:bg-sky-500 text-white font-bold">Entrar com segurança</button>
-            <p id="admin-auth-message" role="status" class="text-xs text-slate-400"></p>
-          </form>
-        </div>
-        <div id="admin-dashboard" class="hidden space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 pb-3">
-            <div><p class="text-sm font-bold text-white" id="admin-user-email"></p><p class="text-xs text-emerald-400">Sessão autenticada • perfil administrador</p></div>
-            <button onclick="handleAdminLogout()" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold"><i class="fa-solid fa-right-from-bracket mr-1"></i> Sair</button>
-          </div>
-          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Estado do painel</p><p class="font-bold text-emerald-400 mt-1">Autenticado</p></div>
-            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Última consulta meteorológica</p><p id="admin-weather-status" class="font-bold text-white mt-1">Verificando…</p></div>
-            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Fontes configuradas</p><p class="font-bold text-white mt-1">Open-Meteo / fontes públicas</p></div>
-            <div class="rounded-xl border border-slate-700 bg-slate-900/60 p-4"><p class="text-xs text-slate-400">Permissões</p><p class="font-bold text-sky-300 mt-1">Administrador</p></div>
-          </div>
-          <div class="grid lg:grid-cols-2 gap-4">
-            <section class="rounded-xl border border-slate-700 p-4 space-y-3">
-              <h3 class="font-bold text-white"><i class="fa-solid fa-sliders text-sky-400 mr-2"></i>Configurações gerais</h3>
-              <label class="block text-xs text-slate-400">Nome de exibição da Central</label>
-              <input id="admin-site-title" class="w-full rounded-lg p-2.5 bg-slate-900 border border-slate-700 text-white" maxlength="100">
-              <label class="block text-xs text-slate-400">Aviso administrativo / comunicado</label>
-              <textarea id="admin-announcement" rows="3" class="w-full rounded-lg p-2.5 bg-slate-900 border border-slate-700 text-white" maxlength="1000"></textarea>
-              <button onclick="saveAdminSettings()" class="rounded-lg px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">Salvar configurações</button>
-            </section>
-            <section class="rounded-xl border border-slate-700 p-4 space-y-3">
-              <h3 class="font-bold text-white"><i class="fa-solid fa-cloud-arrow-down text-sky-400 mr-2"></i>Fontes e monitoramento</h3>
-              <p class="text-xs text-slate-400">Consulta de conectividade da fonte meteorológica principal. O painel não altera dados fornecidos por serviços externos.</p>
-              <button onclick="checkAdminWeatherSource()" class="rounded-lg px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold">Testar Open-Meteo agora</button>
-              <p id="admin-source-result" class="text-xs text-slate-300" role="status">Aguardando teste.</p>
-              <p class="text-[11px] text-amber-300">Ajustes de coordenadas, chaves privadas e credenciais de terceiros não são armazenados neste painel público.</p>
-            </section>
-          </div>
-          <section class="rounded-xl border border-slate-700 p-4 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-bold text-white"><i class="fa-solid fa-users-gear text-sky-400 mr-2"></i>Usuários administrativos</h3><span class="text-[11px] text-slate-400">Gerenciamento restrito ao proprietário do projeto Supabase</span></div>
-            <p class="text-xs text-slate-400">Para adicionar ou remover administradores, utilize o Supabase Dashboard (Authentication → Users) e a tabela <code>admin_users</code>. Não é seguro criar usuários privilegiados diretamente pelo navegador.</p>
-            <button onclick="loadAdminAudit()" class="rounded-lg px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold">Atualizar registro de atividades</button>
-            <div id="admin-audit-list" class="text-xs text-slate-400">Registro de atividades ainda não consultado.</div>
-          </section>
-          <p id="admin-dashboard-message" class="text-xs text-slate-400" role="status"></p>
-        </div>
-      </div>
     </div>
 
     <!-- MODEL VALIDATION: do not publish metrics until they are calculated from archived forecasts and observations -->
-    <div id="model-efficacy-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="efficacy-title">
+    <div id="model-efficacy-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="efficacy-title">
         <div class="max-w-4xl mx-auto w-full space-y-6 my-auto text-slate-100">
             <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-800 gap-4">
                 <div class="flex items-center gap-3">
@@ -413,7 +426,7 @@
     </div>
 
     <!-- DEDICATED TORNADO LAB MODAL PAGE -->
-    <div id="tornado-lab-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <div id="tornado-lab-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div class="max-w-7xl mx-auto w-full space-y-8 my-auto text-slate-100">
             <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
                 <div class="flex items-center gap-3">
@@ -483,17 +496,9 @@
                             <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-sliders text-blue-500"></i> Simulador Interativo de Sondagem</h3>
                             <p class="text-xs text-slate-400">Ajuste os parâmetros atmosféricos para simular diferentes cenários de instabilidade em Erechim.</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button id="lab-load-current-btn" onclick="loadCurrentErechimData()" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-sky-400/30">
-                                <i id="lab-load-current-icon" class="fa-solid fa-cloud-arrow-down"></i> Inserir dados atuais de Erechim
-                            </button>
-                            <button onclick="resetLabSliders()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-all flex items-center gap-2 border border-slate-700">
-                                <i class="fa-solid fa-rotate-right"></i> Restaurar Padrão
-                            </button>
-                        </div>
-                    </div>
-                    <div id="lab-current-data-status" role="status" aria-live="polite" class="mb-5 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-slate-400">
-                        Dados atuais ainda não carregados. Use “Inserir dados atuais de Erechim” para consultar a Open-Meteo.
+                        <button onclick="resetLabSliders()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-all flex items-center gap-2 border border-slate-700">
+                            <i class="fa-solid fa-rotate-right"></i> Restaurar Padrão
+                        </button>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -503,14 +508,14 @@
                                     <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-temperature-high text-rose-400"></i> Temp. Superfície (T)</label>
                                     <span class="font-mono text-sm font-bold text-blue-400"><span id="lab-txt-temp">28.0</span> °C</span>
                                 </div>
-                                <input id="lab-slider-temp" type="range" min="0" max="45" step="0.5" value="28.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <input id="lab-slider-temp" type="range" min="15" max="38" step="0.5" value="28.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
                                 <div class="flex justify-between items-center mb-2">
                                     <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-droplet text-cyan-400"></i> Ponto de Orvalho (Td)</label>
                                     <span class="font-mono text-sm font-bold text-blue-400"><span id="lab-txt-td">21.0</span> °C</span>
                                 </div>
-                                <input id="lab-slider-td" type="range" min="-10" max="35" step="0.5" value="21.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <input id="lab-slider-td" type="range" min="8" max="26" step="0.5" value="21.0" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
                                 <div class="flex justify-between items-center mb-2">
@@ -521,10 +526,10 @@
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
                                 <div class="flex justify-between items-center mb-2">
-                                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-wind text-teal-400"></i> Cisalhamento (superfície–500 hPa, aprox.)</label>
+                                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-wind text-teal-400"></i> Cisalhamento (0-6km)</label>
                                     <span class="font-mono text-sm font-bold text-blue-400"><span id="lab-txt-shear">24.5</span> m/s</span>
                                 </div>
-                                <input id="lab-slider-shear" type="range" min="0" max="60" step="0.5" value="24.5" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <input id="lab-slider-shear" type="range" min="5" max="45" step="0.5" value="24.5" oninput="updateLabSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb">
                             </div>
                         </div>
 
@@ -549,7 +554,7 @@
     </div>
 
     <!-- SOURCES MODAL PAGE -->
-    <div id="sources-page-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <div id="sources-page-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div class="max-w-4xl mx-auto w-full space-y-6 my-auto">
             <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-700">
                 <div class="flex items-center gap-3">
@@ -568,7 +573,7 @@
     </div>
 
     <!-- SITES UTILIZADOS MODAL PAGE -->
-    <div id="sites-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <div id="sites-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div class="max-w-4xl mx-auto w-full space-y-6 my-auto">
             <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-700">
                 <div class="flex items-center gap-3">
@@ -598,7 +603,7 @@
     </div>
 
     <!-- HISTORY MODAL PAGE -->
-    <div id="history-page-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <div id="history-page-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div class="max-w-7xl mx-auto w-full space-y-6 my-auto">
             <div class="flex items-center justify-between glass-card p-4 sm:p-6 rounded-2xl border border-slate-700">
                 <div class="flex items-center gap-3">
@@ -715,6 +720,8 @@
             </div>
         </section>
 
+        <!-- ÁREA RESTRITA: começa após os indicadores públicos em tempo real -->
+        <div id="private-content" class="hidden" aria-hidden="true">
         <!-- EVENTOS EXTREMOS - THRESHOLDS CHECK -->
         <section>
             <div class="flex items-center justify-center mb-4 text-center">
@@ -801,43 +808,6 @@
                 </div>
 
             </div>
-        </section>
-
-        <!-- WINDY RADAR + TEMPERATURA DO DIA -->
-        <section class="glass-card rounded-2xl p-5 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-center sm:text-left">
-                <div>
-                    <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center sm:justify-start gap-2">
-                        <i class="fa-solid fa-satellite-dish text-sky-400"></i> Radar Meteorológico — Windy
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-1">Erechim (RS) • Camada de radar e precipitação</p>
-                </div>
-                <a href="https://www.windy.com/-Radar-radar?radar,-27.634,-52.274,7" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:underline">Abrir no Windy ↗</a>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="lg:col-span-2 rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 min-h-[320px]">
-                    <iframe title="Radar meteorológico Windy sobre Erechim" class="w-full h-[360px] border-0" src="https://embed.windy.com/embed.html?lat=-27.634&lon=-52.274&detailLat=-27.634&detailLon=-52.274&width=650&height=360&zoom=7&level=surface&overlay=radar&product=radar&menu=&message=&marker=true&calendar=now&pressure=false&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                </div>
-                <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                    <div class="rounded-xl p-4 bg-slate-900/60 border border-slate-800 flex flex-col justify-center">
-                        <span class="text-[11px] uppercase tracking-wider text-slate-400">Temperatura agora</span>
-                        <strong id="windy-day-current-temp" class="text-3xl font-bold text-rose-400 mt-1">--°C</strong>
-                        <span id="windy-day-feels-like" class="text-xs text-slate-400 mt-1">Sensação: --°C</span>
-                    </div>
-                    <div class="rounded-xl p-4 bg-slate-900/60 border border-slate-800">
-                        <span class="text-[11px] uppercase tracking-wider text-slate-400">Hoje — temperatura</span>
-                        <div class="flex items-center justify-between gap-2 mt-2">
-                            <div><span class="text-[10px] text-sky-400 block">MÍNIMA</span><strong id="windy-day-min" class="text-xl text-sky-300">--°C</strong></div>
-                            <div class="text-right"><span class="text-[10px] text-rose-400 block">MÁXIMA</span><strong id="windy-day-max" class="text-xl text-rose-300">--°C</strong></div>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-slate-700 flex items-center justify-between gap-2">
-                            <span class="text-[11px] text-slate-400">Chuva prevista</span><strong id="windy-day-rain" class="text-sm text-teal-300">-- mm</strong>
-                        </div>
-                    </div>
-                    <p id="windy-day-date" class="col-span-2 lg:col-span-1 text-[11px] text-slate-500 text-center lg:text-left">Aguardando atualização meteorológica…</p>
-                </div>
-            </div>
-            <p class="text-[11px] text-slate-500">Radar e mapa fornecidos pelo Windy. Temperaturas e precipitação diária consultadas via Open-Meteo para as coordenadas de Erechim; valores de previsão podem mudar.</p>
         </section>
 
         <!-- RADAR / EARTH NULLSCHOOL / WIND / SATELLITE -->
@@ -950,10 +920,11 @@
                 </div>
             </div>
         </section>
+        </div><!-- /#private-content -->
     </main>
 
-    <!-- FOOTER -->
-    <footer class="border-t dark:border-slate-900 border-slate-200 dark:bg-slate-950 bg-white py-8 text-center text-xs text-slate-500">
+    <!-- FOOTER: também restrito a usuários autenticados -->
+    <footer id="private-footer" class="hidden border-t dark:border-slate-900 border-slate-200 dark:bg-slate-950 bg-white py-8 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4 space-y-6">
             
             <div class="flex justify-center mb-4">
@@ -984,10 +955,158 @@
         </div>
     </footer>
 
-    <!-- Supabase JS: biblioteca pública; a autorização real é aplicada por RLS no banco -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- ATENÇÃO: o login controla a interface. Em hospedagem estática, o HTML pode ser inspecionado; conteúdo realmente confidencial e dados privados devem ficar em Edge Functions/APIs com validação JWT e políticas RLS. -->
     <!-- SCRIPTS -->
     <script>
+        /* CONFIGURAÇÃO SUPABASE
+           Configure Project URL e anon/public key. Nunca use service_role no navegador.
+           Ative Email + Phone em Authentication > Providers; habilite cadastro público.
+           Configure provedor de SMS. Para WhatsApp, use provedor/integração que entregue OTP por WhatsApp.
+           Ative confirmação de e-mail e defina URLs de redirecionamento em Authentication > URL Configuration.
+        */
+        const SUPABASE_URL = 'COLE_AQUI_A_PROJECT_URL_DO_SUPABASE';
+        const SUPABASE_ANON_KEY = 'COLE_AQUI_A_ANON_PUBLIC_KEY_DO_SUPABASE';
+        let supabaseAuthClient = null;
+        let pendingRecoveryPhone = '';
+        window.__siteAuthenticated = false;
+
+        function authMessage(id, text) { const el=document.getElementById(id); if(el) el.textContent=text; }
+        function normalizePhone(value) { let v=String(value||'').trim().replace(/[()\s-]/g,''); if(v.startsWith('00')) v='+'+v.slice(2); if(!v.startsWith('+')) v='+55'+v.replace(/^0/,''); return v; }
+        function showAuthPanel(panel) {
+            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+            document.getElementById('phone-verify-panel')?.classList.add('hidden');
+            const map={login:'login-form',register:'register-form','recover-email':'recover-email-form','recover-phone':'recover-phone-form'};
+            document.getElementById(map[panel])?.classList.remove('hidden');
+            const titles={login:'Acesso restrito',register:'Criar cadastro','recover-email':'Recuperar senha por e-mail','recover-phone':'Recuperar senha pelo celular'};
+            document.getElementById('login-modal-title').textContent=titles[panel]||'Acesso restrito';
+        }
+        function openLoginModal() {
+            const modal=document.getElementById('login-modal'); if(modal) modal.classList.remove('hidden');
+            showAuthPanel('login');
+            if(!supabaseAuthClient) authMessage('login-message','Configuração pendente: insira a Project URL e a anon/public key do Supabase.');
+        }
+        function closeLoginModal() { document.getElementById('login-modal')?.classList.add('hidden'); }
+        function setAuthenticatedView(isAuthenticated, email) {
+            window.__siteAuthenticated=!!isAuthenticated;
+            const privateContent=document.getElementById('private-content');
+            const privateFooter=document.getElementById('private-footer');
+            if(privateContent){privateContent.classList.toggle('hidden',!isAuthenticated);privateContent.setAttribute('aria-hidden',String(!isAuthenticated));}
+            if(privateFooter) privateFooter.classList.toggle('hidden',!isAuthenticated);
+            document.querySelectorAll('[data-auth-required="true"]').forEach(el=>el.classList.toggle('hidden',!isAuthenticated));
+            document.getElementById('login-open-button')?.classList.toggle('hidden',!!isAuthenticated);
+            document.getElementById('logout-button')?.classList.toggle('hidden',!isAuthenticated);
+            const label=document.getElementById('auth-user-label');
+            if(label){label.textContent=isAuthenticated?`Conectado: ${email||'usuário autenticado'}`:'';label.classList.toggle('hidden',!isAuthenticated);}
+            if(isAuthenticated) closeLoginModal();
+            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+        }
+        async function handleSupabaseLogin(event) {
+            event.preventDefault(); if(!supabaseAuthClient){authMessage('login-message','Supabase ainda não configurado.');return;}
+            const email=document.getElementById('login-email').value.trim(), password=document.getElementById('login-password').value;
+            authMessage('login-message','Validando credenciais...');
+            const {data,error}=await supabaseAuthClient.auth.signInWithPassword({email,password});
+            if(error){authMessage('login-message','Não foi possível entrar. Confira e-mail e senha e confirme seu cadastro.');return;}
+            setAuthenticatedView(true,data.user?.email||email);
+            const user=data.user;
+            if(user && !user.phone_confirmed_at && user.user_metadata?.phone){
+                openLoginModal(); document.getElementById('phone-verify-panel')?.classList.remove('hidden');
+                document.getElementById('verify-account-phone').value=user.user_metadata.phone;
+                authMessage('phone-verify-message','Confirme seu celular para habilitar a recuperação por telefone.');
+            }
+            document.getElementById('login-password').value='';
+        }
+        async function handleSupabaseRegister(event) {
+            event.preventDefault(); if(!supabaseAuthClient){authMessage('register-message','Supabase ainda não configurado.');return;}
+            const email=document.getElementById('register-email').value.trim();
+            const phone=normalizePhone(document.getElementById('register-phone').value);
+            const password=document.getElementById('register-password').value;
+            const confirm=document.getElementById('register-password-confirm').value;
+            if(password.length<8 || password!==confirm){authMessage('register-message','As senhas devem ser iguais e ter pelo menos 8 caracteres.');return;}
+            authMessage('register-message','Criando cadastro...');
+            const {data,error}=await supabaseAuthClient.auth.signUp({email,password,options:{data:{phone}}});
+            if(error){authMessage('register-message','Não foi possível criar a conta. Verifique os dados ou se o e-mail já está cadastrado.');return;}
+            if(data.session){
+                const {error:phoneError}=await supabaseAuthClient.auth.updateUser({phone});
+                if(phoneError){authMessage('register-message','Conta criada, mas não foi possível enviar a verificação do celular. Entre e tente verificar o número novamente.');return;}
+                authMessage('register-message','Cadastro criado. Enviamos um código ao celular; confirme o número após entrar.');
+            } else {
+                authMessage('register-message','Cadastro criado. Confira sua caixa de entrada e confirme o e-mail. Depois entre para validar seu celular.');
+            }
+            document.getElementById('register-password').value=''; document.getElementById('register-password-confirm').value='';
+        }
+        async function sendAccountPhoneVerification(){
+            if(!supabaseAuthClient||!window.__siteAuthenticated)return;
+            const phone=normalizePhone(document.getElementById('verify-account-phone').value);
+            authMessage('phone-verify-message','Enviando código...');
+            const {error}=await supabaseAuthClient.auth.updateUser({phone});
+            authMessage('phone-verify-message',error?'Não foi possível enviar o código. Confira o número e a configuração do provedor.':'Código enviado. Confira as mensagens do celular.');
+        }
+        async function confirmAccountPhoneVerification(){
+            if(!supabaseAuthClient)return;
+            const phone=normalizePhone(document.getElementById('verify-account-phone').value);
+            const token=document.getElementById('verify-account-phone-token').value.trim();
+            const {error}=await supabaseAuthClient.auth.verifyOtp({phone,token,type:'phone_change'});
+            authMessage('phone-verify-message',error?'Código inválido ou expirado. Solicite outro código.':'Celular verificado com sucesso. Ele poderá ser usado para recuperar a senha.');
+            if(!error) document.getElementById('phone-verify-panel')?.classList.add('hidden');
+        }
+        async function handleEmailRecovery(event){
+            event.preventDefault(); if(!supabaseAuthClient){authMessage('recover-email-message','Supabase ainda não configurado.');return;}
+            const email=document.getElementById('recover-email').value.trim();
+            const redirectTo=window.location.origin+window.location.pathname;
+            const {error}=await supabaseAuthClient.auth.resetPasswordForEmail(email,{redirectTo});
+            authMessage('recover-email-message',error?'Não foi possível enviar o link. Confira o e-mail e as configurações de recuperação.':'Se o endereço estiver cadastrado, você receberá um link para redefinir a senha.');
+        }
+        async function handlePhoneRecoveryRequest(event){
+            event.preventDefault(); if(!supabaseAuthClient){authMessage('recover-phone-message','Supabase ainda não configurado.');return;}
+            const phone=normalizePhone(document.getElementById('recover-phone').value); pendingRecoveryPhone=phone;
+            authMessage('recover-phone-message','Solicitando código...');
+            const channel=document.getElementById('recover-phone-channel')?.value||'sms';
+            const {error}=await supabaseAuthClient.auth.signInWithOtp({phone,options:{shouldCreateUser:false,channel}});
+            if(error){authMessage('recover-phone-message','Não foi possível enviar o código. Confirme se o celular foi verificado e se a autenticação por telefone está configurada.');return;}
+            document.getElementById('recover-phone-form').classList.add('hidden');
+            document.getElementById('recover-phone-verify-form').classList.remove('hidden');
+            authMessage('recover-phone-verify-message','Código enviado. Digite o código e sua nova senha.');
+        }
+        async function handlePhoneRecoveryVerify(event){
+            event.preventDefault(); if(!supabaseAuthClient)return;
+            const token=document.getElementById('recover-phone-token').value.trim();
+            const password=document.getElementById('recover-new-password').value;
+            if(password.length<8){authMessage('recover-phone-verify-message','A nova senha deve ter pelo menos 8 caracteres.');return;}
+            authMessage('recover-phone-verify-message','Validando código...');
+            const {error:otpError}=await supabaseAuthClient.auth.verifyOtp({phone:pendingRecoveryPhone,token,type:'sms'});
+            if(otpError){authMessage('recover-phone-verify-message','Código inválido ou expirado. Solicite outro.');return;}
+            const {error:passwordError}=await supabaseAuthClient.auth.updateUser({password});
+            if(passwordError){authMessage('recover-phone-verify-message','Código validado, mas não foi possível alterar a senha. Tente novamente.');return;}
+            authMessage('recover-phone-verify-message','Senha alterada com sucesso. Você já pode entrar com a nova senha.');
+            document.getElementById('recover-new-password').value='';
+            setAuthenticatedView(false,''); await supabaseAuthClient.auth.signOut();
+            showAuthPanel('login');
+        }
+        async function handleSupabaseLogout(){
+            if(!supabaseAuthClient)return; const {error}=await supabaseAuthClient.auth.signOut();
+            if(error){alert('Não foi possível encerrar a sessão. Tente novamente.');return;} setAuthenticatedView(false,'');
+        }
+        (function initializeSupabaseAuth(){
+            const configured=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('COLE_AQUI')&&SUPABASE_ANON_KEY.length>30&&!SUPABASE_ANON_KEY.includes('COLE_AQUI');
+            if(!configured||!window.supabase?.createClient){setAuthenticatedView(false,'');return;}
+            supabaseAuthClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+            supabaseAuthClient.auth.onAuthStateChange((event,session)=>{
+                setAuthenticatedView(!!session?.user,session?.user?.email||'');
+                if(event==='PASSWORD_RECOVERY'){
+                    openLoginModal(); showAuthPanel('recover-email');
+                    const form=document.getElementById('recover-email-form');
+                    form.innerHTML='<label class="block text-left text-xs font-semibold text-slate-300" for="recovery-new-password-email">Nova senha</label><input id="recovery-new-password-email" type="password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Nova senha"><button type="button" onclick="completeEmailPasswordRecovery()" class="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold">Salvar nova senha</button><p id="email-password-update-message" class="text-xs text-amber-300 text-center"></p>';
+                }
+            });
+            supabaseAuthClient.auth.getSession().then(({data})=>setAuthenticatedView(!!data.session?.user,data.session?.user?.email||''));
+        })();
+        async function completeEmailPasswordRecovery(){
+            const password=document.getElementById('recovery-new-password-email')?.value||'';
+            if(password.length<8){authMessage('email-password-update-message','A senha deve ter pelo menos 8 caracteres.');return;}
+            const {error}=await supabaseAuthClient.auth.updateUser({password});
+            authMessage('email-password-update-message',error?'Não foi possível alterar a senha. Tente novamente.':'Senha alterada com sucesso.');
+        }
+
         const LAT = -27.634;
         const LON = -52.274;
         let chartInstance = null;
@@ -1017,183 +1136,26 @@
             }
         }
 
-        // Configure apenas a URL e a chave PUBLICA anon/publishable do Supabase.
-        // A chave service_role jamais deve ser publicada neste HTML.
-        const SUPABASE_URL = 'COLE_AQUI_A_URL_DO_PROJETO_SUPABASE';
-        const SUPABASE_ANON_KEY = 'COLE_AQUI_A_CHAVE_PUBLICA_ANON';
-        let adminSupabase = null;
-        let adminSession = null;
-        let adminProfile = null;
-
-        function initAdminSupabase() {
-            if (adminSupabase) return adminSupabase;
-            const configured = window.supabase && SUPABASE_URL.startsWith('https://') &&
-                !SUPABASE_URL.includes('COLE_AQUI') && SUPABASE_ANON_KEY.length > 30 &&
-                !SUPABASE_ANON_KEY.includes('COLE_AQUI');
-            if (!configured) return null;
-            adminSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-            });
-            return adminSupabase;
+        // As páginas, ferramentas e modais restritos exigem sessão Supabase ativa.
+        function requireAuthenticatedAccess() {
+            if (!window.__siteAuthenticated) { openLoginModal(); return false; }
+            return true;
         }
-
-        function toggleAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            if (!modal) return;
-            const opening = modal.classList.contains('hidden');
-            modal.classList.toggle('hidden');
-            if (opening) initializeAdminPanel();
-        }
-
-        async function initializeAdminPanel() {
-            const client = initAdminSupabase();
-            const warning = document.getElementById('admin-config-warning');
-            if (!client) {
-                warning.classList.remove('hidden');
-                return;
-            }
-            warning.classList.add('hidden');
-            const { data: { session }, error } = await client.auth.getSession();
-            if (error) { setAdminAuthMessage('Não foi possível verificar a sessão: ' + error.message); return; }
-            adminSession = session;
-            if (session) await verifyAdminAccess();
-            else showAdminLogin();
-        }
-
-        function setAdminAuthMessage(message) {
-            const el = document.getElementById('admin-auth-message');
-            if (el) el.textContent = message || '';
-        }
-
-        function showAdminLogin() {
-            document.getElementById('admin-auth-view').classList.remove('hidden');
-            document.getElementById('admin-dashboard').classList.add('hidden');
-            document.getElementById('admin-user-email').textContent = '';
-        }
-
-        async function verifyAdminAccess() {
-            const client = initAdminSupabase();
-            if (!client || !adminSession) { showAdminLogin(); return; }
-            const { data, error } = await client.from('admin_users')
-                .select('user_id, role, active').eq('user_id', adminSession.user.id).eq('active', true).maybeSingle();
-            if (error || !data || !['owner', 'admin'].includes(data.role)) {
-                await client.auth.signOut();
-                adminSession = null;
-                showAdminLogin();
-                setAdminAuthMessage(error ? 'Falha ao verificar permissões. Confira a configuração RLS.' : 'Esta conta não possui permissão administrativa.');
-                return;
-            }
-            adminProfile = data;
-            document.getElementById('admin-auth-view').classList.add('hidden');
-            document.getElementById('admin-dashboard').classList.remove('hidden');
-            document.getElementById('admin-user-email').textContent = adminSession.user.email || 'Administrador autenticado';
-            document.getElementById('admin-dashboard-message').textContent = 'Acesso autorizado pelo banco de dados.';
-            await loadAdminSettings();
-            await checkAdminWeatherSource();
-        }
-
-        async function handleAdminLogin(event) {
-            if (event) event.preventDefault();
-            const client = initAdminSupabase();
-            if (!client) { setAdminAuthMessage('Configure primeiro o projeto Supabase.'); return; }
-            const button = document.getElementById('admin-login-button');
-            button.disabled = true; button.textContent = 'Autenticando…';
-            const email = document.getElementById('admin-email').value.trim();
-            const password = document.getElementById('admin-password').value;
-            const { data, error } = await client.auth.signInWithPassword({ email, password });
-            button.disabled = false; button.textContent = 'Entrar com segurança';
-            document.getElementById('admin-password').value = '';
-            if (error) { setAdminAuthMessage('Não foi possível entrar: ' + error.message); return; }
-            adminSession = data.session;
-            setAdminAuthMessage('');
-            await verifyAdminAccess();
-        }
-
-        async function handleAdminLogout() {
-            const client = initAdminSupabase();
-            if (client) await client.auth.signOut();
-            adminSession = null; adminProfile = null;
-            showAdminLogin();
-            setAdminAuthMessage('Sessão encerrada.');
-        }
-
-        async function loadAdminSettings() {
-            const client = initAdminSupabase();
-            const { data, error } = await client.from('admin_settings').select('setting_key, setting_value');
-            if (error) { document.getElementById('admin-dashboard-message').textContent = 'Não foi possível carregar configurações: ' + error.message; return; }
-            const settings = Object.fromEntries((data || []).map(row => [row.setting_key, row.setting_value]));
-            document.getElementById('admin-site-title').value = settings.site_title || 'Central de Monitoramento de Erechim';
-            document.getElementById('admin-announcement').value = settings.announcement || '';
-        }
-
-        async function saveAdminSettings() {
-            const client = initAdminSupabase();
-            if (!client || !adminProfile) return;
-            const values = [
-                { setting_key: 'site_title', setting_value: document.getElementById('admin-site-title').value.trim() },
-                { setting_key: 'announcement', setting_value: document.getElementById('admin-announcement').value.trim() }
-            ];
-            const { error } = await client.from('admin_settings').upsert(values, { onConflict: 'setting_key' });
-            document.getElementById('admin-dashboard-message').textContent = error ?
-                'Erro ao salvar: ' + error.message : 'Configurações salvas com sucesso.';
-            if (!error) {
-                await client.from('admin_audit').insert({ action: 'settings_updated', details: { keys: values.map(v => v.setting_key) } });
-            }
-        }
-
-        async function checkAdminWeatherSource() {
-            const result = document.getElementById('admin-source-result');
-            const status = document.getElementById('admin-weather-status');
-            result.textContent = 'Consultando Open-Meteo…'; status.textContent = 'Verificando…';
-            try {
-                const url = 'https://api.open-meteo.com/v1/forecast?latitude=-27.634&longitude=-52.274&current=temperature_2m,relative_humidity_2m&timezone=America%2FSao_Paulo';
-                const response = await fetch(url, { cache: 'no-store' });
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const payload = await response.json();
-                if (!payload.current || typeof payload.current.temperature_2m !== 'number') throw new Error('Resposta sem dados atuais válidos');
-                const stamp = new Date(payload.current.time).toLocaleString('pt-BR');
-                result.textContent = 'Conexão OK • ' + payload.current.temperature_2m.toFixed(1) + ' °C • ' + stamp;
-                status.textContent = 'OK • ' + stamp;
-            } catch (error) {
-                result.textContent = 'Falha na consulta: ' + error.message;
-                status.textContent = 'Falha na fonte';
-            }
-        }
-
-        async function loadAdminAudit() {
-            const client = initAdminSupabase();
-            const target = document.getElementById('admin-audit-list');
-            target.textContent = 'Carregando…';
-            const { data, error } = await client.from('admin_audit').select('action, details, created_at').order('created_at', { ascending: false }).limit(20);
-            if (error) { target.textContent = 'Não foi possível consultar o registro: ' + error.message; return; }
-            if (!data || !data.length) { target.textContent = 'Nenhuma atividade registrada.'; return; }
-            target.innerHTML = data.map(item => `<div class="border-b border-slate-800 py-2"><strong class="text-slate-200">${escapeAdminText(item.action)}</strong><span class="text-slate-500"> • ${new Date(item.created_at).toLocaleString('pt-BR')}</span></div>`).join('');
-        }
-
-        function escapeAdminText(value) {
-            return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-        }
-        function toggleHistoryPage(show) { const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
-        function toggleSourcesPage(show) { const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
-        function toggleSitesModal(show) { const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
-        function toggleTornadoLabModal(show) { const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
-        
+        function toggleHistoryPage(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
+        function toggleSourcesPage(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
+        function toggleSitesModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
+        function toggleTornadoLabModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleModelEfficacyModal(show) {
+            if (show && !requireAuthenticatedAccess()) return;
             const m = document.getElementById('model-efficacy-modal');
-            if (show) {
-                m.classList.remove('hidden');
-                setTimeout(renderEfficacyChart, 200);
-            } else {
-                m.classList.add('hidden');
-            }
+            if (show) { m.classList.remove('hidden'); setTimeout(renderEfficacyChart, 200); }
+            else { m.classList.add('hidden'); }
         }
 
         function switchSatChannel(channel) {
             currentSatChannel = channel;
             reloadSatelliteImage();
         }
-
-        // A autenticação é fornecida pelo Supabase Auth; a autorização é reforçada por RLS.
 
         function updateClock() {
             const now = new Date();
@@ -1297,134 +1259,6 @@
             }
         }
 
-        async function loadCurrentErechimData() {
-            const button = document.getElementById('lab-load-current-btn');
-            const icon = document.getElementById('lab-load-current-icon');
-            const status = document.getElementById('lab-current-data-status');
-            if (button) button.disabled = true;
-            if (icon) icon.classList.add('fa-spin');
-            if (status) {
-                status.className = 'mb-5 rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-sky-300';
-                status.textContent = 'Consultando dados meteorológicos atuais de Erechim na Open-Meteo...';
-            }
-
-            try {
-                const params = new URLSearchParams({
-                    latitude: String(LAT),
-                    longitude: String(LON),
-                    current: 'temperature_2m,dew_point_2m,wind_speed_10m,wind_direction_10m',
-                    hourly: 'temperature_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,wind_speed_500hPa,wind_direction_500hPa,cape',
-                    past_hours: '6',
-                    forecast_hours: '1',
-                    timezone: 'America/Sao_Paulo',
-                    wind_speed_unit: 'ms'
-                });
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
-                let response;
-                try {
-                    response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
-                        signal: controller.signal,
-                        headers: { 'Accept': 'application/json' }
-                    });
-                } finally {
-                    clearTimeout(timeoutId);
-                }
-                if (!response.ok) throw new Error(`Open-Meteo respondeu com HTTP ${response.status}`);
-                const data = await response.json();
-                if (!data || !data.current || !data.hourly || !Array.isArray(data.hourly.time)) {
-                    throw new Error('A resposta da API está incompleta.');
-                }
-
-                const currentTime = Date.parse(data.current.time);
-                if (!Number.isFinite(currentTime)) throw new Error('Horário dos dados atuais inválido.');
-
-                let hourIndex = -1;
-                let bestTime = -Infinity;
-                data.hourly.time.forEach((time, index) => {
-                    const parsed = Date.parse(time);
-                    if (Number.isFinite(parsed) && parsed <= currentTime && parsed > bestTime) {
-                        bestTime = parsed;
-                        hourIndex = index;
-                    }
-                });
-                if (hourIndex < 0) throw new Error('Não foi possível localizar a hora correspondente na série atmosférica.');
-
-                const pick = (currentKey, hourlyKey) => {
-                    const currentValue = Number(data.current[currentKey]);
-                    if (Number.isFinite(currentValue)) return currentValue;
-                    const hourlyValue = Number(data.hourly[hourlyKey]?.[hourIndex]);
-                    return Number.isFinite(hourlyValue) ? hourlyValue : null;
-                };
-
-                const temperature = pick('temperature_2m', 'temperature_2m');
-                const dewPoint = pick('dew_point_2m', 'dew_point_2m');
-                const wind10Speed = Number(data.hourly.wind_speed_10m?.[hourIndex]);
-                const wind10Direction = Number(data.hourly.wind_direction_10m?.[hourIndex]);
-                const wind500Speed = Number(data.hourly.wind_speed_500hPa?.[hourIndex]);
-                const wind500Direction = Number(data.hourly.wind_direction_500hPa?.[hourIndex]);
-
-                if (![temperature, dewPoint].every(Number.isFinite)) {
-                    throw new Error('A API não forneceu temperatura e ponto de orvalho válidos.');
-                }
-
-                // O cisalhamento é estimado pela diferença vetorial entre o vento próximo à superfície
-                // e o vento em 500 hPa. É uma aproximação de camada profunda, não uma sondagem observada.
-                let shearEstimate = null;
-                if ([wind10Speed, wind10Direction, wind500Speed, wind500Direction].every(Number.isFinite)) {
-                    const toUV = (speed, direction) => {
-                        const radians = direction * Math.PI / 180;
-                        return {
-                            u: -speed * Math.sin(radians),
-                            v: -speed * Math.cos(radians)
-                        };
-                    };
-                    const low = toUV(wind10Speed, wind10Direction);
-                    const upper = toUV(wind500Speed, wind500Direction);
-                    shearEstimate = Math.hypot(upper.u - low.u, upper.v - low.v);
-                }
-
-                const tempSlider = document.getElementById('lab-slider-temp');
-                const tdSlider = document.getElementById('lab-slider-td');
-                const shearSlider = document.getElementById('lab-slider-shear');
-                const clampToSlider = (value, slider) => Math.min(Number(slider.max), Math.max(Number(slider.min), value));
-
-                tempSlider.value = clampToSlider(temperature, tempSlider);
-                tdSlider.value = clampToSlider(dewPoint, tdSlider);
-                if (shearEstimate !== null && shearSlider) {
-                    shearSlider.value = clampToSlider(shearEstimate, shearSlider);
-                }
-
-                // SRH não é estimado aqui: depende do hodógrafo e do movimento da tempestade.
-                // O controle permanece com o valor escolhido pelo usuário.
-                updateLabSimulation();
-
-                const cape = Number(data.hourly.cape?.[hourIndex]);
-                const capeText = Number.isFinite(cape) ? ` CAPE do modelo Open-Meteo: ${cape.toFixed(0)} J/kg (referência separada; o CAPE exibido no simulador continua sendo simplificado).` : '';
-                const shearText = shearEstimate !== null
-                    ? ` Cisalhamento vetorial superfície–500 hPa estimado: ${shearEstimate.toFixed(1)} m/s.`
-                    : ' O cisalhamento não foi atualizado porque o modelo não forneceu vento válido em 500 hPa.';
-                const timeLabel = new Date(data.current.time).toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo'
-                });
-
-                if (status) {
-                    status.className = 'mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-xs text-emerald-300 leading-relaxed';
-                    status.textContent = `Dados do modelo carregados para Erechim em ${timeLabel}: temperatura ${temperature.toFixed(1)} °C e ponto de orvalho ${dewPoint.toFixed(1)} °C.${shearText} SRH (0–1 km) permaneceu inalterado e deve ser ajustado manualmente com base em uma sondagem/hodógrafo confiável.${capeText} Fonte: Open-Meteo.`;
-                }
-            } catch (error) {
-                console.error('Falha ao inserir dados atuais de Erechim no Lab Tornado:', error);
-                if (status) {
-                    status.className = 'mb-5 rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-3 text-xs text-rose-300';
-                    status.textContent = `Não foi possível carregar os dados atuais: ${error.message}. Os controles não foram atualizados; tente novamente em instantes.`;
-                }
-            } finally {
-                if (button) button.disabled = false;
-                if (icon) icon.classList.remove('fa-spin');
-            }
-        }
-
         function resetLabSliders() {
             document.getElementById('lab-slider-temp').value = 28.0;
             document.getElementById('lab-slider-td').value = 21.0;
@@ -1463,41 +1297,15 @@
                 const requiredCurrent = ['temperature_2m','relative_humidity_2m','apparent_temperature','surface_pressure','wind_speed_10m'];
                 if (requiredCurrent.some(key => !Number.isFinite(Number(current[key])))) throw new Error('A API não retornou todas as observações necessárias.');
 
-                const temp = Number(current.temperature_2m);
-                const humidity = Number(current.relative_humidity_2m);
-
-                // A API pode entregar current.time em intervalos de 15 minutos,
-                // enquanto hourly.time contém somente marcações de hora cheia.
-                // Por isso, não usamos indexOf (que exige igualdade exata).
-                const currentTimeMs = Date.parse(current.time);
-                if (!Number.isFinite(currentTimeMs)) {
-                    throw new Error('A API retornou um horário atual inválido.');
-                }
-
-                const hourlyTimesMs = data.hourly.time.map(value => Date.parse(value));
-                let currentHourIndex = -1;
-                let closestPreviousTime = -Infinity;
-                for (let i = 0; i < hourlyTimesMs.length; i++) {
-                    const hourTimeMs = hourlyTimesMs[i];
-                    if (Number.isFinite(hourTimeMs) && hourTimeMs <= currentTimeMs && hourTimeMs > closestPreviousTime) {
-                        closestPreviousTime = hourTimeMs;
-                        currentHourIndex = i;
-                    }
-                }
-                if (currentHourIndex < 0) {
-                    throw new Error('A série horária não contém um horário igual ou anterior ao horário atual.');
-                }
-
-                if (!Array.isArray(data.hourly.precipitation)) {
-                    throw new Error('A API não retornou a série horária de precipitação.');
-                }
+                const temp = current.temperature_2m;
+                const humidity = current.relative_humidity_2m;
+                const currentHourIndex = data.hourly.time.indexOf(current.time);
+                if (currentHourIndex < 0) throw new Error('Não foi possível sincronizar o horário atual com a série horária.');
                 const rainStartIndex = Math.max(0, currentHourIndex - 12);
-                const rain12h = data.hourly.precipitation
-                    .slice(rainStartIndex, currentHourIndex)
-                    .reduce((total, value) => total + (Number(value) || 0), 0);
-                const windSpeed = Number(current.wind_speed_10m);
+                const rain12h = data.hourly.precipitation.slice(rainStartIndex, currentHourIndex).reduce((a, b) => a + (Number(b) || 0), 0);
+                const windSpeed = current.wind_speed_10m;
                 const windGust = Number.isFinite(Number(current.wind_gusts_10m)) ? Number(current.wind_gusts_10m) : windSpeed;
-                const windDegree = Number.isFinite(Number(current.wind_direction_10m)) ? Number(current.wind_direction_10m) : 0;
+                const windDegree = current.wind_direction_10m || 0;
 
                 const dataTimeObj = new Date(current.time);
                 const headerDataTime = document.getElementById('header-data-time');
@@ -1508,21 +1316,6 @@
                 // Atualizar Métricas Principais
                 const metricTempEl = document.getElementById('metric-temp');
                 if (metricTempEl) metricTempEl.innerText = `${temp.toFixed(1)}°C`;
-
-                // Temperatura e precipitação previstas para o dia local de Erechim
-                const todayKey = String(current.time || '').slice(0, 10);
-                const todayIndex = Array.isArray(data.daily.time) ? data.daily.time.indexOf(todayKey) : -1;
-                const dayMin = todayIndex >= 0 ? Number(data.daily.temperature_2m_min?.[todayIndex]) : NaN;
-                const dayMax = todayIndex >= 0 ? Number(data.daily.temperature_2m_max?.[todayIndex]) : NaN;
-                const dayRain = todayIndex >= 0 ? Number(data.daily.precipitation_sum?.[todayIndex]) : NaN;
-                const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-                setText('windy-day-current-temp', `${temp.toFixed(1)}°C`);
-                setText('windy-day-feels-like', `Sensação: ${Number(current.apparent_temperature).toFixed(1)}°C`);
-                setText('windy-day-min', Number.isFinite(dayMin) ? `${dayMin.toFixed(1)}°C` : '--°C');
-                setText('windy-day-max', Number.isFinite(dayMax) ? `${dayMax.toFixed(1)}°C` : '--°C');
-                setText('windy-day-rain', Number.isFinite(dayRain) ? `${dayRain.toFixed(1)} mm` : '-- mm');
-                const todayDate = todayKey ? new Date(`${todayKey}T12:00:00`) : new Date();
-                setText('windy-day-date', `Previsão para ${todayDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} • Atualizado às ${new Date(current.time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
                 
                 const metricTempSubEl = document.getElementById('metric-temp-sub');
                 if (metricTempSubEl) metricTempSubEl.innerText = `Sensação: ${current.apparent_temperature.toFixed(1)}°C`;
@@ -1685,12 +1478,7 @@
 
                 // PREVISÃO PROGRAMÁTICA DAS PRÓXIMAS 6 HORAS (CÁLCULO E ALERTA)
                 let startIndex = currentHourIndex + 1;
-                const availableForecastHours = data.hourly.time.length - startIndex;
-                if (availableForecastHours < 6) throw new Error('A API não forneceu seis horas completas de previsão.');
-                const requiredHourlySeries = ['precipitation', 'wind_speed_10m', 'temperature_2m'];
-                if (requiredHourlySeries.some(key => !Array.isArray(data.hourly[key]) || data.hourly[key].length <= startIndex + 5)) {
-                    throw new Error('A API retornou séries horárias incompletas para a projeção de seis horas.');
-                }
+                if (startIndex >= data.hourly.time.length) throw new Error('A API não forneceu as próximas horas de previsão.');
 
                 let sumRain6h = 0;
                 let maxWind6h = 0;
@@ -1699,15 +1487,11 @@
 
                 // Loop pelas próximas 6 horas da array de dados
                 for (let i = startIndex; i < startIndex + 6 && i < data.hourly.time.length; i++) {
-                    sumRain6h += Number(data.hourly.precipitation[i]) || 0;
-                    const hourlyWind = Number(data.hourly.wind_speed_10m[i]);
-                    const hourlyTemp = Number(data.hourly.temperature_2m[i]);
-                    if (Number.isFinite(hourlyWind) && hourlyWind > maxWind6h) maxWind6h = hourlyWind;
-                    if (Number.isFinite(hourlyTemp) && hourlyTemp > maxTemp6h) maxTemp6h = hourlyTemp;
-                    if (Number.isFinite(hourlyTemp) && hourlyTemp < minTemp6h) minTemp6h = hourlyTemp;
+                    sumRain6h += data.hourly.precipitation[i] || 0;
+                    if (data.hourly.wind_speed_10m[i] > maxWind6h) maxWind6h = data.hourly.wind_speed_10m[i];
+                    if (data.hourly.temperature_2m[i] > maxTemp6h) maxTemp6h = data.hourly.temperature_2m[i];
+                    if (data.hourly.temperature_2m[i] < minTemp6h) minTemp6h = data.hourly.temperature_2m[i];
                 }
-
-                if (maxTemp6h === -99 || minTemp6h === 99) throw new Error('A API retornou temperaturas inválidas para as próximas seis horas.');
 
                 const content6hEl = document.getElementById('content-6h-alert');
                 const label6hEl = document.getElementById('label-6h-span');
