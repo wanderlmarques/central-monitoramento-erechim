@@ -271,20 +271,10 @@
 
 
 
-                <!-- Admin & Controls -->
-                <div class="flex w-full items-center justify-center gap-3 border-t pt-4 dark:border-slate-800 border-slate-200 flex-wrap">
+                <!-- Abas em uma linha; login abaixo -->
+                <div class="flex w-full flex-col items-center justify-center gap-3 border-t pt-4 dark:border-slate-800 border-slate-200">
+                    <div id="header-tools-row" class="flex w-full items-center justify-center gap-3 flex-nowrap whitespace-nowrap overflow-x-auto pb-1">
                     
-                    <!-- Login público / logout autenticado -->
-                    <div id="admin-status-area" class="flex items-center justify-center gap-2">
-                        <button id="login-open-button" type="button" onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition bg-sky-700 border-sky-600 hover:bg-sky-600 text-white">
-                            <i class="fa-solid fa-right-to-bracket"></i><span>Entrar / Acesso restrito</span>
-                        </button>
-                        <button id="logout-button" type="button" onclick="handleSupabaseLogout()" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 text-slate-700">
-                            <i class="fa-solid fa-right-from-bracket"></i><span>Sair</span>
-                        </button>
-                        <span id="auth-user-label" class="hidden text-xs text-emerald-400 font-semibold"></span>
-                    </div>
-
                     <!-- Tornado Lab Modal Button -->
                     <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleTornadoLabModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-tornado text-blue-400"></i>
@@ -319,6 +309,17 @@
                     <button onclick="toggleTheme()" class="p-2 rounded-xl dark:bg-slate-800 dark:text-amber-400 bg-slate-100 text-slate-700 hover:opacity-80 transition" title="Alternar Tema">
                         <i id="theme-icon" class="fa-solid fa-moon"></i>
                     </button>
+                    </div>
+                    <!-- Área de login abaixo das abas -->
+                    <div id="admin-status-area" class="flex w-full flex-wrap items-center justify-center gap-2 pt-1">
+                        <button id="login-open-button" type="button" onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition bg-sky-700 border-sky-600 hover:bg-sky-600 text-white">
+                            <i class="fa-solid fa-right-to-bracket"></i><span>Entrar / Acesso restrito</span>
+                        </button>
+                        <button id="logout-button" type="button" onclick="handleSupabaseLogout()" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 text-slate-700">
+                            <i class="fa-solid fa-right-from-bracket"></i><span>Sair</span>
+                        </button>
+                        <span id="auth-user-label" class="hidden text-xs text-emerald-400 font-semibold"></span>
+                    </div>
                 </div>
 
             </div>
