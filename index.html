@@ -333,17 +333,17 @@
             <div class="flex flex-col items-center gap-2 mb-5">
                 <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-lock text-2xl"></i></span>
                 <h2 id="login-modal-title" class="text-xl font-bold text-white">Acesso restrito</h2>
-                <p class="text-xs text-slate-400">Acesso demonstrativo temporário para apresentação do site.</p>
+                <p class="text-xs text-slate-400">Entre com sua conta administrativa cadastrada no Supabase.</p>
             </div>
             <div class="flex justify-center mb-4">
-                <span class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Login de demonstração</span>
+                <span class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Login administrativo</span>
             </div>
-            <form id="login-form" class="space-y-3" onsubmit="handleDemoLogin(event)">
+            <form id="login-form" class="space-y-3" onsubmit="handleSupabaseLogin(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="login-email">E-mail</label>
                 <input id="login-email" type="email" autocomplete="username" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="wander.l.marques@gmail.com">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="login-password">Senha</label>
                 <input id="login-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Sua senha">
-                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Informe o e-mail e a senha temporária de demonstração.</p>
+                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Informe o e-mail e a senha cadastrados no Supabase.</p>
                 <button id="login-submit" type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Entrar</button>
             </form>
             <form id="register-form" class="hidden space-y-3" onsubmit="handleSupabaseRegister(event)">
@@ -953,14 +953,23 @@
         </div>
     </footer>
 
-    <!-- LOGIN TEMPORÁRIO DE DEMONSTRAÇÃO
-         IMPORTANTE: autenticação somente visual, sem segurança real.
-         Remover/substituir por Supabase antes de usar com dados privados. -->
+    <!-- AUTENTICAÇÃO ADMINISTRATIVA PELO SUPABASE
+         Use somente a Project URL e a chave pública (Publishable/anon).
+         NUNCA coloque Secret key ou service_role neste arquivo. -->
     <script>
-        const ADMIN_EMAIL = 'wander.l.marques@gmail.com';
-        // Credencial temporária para a apresentação. Não reutilize esta senha em outros serviços.
-        const DEMO_PASSWORD = 'ErechimDemo2026!';
-        const DEMO_SESSION_KEY = 'centralErechimDemoAuth';
+        // PREENCHA estes dois campos com os dados do seu projeto Supabase.
+        const SUPABASE_URL = 'COLE_AQUI_A_URL_DO_PROJETO_SUPABASE';
+        const SUPABASE_PUBLISHABLE_KEY = 'COLE_AQUI_A_CHAVE_PUBLICA_SUPABASE';
+
+        const supabaseClient = (() => {
+            const configured = SUPABASE_URL.startsWith('https://')
+                && !SUPABASE_URL.includes('COLE_AQUI')
+                && SUPABASE_PUBLISHABLE_KEY
+                && !SUPABASE_PUBLISHABLE_KEY.includes('COLE_AQUI');
+            if (!configured || !window.supabase?.createClient) return null;
+            return window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        })();
+
         window.__siteAuthenticated = false;
         window.__siteIsAdmin = false;
 
@@ -968,73 +977,159 @@
             const el = document.getElementById(id);
             if (el) el.textContent = message;
         }
+
         function showAuthPanel(panel) {
             ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
-            document.getElementById('login-form')?.classList.remove('hidden');
+            document.getElementById(panel === 'recover' ? 'recover-email-form' : 'login-form')?.classList.remove('hidden');
             const title = document.getElementById('login-modal-title');
-            if (title) title.textContent = 'Acesso demonstrativo';
+            if (title) title.textContent = panel === 'recover' ? 'Recuperar senha' : 'Acesso administrativo';
         }
+
         function openLoginModal() {
             document.getElementById('login-modal')?.classList.remove('hidden');
             showAuthPanel('login');
-            authMessage('login-message', 'Login temporário habilitado para a apresentação.');
+            authMessage('login-message', supabaseClient
+                ? 'Entre com o e-mail e a senha da conta administrativa cadastrada no Supabase.'
+                : 'A integração ainda precisa receber a Project URL e a chave pública do Supabase.');
         }
+
         function closeLoginModal() {
             document.getElementById('login-modal')?.classList.add('hidden');
         }
-        function setAuthenticatedView(isAuthenticated, email) {
-            window.__siteAuthenticated = !!isAuthenticated;
-            window.__siteIsAdmin = !!isAuthenticated && String(email || '').trim().toLowerCase() === ADMIN_EMAIL;
+
+        function setAuthenticatedView(isAuthenticated, email, role = '') {
+            const allowed = !!isAuthenticated && ['owner', 'admin'].includes(role);
+            window.__siteAuthenticated = allowed;
+            window.__siteIsAdmin = allowed;
+
             const privateContent = document.getElementById('private-content');
             const privateFooter = document.getElementById('private-footer');
             if (privateContent) {
-                privateContent.classList.toggle('hidden', !isAuthenticated);
-                privateContent.setAttribute('aria-hidden', String(!isAuthenticated));
+                privateContent.classList.toggle('hidden', !allowed);
+                privateContent.setAttribute('aria-hidden', String(!allowed));
             }
-            if (privateFooter) privateFooter.classList.toggle('hidden', !isAuthenticated);
-            document.querySelectorAll('[data-auth-required="true"]').forEach(el => el.classList.toggle('hidden', !isAuthenticated));
-            document.getElementById('login-open-button')?.classList.toggle('hidden', !!isAuthenticated);
-            document.getElementById('logout-button')?.classList.toggle('hidden', !isAuthenticated);
+            if (privateFooter) privateFooter.classList.toggle('hidden', !allowed);
+            document.querySelectorAll('[data-auth-required="true"]').forEach(el => el.classList.toggle('hidden', !allowed));
+            document.getElementById('login-open-button')?.classList.toggle('hidden', allowed);
+            document.getElementById('logout-button')?.classList.toggle('hidden', !allowed);
+
             const label = document.getElementById('auth-user-label');
             if (label) {
-                label.textContent = isAuthenticated ? `Administrador (demonstração): ${email || ADMIN_EMAIL}` : '';
-                label.classList.toggle('hidden', !isAuthenticated);
+                label.textContent = allowed ? `Administrador (${role}): ${email || ''}` : '';
+                label.classList.toggle('hidden', !allowed);
             }
-            if (isAuthenticated) closeLoginModal();
+
+            if (allowed) closeLoginModal();
             else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
+            return allowed;
         }
-        function handleDemoLogin(event) {
+
+        async function validateSupabaseAdmin(session) {
+            if (!session?.user || !supabaseClient) {
+                setAuthenticatedView(false, '');
+                return false;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('admin_users')
+                .select('role, active')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Falha ao verificar administrador no Supabase:', error);
+                setAuthenticatedView(false, '');
+                authMessage('login-message', 'Não foi possível validar seu acesso. Confira se as tabelas e políticas RLS foram criadas no Supabase.');
+                return false;
+            }
+
+            if (!data || data.active !== true || !['owner', 'admin'].includes(data.role)) {
+                await supabaseClient.auth.signOut();
+                setAuthenticatedView(false, '');
+                authMessage('login-message', 'Esta conta não possui autorização administrativa. Solicite a inclusão em admin_users.');
+                return false;
+            }
+
+            setAuthenticatedView(true, session.user.email || '', data.role);
+            return true;
+        }
+
+        async function handleSupabaseLogin(event) {
             event.preventDefault();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
-            if (email !== ADMIN_EMAIL || password !== DEMO_PASSWORD) {
-                authMessage('login-message', 'E-mail ou senha incorretos. Confira os dados de demonstração.');
+            if (!supabaseClient) {
+                authMessage('login-message', 'Antes de entrar, preencha SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY neste arquivo.');
                 return;
             }
-            try { sessionStorage.setItem(DEMO_SESSION_KEY, email); } catch (e) {}
-            setAuthenticatedView(true, ADMIN_EMAIL);
-            document.getElementById('login-password').value = '';
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const submit = document.getElementById('login-submit');
+            if (submit) { submit.disabled = true; submit.textContent = 'Verificando...'; }
+            authMessage('login-message', 'Conectando ao Supabase...');
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                const authorized = await validateSupabaseAdmin(data.session);
+                if (authorized) document.getElementById('login-password').value = '';
+            } catch (error) {
+                console.error('Erro no login Supabase:', error);
+                authMessage('login-message', error.message || 'Não foi possível entrar. Confira seu e-mail e senha.');
+            } finally {
+                if (submit) { submit.disabled = false; submit.textContent = 'Entrar'; }
+            }
         }
-        function handleSupabaseLogout() {
-            try { sessionStorage.removeItem(DEMO_SESSION_KEY); } catch (e) {}
+
+        async function handleSupabaseLogout() {
+            if (!supabaseClient) return;
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                authMessage('login-message', 'Não foi possível encerrar a sessão: ' + error.message);
+                return;
+            }
             setAuthenticatedView(false, '');
             openLoginModal();
-            authMessage('login-message', 'Sessão encerrada.');
+            authMessage('login-message', 'Sessão encerrada com segurança.');
         }
-        // Recupera a sessão somente nesta aba do navegador, inclusive após atualizar a página.
-        (function initializeDemoAuth() {
-            let savedEmail = '';
-            try { savedEmail = sessionStorage.getItem(DEMO_SESSION_KEY) || ''; } catch (e) {}
-            if (savedEmail.toLowerCase() === ADMIN_EMAIL) {
-                setAuthenticatedView(true, ADMIN_EMAIL);
-            } else {
-                setAuthenticatedView(false, '');
-                authMessage('login-message', 'Login temporário habilitado para a apresentação.');
+
+        async function handleEmailRecovery(event) {
+            event.preventDefault();
+            if (!supabaseClient) {
+                authMessage('recover-email-message', 'Configure primeiro a URL e a chave pública do Supabase.');
+                return;
             }
+            const email = document.getElementById('recover-email').value.trim();
+            const redirectTo = window.location.origin + window.location.pathname;
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+            authMessage('recover-email-message', error
+                ? 'Não foi possível enviar o link: ' + error.message
+                : 'Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.');
+        }
+
+        // Restaura a sessão existente ao abrir ou atualizar o site.
+        (async function initializeSupabaseAuth() {
+            if (!supabaseClient) {
+                setAuthenticatedView(false, '');
+                authMessage('login-message', 'Integração pendente: insira a Project URL e a chave pública do Supabase.');
+                return;
+            }
+
+            supabaseClient.auth.onAuthStateChange((event) => {
+                if (event === 'SIGNED_OUT') setAuthenticatedView(false, '');
+            });
+
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (error) {
+                console.error('Erro ao recuperar sessão Supabase:', error);
+                setAuthenticatedView(false, '');
+                return;
+            }
+            if (data.session) await validateSupabaseAdmin(data.session);
+            else setAuthenticatedView(false, '');
         })();
 
         const LAT = -27.634;
