@@ -104,9 +104,15 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .light .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            border: 1px solid #d4d4d8;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            backdrop-filter: none;
+        }
+        /* No tema cinza-claro, cartões e cabeçalho permanecem totalmente opacos. */
+        .light header {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
         }
 
         .pulse-danger {
@@ -334,10 +340,13 @@
           <h2 id="public-weather-title" class="text-xl sm:text-2xl font-extrabold text-slate-900">Condições meteorológicas e avisos por localização</h2>
           <p class="text-sm text-slate-600">Consulte as condições atuais e indicadores de atenção para sua região.</p>
         </div>
-        <div class="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
-          <input id="public-location-input" type="search" value="Erechim, Rio Grande do Sul" placeholder="Digite uma cidade (ex.: Gaurama, RS)" class="w-full sm:max-w-md rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 text-sm" aria-label="Cidade para monitoramento">
+        <div class="mt-5 flex flex-col items-center gap-2">
+          <label for="public-location-input" class="text-sm font-bold text-slate-800">Informe sua localização (cidade/município)</label>
+          <div class="w-full flex flex-col sm:flex-row gap-2 justify-center">
+          <input id="public-location-input" type="search" value="" placeholder="Digite sua cidade (ex.: Gaurama, RS). Padrão: Erechim, RS" class="w-full sm:max-w-md rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 text-sm" aria-label="Cidade para monitoramento">
           <button type="button" onclick="searchPublicLocation()" class="rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold px-5 py-3 text-sm"><i class="fa-solid fa-magnifying-glass mr-2"></i>Consultar</button>
           <button type="button" onclick="usePublicGeolocation()" class="rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-semibold px-4 py-3 text-sm"><i class="fa-solid fa-location-crosshairs mr-2"></i>Minha localização</button>
+          </div>
         </div>
         <div class="mt-4 flex flex-wrap justify-center gap-3 text-xs text-slate-500">
           <span id="public-location-label"><i class="fa-solid fa-location-dot mr-1"></i>Erechim, RS</span>
@@ -1835,6 +1844,11 @@
         }
         async function searchPublicLocation() {
             const query = (publicEl('public-location-input')?.value || '').trim();
+            if (!query) {
+                publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS' };
+                await loadPublicWeather();
+                return;
+            }
             if (query.length < 2) { setPublicStatus('Digite o nome de uma cidade para consultar.', true); return; }
             setPublicStatus('Localizando cidade...');
             try {
