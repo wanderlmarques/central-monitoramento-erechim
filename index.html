@@ -358,9 +358,9 @@
           <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><div class="text-xs uppercase font-bold text-slate-500">Chuva nas próximas horas</div><div id="public-rain" class="text-2xl font-extrabold text-slate-900 mt-1">--%</div><div id="public-rain-mm" class="text-xs text-slate-500 mt-1">Precipitação: --</div></div>
           <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><div class="text-xs uppercase font-bold text-slate-500">Vento</div><div id="public-wind" class="text-2xl font-extrabold text-slate-900 mt-1">-- km/h</div><div id="public-gust" class="text-xs text-slate-500 mt-1">Rajadas: --</div></div>
         </div>
-        <div class="mt-4 text-left">
-          <h3 class="text-sm font-extrabold text-slate-800 mb-2"><i class="fa-solid fa-bell text-amber-500 mr-2"></i>Indicadores automáticos de atenção</h3>
-          <div id="public-weather-alerts" class="space-y-2"><p class="text-sm text-slate-500">Os indicadores serão exibidos após a consulta.</p></div>
+        <div class="mt-5 text-left rounded-xl border-2 border-slate-300 bg-slate-100 p-3 sm:p-4">
+          <h3 class="text-base sm:text-lg font-black text-slate-900 mb-3 flex items-center gap-2"><span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-400 text-slate-950"><i class="fa-solid fa-triangle-exclamation"></i></span>Indicadores automáticos de atenção</h3>
+          <div id="public-weather-alerts" class="space-y-3"><p class="text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg p-3">Os indicadores serão exibidos após a consulta.</p></div>
         </div>
         <p class="mt-5 border-t border-slate-200 pt-3 text-[11px] leading-relaxed text-slate-500">Fonte meteorológica: Open-Meteo. Os indicadores são estimativas automáticas baseadas em dados meteorológicos e não representam alertas oficiais. Para situações de risco, acompanhe o INMET e a Defesa Civil. A localização do dispositivo só é acessada se você clicar em “Minha localização” e autorizar o navegador.</p>
       </div>
@@ -685,14 +685,14 @@
         </div>
 
 <!-- INDICADOR DE TENDÊNCIA E ALERTA DAS PRÓXIMAS 6 HORAS -->
-                <div id="header-6h-alert" class="flex-1 max-w-xl mx-auto lg:mx-4 px-4 py-3 rounded-xl bg-emerald-600/20 border-2 border-emerald-500 text-emerald-100 transition shadow-lg text-center">
+                <div id="header-6h-alert" class="flex-1 max-w-xl mx-auto lg:mx-4 px-5 py-4 rounded-xl bg-emerald-700 border-2 border-emerald-800 text-white transition shadow-lg text-center">
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-1.5 border-b border-emerald-500/30 pb-2">
-                        <span class="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 justify-center">
-                            <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> INDICADOR INTERNO — PRÓXIMAS 6 HORAS:
+                        <span class="text-sm font-black uppercase tracking-wider text-white flex items-center gap-1.5 justify-center">
+                            <i class="fa-solid fa-clock-rotate-left text-white"></i> INDICADOR INTERNO — PRÓXIMAS 6 HORAS:
                         </span>
-                        <span id="label-6h-span" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 uppercase">SEM ALERTA</span>
+                        <span id="label-6h-span" class="text-xs font-mono font-bold px-3 py-1 rounded bg-white text-emerald-900 uppercase">SEM ALERTA</span>
                     </div>
-                    <div id="content-6h-alert" class="text-xs text-emerald-100 flex justify-center items-center">
+                    <div id="content-6h-alert" class="text-sm font-semibold text-white flex justify-center items-center">
                         <i class="fa-solid fa-spinner fa-spin text-emerald-300 mr-2"></i>
                         <span>Carregando projeção meteorológica detalhada...</span>
                     </div>
@@ -1671,28 +1671,28 @@
                     const title6h = header6hBox.querySelector('span.tracking-wider');
 
                     let alertMsg6h = 'NORMAL';
-                    let boxClass = 'bg-emerald-600/20 border-emerald-500 text-emerald-100';
-                    let labelClass = 'bg-emerald-500 text-slate-950 border-emerald-500';
-                    let iconClass = 'text-emerald-400';
-                    let titleClass = 'text-emerald-300';
+                    let boxClass = 'bg-emerald-700 border-emerald-900 text-white';
+                    let labelClass = 'bg-white text-emerald-900 border-white';
+                    let iconClass = 'text-white';
+                    let titleClass = 'text-white';
 
                     // Lógica de Gatilho de Alertas para as próximas 6h
                     if (sumRain6h >= 30 || maxWind6h >= 43 || maxTemp6h >= 32 || minTemp6h <= 5) {
                         alertMsg6h = 'ALERTA SEVERO';
-                        boxClass = 'bg-rose-900/40 border-rose-500 text-rose-100 shadow-rose-900/50 animate-pulse';
+                        boxClass = 'bg-rose-700 border-rose-900 text-white shadow-rose-900/50';
                         labelClass = 'bg-rose-500 text-white border border-rose-400';
-                        iconClass = 'text-rose-400';
-                        titleClass = 'text-rose-300';
+                        iconClass = 'text-white';
+                        titleClass = 'text-white';
                     } else if (sumRain6h >= 15 || maxWind6h >= 30 || maxTemp6h >= 28 || minTemp6h <= 10) {
                         alertMsg6h = 'ATENÇÃO';
-                        boxClass = 'bg-amber-900/40 border-amber-500 text-amber-100 shadow-amber-900/50';
+                        boxClass = 'bg-amber-500 border-amber-800 text-slate-950 shadow-amber-900/30';
                         labelClass = 'bg-amber-500 text-slate-900 border border-amber-400';
-                        iconClass = 'text-amber-400';
-                        titleClass = 'text-amber-300';
+                        iconClass = 'text-slate-950';
+                        titleClass = 'text-slate-950';
                     }
 
                     // Renderiza os valores formatados na barra
-                    content6hEl.innerHTML = `Temp: <strong class="text-white">${minTemp6h.toFixed(1)}° a ${maxTemp6h.toFixed(1)}°</strong> &bull; Chuva: <strong class="text-white">${sumRain6h.toFixed(1)} mm</strong> &bull; Vento Máx: <strong class="text-white">${maxWind6h.toFixed(1)} km/h</strong>`;
+                    content6hEl.innerHTML = `<span class="font-bold">Temperatura:</span> <strong>${minTemp6h.toFixed(1)}° a ${maxTemp6h.toFixed(1)}°</strong> <span class="mx-1">•</span> <span class="font-bold">Chuva:</span> <strong>${sumRain6h.toFixed(1)} mm</strong> <span class="mx-1">•</span> <span class="font-bold">Vento máx.:</span> <strong>${maxWind6h.toFixed(1)} km/h</strong>`;
                     label6hEl.innerText = alertMsg6h;
                     
                     // Aplica as classes dinamicamente
@@ -1903,7 +1903,7 @@
                 if (rain >= 70 || mm >= 15) alerts.push(['Atenção para chuva', `Probabilidade máxima nas próximas 6h: ${rain}%; precipitação estimada: ${mm.toFixed(1)} mm.`, 'amber']);
                 if (Number(c.temperature_2m) >= 35) alerts.push(['Temperatura elevada', `Temperatura atual de ${Number(c.temperature_2m).toFixed(1)}°C. Hidrate-se e evite exposição prolongada ao sol.`, 'amber']);
                 if (!alerts.length) alerts.push(['Sem indicador automático relevante neste momento', 'Os parâmetros consultados não ultrapassaram os limites informativos deste painel. Isso não garante ausência de risco.', 'emerald']);
-                publicEl('public-weather-alerts').innerHTML = alerts.map(([title,desc,color]) => `<div class="rounded-xl border p-3 ${color==='rose'?'bg-rose-50 border-rose-200 text-rose-900':color==='amber'?'bg-amber-50 border-amber-200 text-amber-900':'bg-emerald-50 border-emerald-200 text-emerald-900'}"><div class="font-bold text-sm">${title}</div><p class="text-xs mt-1">${desc}</p></div>`).join('');
+                publicEl('public-weather-alerts').innerHTML = alerts.map(([title,desc,color]) => { const danger = color === 'rose'; const warning = color === 'amber'; const style = danger ? 'bg-rose-100 border-rose-500 text-rose-950 ring-2 ring-rose-300' : warning ? 'bg-amber-100 border-amber-500 text-amber-950 ring-2 ring-amber-200' : 'bg-emerald-100 border-emerald-500 text-emerald-950'; const badge = danger ? 'PERIGO' : warning ? 'ATENÇÃO' : 'NORMAL'; const icon = danger ? 'fa-circle-exclamation' : warning ? 'fa-triangle-exclamation' : 'fa-circle-check'; return `<div class="rounded-xl border-l-8 ${style} p-4 shadow-sm"><div class="flex flex-wrap items-center justify-between gap-2"><div class="font-extrabold text-base flex items-center gap-2"><i class="fa-solid ${icon}"></i>${title}</div><span class="text-[11px] font-black tracking-wider px-3 py-1 rounded-full ${danger ? 'bg-rose-700 text-white' : warning ? 'bg-amber-500 text-slate-950' : 'bg-emerald-700 text-white'}">${badge}</span></div><p class="text-sm font-medium mt-2 leading-relaxed">${desc}</p></div>`; }).join('');
                 setPublicStatus('Dados recebidos. Os indicadores abaixo são cálculos informativos, não alertas oficiais.');
             } catch (error) { setPublicStatus(error.message || 'Não foi possível carregar os dados meteorológicos.', true); }
         }
