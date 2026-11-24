@@ -345,6 +345,10 @@
                 <input id="login-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Sua senha">
                 <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Informe o e-mail e a senha cadastrados no Supabase.</p>
                 <button id="login-submit" type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Entrar</button>
+                <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-1 text-xs">
+                    <button type="button" onclick="showAuthPanel('recover')" class="text-sky-300 hover:text-sky-200 underline">Esqueci minha senha</button>
+                    <button type="button" onclick="showAuthPanel('register')" class="text-emerald-300 hover:text-emerald-200 underline">Criar conta</button>
+                </div>
             </form>
             <form id="register-form" class="hidden space-y-3" onsubmit="handleSupabaseRegister(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="register-email">E-mail</label>
@@ -357,12 +361,22 @@
                 <input id="register-password-confirm" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Repita a senha">
                 <p id="register-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Após o cadastro, confirme seu e-mail e valide o celular por código.</p>
                 <button id="register-submit" type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">Criar cadastro</button>
+                <button type="button" onclick="showAuthPanel('login')" class="w-full text-xs text-slate-300 hover:text-white underline">Voltar ao login</button>
             </form>
             <form id="recover-email-form" class="hidden space-y-3" onsubmit="handleEmailRecovery(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="recover-email">E-mail cadastrado</label>
                 <input id="recover-email" type="email" autocomplete="email" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="seuemail@exemplo.com">
                 <p id="recover-email-message" class="text-xs text-amber-300 text-center" role="status">Enviaremos um link para redefinir sua senha.</p>
                 <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Enviar link de recuperação</button>
+                <button type="button" onclick="showAuthPanel('login')" class="w-full text-xs text-slate-300 hover:text-white underline">Voltar ao login</button>
+            </form>
+            <form id="update-password-form" class="hidden space-y-3" onsubmit="handlePasswordUpdate(event)">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="new-account-password">Nova senha (mínimo 8 caracteres)</label>
+                <input id="new-account-password" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Digite a nova senha">
+                <label class="block text-left text-xs font-semibold text-slate-300" for="confirm-account-password">Confirmar nova senha</label>
+                <input id="confirm-account-password" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Repita a nova senha">
+                <p id="update-password-message" class="text-xs text-amber-300 text-center" role="status">Escolha uma nova senha para sua conta.</p>
+                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">Salvar nova senha</button>
             </form>
             <form id="recover-phone-form" class="hidden space-y-3" onsubmit="handlePhoneRecoveryRequest(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="recover-phone">Celular verificado com DDI</label>
@@ -958,7 +972,7 @@
          NUNCA coloque Secret key ou service_role neste arquivo. -->
     <script>
         // PREENCHA estes dois campos com os dados do seu projeto Supabase.
-        const SUPABASE_URL = 'https://kckaadrrxxwscbxohjbg.supabase.co';
+       const SUPABASE_URL = 'https://kckaadrrxxwscbxohjbg.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XuDB-kpv-oi-ONTpTbze-g_3mz9OMeW';
 
         const supabaseClient = (() => {
@@ -979,12 +993,79 @@
         }
 
         function showAuthPanel(panel) {
-            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form'].forEach(id => {
+            const panels = {
+                login: 'login-form',
+                register: 'register-form',
+                recover: 'recover-email-form',
+                update: 'update-password-form'
+            };
+            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form','update-password-form'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
-            document.getElementById(panel === 'recover' ? 'recover-email-form' : 'login-form')?.classList.remove('hidden');
+            document.getElementById(panels[panel] || panels.login)?.classList.remove('hidden');
+            const titles = { login: 'Acesso administrativo', register: 'Criar conta', recover: 'Recuperar senha', update: 'Definir nova senha' };
             const title = document.getElementById('login-modal-title');
-            if (title) title.textContent = panel === 'recover' ? 'Recuperar senha' : 'Acesso administrativo';
+            if (title) title.textContent = titles[panel] || titles.login;
+        }
+
+        async function handleSupabaseRegister(event) {
+            event.preventDefault();
+            if (!supabaseClient) {
+                authMessage('register-message', 'Configure a URL e a chave pública do Supabase antes do cadastro.');
+                return;
+            }
+            const email = document.getElementById('register-email').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-password-confirm').value;
+            if (password.length < 8) {
+                authMessage('register-message', 'A senha precisa ter pelo menos 8 caracteres.');
+                return;
+            }
+            if (password !== confirm) {
+                authMessage('register-message', 'As senhas não coincidem.');
+                return;
+            }
+            const submit = document.getElementById('register-submit');
+            if (submit) { submit.disabled = true; submit.textContent = 'Criando conta...'; }
+            try {
+                const redirectTo = window.location.origin + window.location.pathname;
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: { emailRedirectTo: redirectTo, data: { phone } }
+                });
+                if (error) throw error;
+                authMessage('register-message', data.session
+                    ? 'Conta criada. Para acessar a área administrativa, ela também precisa estar autorizada em admin_users.'
+                    : 'Cadastro recebido! Confira seu e-mail e confirme a conta. Depois, um administrador deverá autorizar o acesso em admin_users.');
+            } catch (error) {
+                console.error('Erro no cadastro Supabase:', error);
+                authMessage('register-message', error.message || 'Não foi possível criar a conta.');
+            } finally {
+                if (submit) { submit.disabled = false; submit.textContent = 'Criar cadastro'; }
+            }
+        }
+
+        async function handlePasswordUpdate(event) {
+            event.preventDefault();
+            if (!supabaseClient) return authMessage('update-password-message', 'A integração com o Supabase não está configurada.');
+            const password = document.getElementById('new-account-password').value;
+            const confirm = document.getElementById('confirm-account-password').value;
+            if (password.length < 8) return authMessage('update-password-message', 'A senha precisa ter pelo menos 8 caracteres.');
+            if (password !== confirm) return authMessage('update-password-message', 'As senhas não coincidem.');
+            const { error } = await supabaseClient.auth.updateUser({ password });
+            if (error) {
+                console.error('Erro ao atualizar senha:', error);
+                return authMessage('update-password-message', 'Não foi possível atualizar a senha: ' + error.message);
+            }
+            authMessage('update-password-message', 'Senha alterada com sucesso! Agora você pode entrar com a nova senha.');
+            document.getElementById('new-account-password').value = '';
+            document.getElementById('confirm-account-password').value = '';
+            await supabaseClient.auth.signOut();
+            setAuthenticatedView(false, '');
+            showAuthPanel('login');
+            authMessage('login-message', 'Senha alterada. Entre com sua nova senha.');
         }
 
         function openLoginModal() {
@@ -1104,10 +1185,14 @@
             }
             const email = document.getElementById('recover-email').value.trim();
             const redirectTo = window.location.origin + window.location.pathname;
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
-            authMessage('recover-email-message', error
-                ? 'Não foi possível enviar o link: ' + error.message
-                : 'Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.');
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+                if (error) throw error;
+                authMessage('recover-email-message', 'Solicitação enviada. Abra o e-mail mais recente do Supabase e clique no link uma única vez.');
+            } catch (error) {
+                console.error('Erro ao solicitar recuperação:', error);
+                authMessage('recover-email-message', 'Não foi possível enviar o link: ' + error.message);
+            }
         }
 
         // Restaura a sessão existente ao abrir ou atualizar o site.
@@ -1120,6 +1205,11 @@
 
             supabaseClient.auth.onAuthStateChange((event) => {
                 if (event === 'SIGNED_OUT') setAuthenticatedView(false, '');
+                if (event === 'PASSWORD_RECOVERY') {
+                    document.getElementById('login-modal')?.classList.remove('hidden');
+                    showAuthPanel('update');
+                    authMessage('update-password-message', 'Link validado. Agora escolha sua nova senha.');
+                }
             });
 
             const { data, error } = await supabaseClient.auth.getSession();
