@@ -894,7 +894,7 @@
         </section>
 
         <!-- RADAR / EARTH NULLSCHOOL / WIND / SATELLITE -->
-        <section class="space-y-6">
+        <section class="space-y-6 mt-10 pt-6 border-t border-slate-800/70">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                 <!-- Earth Nullschool map -->
                 <div class="lg:col-span-2 glass-card rounded-2xl p-5 flex flex-col items-center">
@@ -912,15 +912,15 @@
                 </div>
 
                 <!-- Wind direction card on the side -->
-                <div class="glass-card rounded-2xl p-5 flex flex-col items-center justify-center">
-                    <div class="flex flex-col items-center justify-center mb-3 gap-2">
+                <div class="glass-card rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-between min-h-[620px] h-full">
+                    <div class="flex flex-col items-center justify-center mb-3 gap-3 w-full">
                         <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-compass text-teal-400 text-base"></i> Direção & Intensidade do Vento
                         </h2>
                         <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-3 py-1 rounded-lg">--° N</span>
                     </div>
-                    <div class="flex flex-col items-center justify-center my-5 relative">
-                        <div class="w-40 h-40 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
+                    <div class="flex flex-1 w-full flex-col items-center justify-center my-4 relative">
+                        <div class="w-52 h-52 sm:w-60 sm:h-60 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
                             <span class="absolute top-2 text-[11px] font-bold text-slate-400">N</span>
                             <span class="absolute right-3 text-[11px] font-bold text-slate-400">L</span>
                             <span class="absolute bottom-2 text-[11px] font-bold text-slate-400">S</span>
@@ -933,14 +933,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-center text-xs mt-4 w-full">
-                        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                            <span class="text-slate-400 block text-[11px] mb-1.5">Velocidade</span>
-                            <strong id="wind-card-speed" class="text-base font-bold text-teal-300">-- km/h</strong>
+                    <div class="grid grid-cols-2 gap-3 text-center text-sm mt-4 w-full">
+                        <div class="p-4 sm:p-5 min-h-24 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col justify-center">
+                            <span class="text-slate-300 block text-xs mb-2">Velocidade</span>
+                            <strong id="wind-card-speed" class="text-lg sm:text-xl font-bold text-teal-300">-- km/h</strong>
                         </div>
-                        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                            <span class="text-slate-400 block text-[11px] mb-1.5">Rajada Máx</span>
-                            <strong id="wind-card-gust" class="text-base font-bold text-amber-300">-- km/h</strong>
+                        <div class="p-4 sm:p-5 min-h-24 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col justify-center">
+                            <span class="text-slate-300 block text-xs mb-2">Rajada Máx</span>
+                            <strong id="wind-card-gust" class="text-lg sm:text-xl font-bold text-amber-300">-- km/h</strong>
                         </div>
                     </div>
                 </div>
