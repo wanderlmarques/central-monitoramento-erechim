@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="light">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Painel independente de monitoramento e consulta meteorológica para Erechim, Rio Grande do Sul.">
-    <meta name="theme-color" content="#f4f4f5">
+    <meta name="theme-color" content="#09090b">
     <title>Painel Meteorológico  — Erechim / RS</title>
     <!-- Supabase Auth client (login) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -244,6 +244,36 @@
             #forecast-3days-container > div { min-height: 155px; }
         }
 
+
+        /* Contraste reforçado do painel público e previsão diária no tema escuro. */
+        .dark #public-weather-panel > div {
+            background-color: #09090b;
+            border-color: #3f3f46;
+            border-top-color: #facc15;
+        }
+        .dark #public-weather-panel #public-weather-status,
+        .dark #public-weather-panel #public-weather-alerts > p {
+            background-color: #18181b;
+            border-color: #52525b;
+            color: #e4e4e7;
+        }
+        .dark #public-weather-panel #public-weather-metrics > div {
+            background-color: #18181b;
+            border-color: #3f3f46;
+        }
+        .dark #public-weather-panel #public-weather-metrics > div > div:first-child,
+        .dark #public-weather-panel #public-weather-metrics > div > div:last-child {
+            color: #cbd5e1;
+        }
+        .dark #forecast-3days-container > div {
+            background-color: #18181b;
+            border-color: #52525b;
+        }
+        #forecast-3days-container > div h3 {
+            font-weight: 800;
+            line-height: 1.4;
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -326,21 +356,21 @@
 
     <!-- PAINEL PÚBLICO DE CONDIÇÕES E ALERTAS PERSONALIZADOS -->
     <section id="public-weather-panel" class="w-full px-4 py-6 sm:py-8" aria-labelledby="public-weather-title">
-      <div class="max-w-5xl mx-auto rounded-2xl border border-slate-200 bg-white shadow-lg p-4 sm:p-6">
+      <div class="max-w-5xl mx-auto rounded-2xl border border-slate-700 border-t-4 border-t-yellow-400 dark:bg-slate-950 bg-white shadow-lg shadow-yellow-400/10 p-4 sm:p-6">
         <div class="flex flex-col gap-2 items-center">
-          <span class="text-xs font-bold uppercase tracking-widest text-sky-700">Monitoramento público</span>
-          <h2 id="public-weather-title" class="text-xl sm:text-2xl font-extrabold text-slate-900">Condições meteorológicas e avisos por localização</h2>
-          <p class="text-sm text-slate-600">Consulte as condições atuais e indicadores de atenção para sua região.</p>
+          <span class="text-xs font-bold uppercase tracking-widest text-yellow-500 dark:text-yellow-300">Monitoramento público</span>
+          <h2 id="public-weather-title" class="text-xl sm:text-2xl font-extrabold dark:text-white text-slate-900">Condições meteorológicas e avisos por localização</h2>
+          <p class="text-sm dark:text-slate-300 text-slate-600">Consulte as condições atuais e indicadores de atenção para sua região.</p>
         </div>
         <div class="mt-5 flex flex-col items-center gap-2">
-          <label for="public-location-input" class="text-sm font-bold text-slate-800">Informe sua localização (cidade/município)</label>
+          <label for="public-location-input" class="text-sm font-bold dark:text-slate-100 text-slate-800">Informe sua localização (cidade/município)</label>
           <div class="w-full flex flex-col sm:flex-row gap-2 justify-center">
           <input id="public-location-input" type="search" value="" placeholder="Digite sua cidade (ex.: Gaurama, RS). Padrão: Erechim, RS" class="w-full sm:max-w-md rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 text-sm" aria-label="Cidade para monitoramento">
           <button type="button" onclick="searchPublicLocation()" class="rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold px-5 py-3 text-sm"><i class="fa-solid fa-magnifying-glass mr-2"></i>Consultar</button>
           <button type="button" onclick="usePublicGeolocation()" class="rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-semibold px-4 py-3 text-sm"><i class="fa-solid fa-location-crosshairs mr-2"></i>Minha localização</button>
           </div>
         </div>
-        <div class="mt-4 flex flex-wrap justify-center gap-3 text-xs text-slate-500">
+        <div class="mt-4 flex flex-wrap justify-center gap-3 text-xs dark:text-slate-300 text-slate-500">
           <span id="public-location-label"><i class="fa-solid fa-location-dot mr-1"></i>Erechim, RS</span>
           <span id="public-update-label">Aguardando consulta...</span>
         </div>
@@ -804,7 +834,6 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Frio Extremo</span>
                     </div>
                     <div class="mt-2 w-full text-center">
-                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-cold" class="dark:text-slate-300 text-slate-700">&lt; 5.0 °C</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-cold" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-cold" class="text-xs font-mono text-slate-400">-- °C</span>
@@ -819,7 +848,6 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Calor Extremo</span>
                     </div>
                     <div class="mt-2 w-full text-center">
-                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-heat" class="dark:text-slate-300 text-slate-700">&gt; 28.0 °C</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-heat" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-heat" class="text-xs font-mono text-slate-400">-- °C</span>
@@ -834,7 +862,6 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Chuva Intensa</span>
                     </div>
                     <div class="mt-2 w-full text-center">
-                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-rain" class="dark:text-slate-300 text-slate-700">&gt; 30mm / 12h</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-rain" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-rain" class="text-xs font-mono text-slate-400">-- mm</span>
@@ -849,7 +876,6 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Vento Forte</span>
                     </div>
                     <div class="mt-2 w-full text-center">
-                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-wind" class="dark:text-slate-300 text-slate-700">&gt; 40 km/h</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-wind" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-wind" class="text-xs font-mono text-slate-400">-- km/h</span>
@@ -886,8 +912,9 @@
                         </h2>
                         <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-mono">Erechim (RS) — Earth Nullschool</span>
                     </div>
-                    <div class="w-full h-[580px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
-                        <iframe title="Earth Nullschool — visualização global de vento e dinâmica atmosférica sobre Erechim" class="w-full h-full border-0" src="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.27,-27.63,3000/loc=-52.27,-27.63" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <div class="relative w-full h-[580px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
+                        <iframe id="earth-nullschool-frame" title="Earth Nullschool — visualização global de vento e dinâmica atmosférica sobre Erechim" class="w-full h-full border-0 pointer-events-none" src="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.27,-27.63,3000/loc=-52.27,-27.63" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <button type="button" id="earth-nullschool-lock" onclick="toggleMapInteraction('earth-nullschool-frame','earth-nullschool-lock')" class="absolute bottom-3 right-3 z-20 w-11 h-11 rounded-full bg-slate-900/95 text-white border border-slate-500 shadow-lg flex items-center justify-center hover:bg-slate-700" title="Desbloquear interação com o mapa" aria-label="Desbloquear interação com o mapa" aria-pressed="false"><i class="fa-solid fa-lock"></i></button>
                     </div>
                     <p class="text-xs text-slate-400 mt-3 text-center">Visualização interativa externa. Os dados e a atualização são fornecidos pelo Earth Nullschool.</p>
                 </div>
@@ -936,12 +963,13 @@
                     <span id="sat-mode-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono uppercase inline-block">INFRAVERMELHO</span>
                 </div>
                 <div class="relative w-full h-[420px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 flex items-center justify-center group">
-                    <iframe title="Visualização interativa de satélite" referrerpolicy="strict-origin-when-cross-origin" id="sat-iframe-view" class="w-full h-full border-0 hidden" src="about:blank" loading="lazy"></iframe>
-                    <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Imagem infravermelha do satélite GOES-16 para a região sul da América do Sul" class="w-full h-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.02]" onerror="handleSatelliteError(this)">
+                    <iframe title="Visualização interativa de satélite" referrerpolicy="strict-origin-when-cross-origin" id="sat-iframe-view" class="w-full h-full border-0 hidden pointer-events-none" src="about:blank" loading="lazy"></iframe>
+                    <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Imagem infravermelha do satélite GOES-16 para a região sul da América do Sul" class="w-full h-full object-contain rounded-xl transition duration-300" onerror="handleSatelliteError(this)">
                     <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-300 backdrop-blur-sm z-10">
                         <span id="sat-status-label" class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> GOES-16 NOAA / CIRA</span>
                         <button onclick="reloadSatelliteImage()" class="hover:text-sky-400 transition" title="Recarregar imagem"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
+                    <button type="button" id="satellite-lock" onclick="toggleMapInteraction('sat-iframe-view','satellite-lock')" class="absolute bottom-3 right-3 z-20 w-11 h-11 rounded-full bg-slate-900/95 text-white border border-slate-500 shadow-lg flex items-center justify-center hover:bg-slate-700" title="Desbloquear interação com o satélite" aria-label="Desbloquear interação com o satélite" aria-pressed="false"><i class="fa-solid fa-lock"></i></button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-xs w-full max-w-3xl">
                     <button onclick="switchSatChannel('ir')" class="py-2 px-3 rounded bg-sky-950 text-sky-200 border border-sky-800 hover:bg-sky-900 transition font-medium text-center">Infravermelho</button>
@@ -1323,6 +1351,19 @@
         function switchSatChannel(channel) {
             currentSatChannel = channel;
             reloadSatelliteImage();
+        }
+
+        // Mapas externos iniciam bloqueados para evitar movimentos acidentais.
+        function toggleMapInteraction(frameId, buttonId) {
+            const frame = document.getElementById(frameId);
+            const button = document.getElementById(buttonId);
+            if (!frame || !button) return;
+            const unlocked = frame.style.pointerEvents !== 'auto';
+            frame.style.pointerEvents = unlocked ? 'auto' : 'none';
+            button.innerHTML = unlocked ? '<i class="fa-solid fa-lock-open"></i>' : '<i class="fa-solid fa-lock"></i>';
+            button.title = unlocked ? 'Bloquear interação com o mapa' : 'Desbloquear interação com o mapa';
+            button.setAttribute('aria-label', button.title);
+            button.setAttribute('aria-pressed', String(unlocked));
         }
 
         function updateClock() {
@@ -1852,11 +1893,11 @@
                 
                 html += `
                     <div class="rounded-2xl dark:bg-slate-900 bg-slate-100 border border-slate-800 p-5 shadow">
-                        <span class="text-[10px] font-bold text-sky-400 block uppercase">Dia +${i}</span>
-                        <h3 class="font-bold text-sm text-white">${weekDays[d.getDay()]} (${d.getDate()}/${d.getMonth()+1})</h3>
+                        <span class="text-[10px] font-bold text-sky-600 dark:text-sky-400 block uppercase">Dia +${i}</span>
+                        <h3 class="font-bold text-sm dark:text-white text-slate-900">${weekDays[d.getDay()]} (${d.getDate()}/${d.getMonth()+1})</h3>
                         <div class="mt-3 text-xs font-mono flex justify-between">
-                            <span class="text-sky-400">Min: ${daily.temperature_2m_min[i].toFixed(1)}°C</span>
-                            <span class="text-rose-400">Máx: ${daily.temperature_2m_max[i].toFixed(1)}°C</span>
+                            <span class="font-semibold text-sky-700 dark:text-sky-400">Min: ${daily.temperature_2m_min[i].toFixed(1)}°C</span>
+                            <span class="font-semibold text-rose-700 dark:text-rose-400">Máx: ${daily.temperature_2m_max[i].toFixed(1)}°C</span>
                         </div>
                         <div class="mt-2 pt-2 border-t dark:border-slate-800 border-slate-200 text-[11px] sm:text-xs flex justify-between items-center">
                             <span class="text-slate-500 dark:text-slate-400">Chuva: <strong class="${rainSum > 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}">${willRain}</strong></span>
