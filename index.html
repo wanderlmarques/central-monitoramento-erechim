@@ -542,9 +542,14 @@
                         <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Chuva</div><div id="lab-current-rain" class="text-xl font-extrabold text-white mt-1">-- mm</div></div>
                         <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Vento / rajadas</div><div id="lab-current-wind" class="text-lg font-extrabold text-white mt-1">-- / --</div></div>
                     </div>
+                    <div id="lab-current-tornado-assessment" class="mt-4 rounded-xl border border-amber-500/50 bg-amber-950/30 p-4" role="status" aria-live="polite">
+                        <div class="flex items-center gap-2 text-amber-300 font-extrabold"><i class="fa-solid fa-triangle-exclamation"></i> Avaliação de possibilidade de tornado</div>
+                        <p id="lab-current-tornado-text" class="mt-2 text-sm text-slate-100">Aguardando dados meteorológicos. Os parâmetros atuais disponíveis não permitem confirmar nem descartar a possibilidade de tornado.</p>
+                        <p class="mt-2 text-xs text-slate-400">Esta consulta não é um detector de tornados. A avaliação confiável exige análise de radar, estrutura da tempestade, instabilidade e cisalhamento do vento. A ausência de indicação não significa ausência de risco.</p>
+                    </div>
                 </section>
 
-                <section>
+                <section class="rounded-2xl border border-indigo-500/40 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
                         <div>
                             <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gauge-high text-blue-500"></i> Parâmetros do cenário simulado</h3>
@@ -1493,6 +1498,8 @@
                 set('lab-current-wind', `${Number(c.wind_speed_10m).toFixed(1)} / ${Number(c.wind_gusts_10m ?? c.wind_speed_10m).toFixed(1)} km/h`);
                 if (updated) updated.textContent = `Atualizado: ${new Date(c.time).toLocaleString('pt-BR')}`;
                 if (status) status.textContent = 'Condições atuais recebidas. Os dados abaixo descrevem o tempo no momento da consulta.';
+                const tornadoText = document.getElementById('lab-current-tornado-text');
+                if (tornadoText) tornadoText.textContent = 'Com os dados meteorológicos de superfície consultados neste painel, não é possível determinar se existe possibilidade de tornado neste instante. Esses dados, isoladamente, não confirmam nem descartam tornado.';
             } catch (error) {
                 if (status) status.textContent = error.message || 'Não foi possível carregar os dados atuais.';
                 if (status) status.className = 'text-sm text-amber-300 mb-3';
