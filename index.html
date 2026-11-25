@@ -309,22 +309,10 @@
                         <span>Lab Tornado</span>
                     </button>
 
-                    <!-- Model Efficacy Modal Button -->
-                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleModelEfficacyModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
-                        <i class="fa-solid fa-chart-column text-emerald-400"></i>
-                        <span>Eficácia do Modelo</span>
-                    </button>
-
                     <!-- History Modal Button -->
                     <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleHistoryPage(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
                         <span>Séries & Histórico</span>
-                    </button>
-
-                    <!-- Sources Modal Button -->
-                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleSourcesPage(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
-                        <i class="fa-solid fa-globe text-sky-400"></i>
-                        <span>Fontes</span>
                     </button>
 
                     <!-- Sites Utilizados Modal Button -->
@@ -362,27 +350,31 @@
           <h2 id="public-weather-title" class="text-xl sm:text-2xl font-extrabold dark:text-white text-slate-900">Condições meteorológicas e avisos por localização</h2>
           <p class="text-sm dark:text-slate-300 text-slate-600">Consulte as condições atuais e indicadores de atenção para sua região.</p>
         </div>
-        <div class="mt-5 flex flex-col items-center gap-2">
+        <div class="mt-6 flex flex-col items-center gap-3">
           <label for="public-location-input" class="text-sm font-bold dark:text-slate-100 text-slate-800">Informe sua localização (cidade/município)</label>
-          <div class="w-full flex flex-col sm:flex-row gap-2 justify-center">
+          <div class="w-full flex flex-col sm:flex-row gap-3 justify-center">
           <input id="public-location-input" type="search" value="" placeholder="Digite sua cidade (ex.: Gaurama, RS). Padrão: Erechim, RS" class="w-full sm:max-w-md rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 text-sm" aria-label="Cidade para monitoramento">
           <button type="button" onclick="searchPublicLocation()" class="rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold px-5 py-3 text-sm"><i class="fa-solid fa-magnifying-glass mr-2"></i>Consultar</button>
           <button type="button" onclick="usePublicGeolocation()" class="rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-semibold px-4 py-3 text-sm"><i class="fa-solid fa-location-crosshairs mr-2"></i>Minha localização</button>
           </div>
         </div>
-        <div class="mt-4 flex flex-wrap justify-center gap-3 text-xs dark:text-slate-300 text-slate-500">
+        <div class="mt-6 flex flex-wrap justify-center gap-4 text-xs dark:text-slate-300 text-slate-500">
           <span id="public-location-label"><i class="fa-solid fa-location-dot mr-1"></i>Erechim, RS</span>
           <span id="public-update-label">Aguardando consulta...</span>
         </div>
         <div id="public-weather-status" class="mt-5 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600" role="status" aria-live="polite">Carregando condições meteorológicas...</div>
-        <div id="public-weather-metrics" class="hidden mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div id="public-weather-metrics" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><div class="text-xs uppercase font-bold text-slate-500">Temperatura</div><div id="public-temp" class="text-2xl font-extrabold text-slate-900 mt-1">--°C</div><div id="public-feels" class="text-xs text-slate-500 mt-1">Sensação: --</div></div>
           <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><div class="text-xs uppercase font-bold text-slate-500">Chuva nas próximas horas</div><div id="public-rain" class="text-2xl font-extrabold text-slate-900 mt-1">--%</div><div id="public-rain-mm" class="text-xs text-slate-500 mt-1">Precipitação: --</div></div>
           <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><div class="text-xs uppercase font-bold text-slate-500">Vento</div><div id="public-wind" class="text-2xl font-extrabold text-slate-900 mt-1">-- km/h</div><div id="public-gust" class="text-xs text-slate-500 mt-1">Rajadas: --</div></div>
         </div>
-        <div class="mt-5 text-left rounded-xl border-2 border-slate-300 bg-slate-100 p-3 sm:p-4">
+        <div class="mt-6 text-left rounded-xl border-2 border-slate-300 bg-slate-100 p-4 sm:p-5">
           <h3 class="text-base sm:text-lg font-black text-slate-900 mb-3 flex items-center gap-2"><span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-400 text-slate-950"><i class="fa-solid fa-triangle-exclamation"></i></span>Indicadores automáticos de atenção</h3>
-          <div id="public-weather-alerts" class="space-y-3"><p class="text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg p-3">Os indicadores serão exibidos após a consulta.</p></div>
+          <div id="public-custom-alert-heading" class="hidden mb-4 rounded-xl border-2 border-amber-500 bg-amber-100 p-4 text-amber-950 shadow-sm" role="alert" aria-live="polite">
+            <div class="font-black text-base sm:text-lg flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i>Alerta meteorológico para sua região</div>
+            <p class="mt-2 text-sm font-semibold">Elemento(s) de alerta identificado(s): <span id="public-custom-alert-elements"></span></p>
+          </div>
+          <div id="public-weather-alerts" class="space-y-4"><p class="text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg p-3">Os indicadores serão exibidos após a consulta.</p></div>
           <div class="mt-3 rounded-xl border-2 border-emerald-700 bg-emerald-700 p-4 sm:p-5 text-white shadow-sm text-center">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-2 border-b border-emerald-300/50 pb-2">
               <span class="text-sm sm:text-base font-black uppercase tracking-wide flex items-center gap-2 justify-center">
@@ -1914,7 +1906,7 @@
         }
 
         // Consulta pública por cidade/coordenadas, sem alterar a estação usada no painel técnico.
-        let publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS' };
+        let publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS', isCustom: false };
         const publicEl = (id) => document.getElementById(id);
         function setPublicStatus(message, isError=false) {
             const el = publicEl('public-weather-status');
@@ -1925,7 +1917,7 @@
         async function searchPublicLocation() {
             const query = (publicEl('public-location-input')?.value || '').trim();
             if (!query) {
-                publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS' };
+                publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS', isCustom: false };
                 await loadPublicWeather();
                 return;
             }
@@ -1938,7 +1930,8 @@
                 const result = await response.json();
                 if (!result.results?.length) throw new Error('Cidade não encontrada. Tente informar também o estado.');
                 const place = result.results[0];
-                publicWeatherLocation = { lat: place.latitude, lon: place.longitude, label: [place.name, place.admin1, place.country].filter(Boolean).join(', ') };
+                const isErechim = /erechim/i.test(place.name || '') && Math.abs(place.latitude - (-27.634)) < 0.15 && Math.abs(place.longitude - (-52.274)) < 0.15;
+                publicWeatherLocation = { lat: place.latitude, lon: place.longitude, label: [place.name, place.admin1, place.country].filter(Boolean).join(', '), isCustom: !isErechim };
                 await loadPublicWeather();
             } catch (error) { setPublicStatus(error.message || 'Falha ao localizar a cidade.', true); }
         }
@@ -1946,7 +1939,7 @@
             if (!navigator.geolocation) { setPublicStatus('Este navegador não oferece geolocalização.', true); return; }
             setPublicStatus('Aguardando autorização de localização do navegador...');
             navigator.geolocation.getCurrentPosition(async pos => {
-                publicWeatherLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Sua localização (coordenadas aproximadas)' };
+                publicWeatherLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Sua localização (coordenadas aproximadas)', isCustom: true };
                 await loadPublicWeather();
             }, err => setPublicStatus(err.code === 1 ? 'Permissão de localização negada. Você pode pesquisar uma cidade manualmente.' : 'Não foi possível obter sua localização. Pesquise uma cidade manualmente.', true), { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
         }
@@ -1982,6 +1975,18 @@
                 else if (gust >= 45) alerts.push(['Vento merece atenção', `Rajadas estimadas em ${gust.toFixed(0)} km/h.`, 'amber']);
                 if (rain >= 70 || mm >= 15) alerts.push(['Atenção para chuva', `Probabilidade máxima nas próximas 6h: ${rain}%; precipitação estimada: ${mm.toFixed(1)} mm.`, 'amber']);
                 if (Number(c.temperature_2m) >= 35) alerts.push(['Temperatura elevada', `Temperatura atual de ${Number(c.temperature_2m).toFixed(1)}°C. Hidrate-se e evite exposição prolongada ao sol.`, 'amber']);
+                const activeAlerts = alerts.filter(([, , color]) => color !== 'emerald');
+                const customAlertHeading = publicEl('public-custom-alert-heading');
+                const customAlertElements = publicEl('public-custom-alert-elements');
+                if (customAlertHeading && customAlertElements) {
+                    if (publicWeatherLocation.isCustom && activeAlerts.length) {
+                        customAlertElements.textContent = activeAlerts.map(([title]) => title).join('; ');
+                        customAlertHeading.classList.remove('hidden');
+                    } else {
+                        customAlertHeading.classList.add('hidden');
+                        customAlertElements.textContent = '';
+                    }
+                }
                 if (!alerts.length) alerts.push(['Sem indicador automático relevante neste momento', 'Os parâmetros consultados não ultrapassaram os limites informativos deste painel. Isso não garante ausência de risco.', 'emerald']);
                 publicEl('public-weather-alerts').innerHTML = alerts.map(([title,desc,color]) => { const danger = color === 'rose'; const warning = color === 'amber'; const style = danger ? 'bg-rose-100 border-rose-500 text-rose-950 ring-2 ring-rose-300' : warning ? 'bg-amber-100 border-amber-500 text-amber-950 ring-2 ring-amber-200' : 'bg-emerald-100 border-emerald-500 text-emerald-950'; const badge = danger ? 'PERIGO' : warning ? 'ATENÇÃO' : 'NORMAL'; const icon = danger ? 'fa-circle-exclamation' : warning ? 'fa-triangle-exclamation' : 'fa-circle-check'; return `<div class="rounded-xl border-l-8 ${style} p-4 shadow-sm"><div class="flex flex-wrap items-center justify-between gap-2"><div class="font-extrabold text-base flex items-center gap-2"><i class="fa-solid ${icon}"></i>${title}</div><span class="text-[11px] font-black tracking-wider px-3 py-1 rounded-full ${danger ? 'bg-rose-700 text-white' : warning ? 'bg-amber-500 text-slate-950' : 'bg-emerald-700 text-white'}">${badge}</span></div><p class="text-sm font-medium mt-2 leading-relaxed">${desc}</p></div>`; }).join('');
                 setPublicStatus('Dados recebidos. Os indicadores abaixo são cálculos informativos, não alertas oficiais.');
