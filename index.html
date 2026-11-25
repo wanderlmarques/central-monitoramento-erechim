@@ -500,6 +500,28 @@
             </div>
 
             <div class="space-y-8">
+                <section class="rounded-2xl border border-sky-700/50 bg-slate-900 p-5 sm:p-6 shadow-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                        <div>
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cloud-sun text-sky-400"></i> Condições meteorológicas atuais — Erechim/RS</h3>
+                            <p class="text-xs text-slate-300 mt-1">Dados meteorológicos do momento, consultados automaticamente via Open-Meteo. Não são parâmetros da simulação.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="lab-current-updated" class="text-xs text-slate-400">Aguardando consulta...</span>
+                            <button type="button" onclick="loadLabCurrentWeather()" class="px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold"><i class="fa-solid fa-rotate-right mr-1"></i> Atualizar</button>
+                        </div>
+                    </div>
+                    <div id="lab-current-status" class="text-sm text-slate-300 mb-3" role="status">Carregando dados meteorológicos atuais...</div>
+                    <div id="lab-current-metrics" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Temperatura</div><div id="lab-current-temp" class="text-xl font-extrabold text-white mt-1">-- °C</div></div>
+                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Sensação térmica</div><div id="lab-current-feels" class="text-xl font-extrabold text-white mt-1">-- °C</div></div>
+                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Umidade</div><div id="lab-current-humidity" class="text-xl font-extrabold text-white mt-1">--%</div></div>
+                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Pressão</div><div id="lab-current-pressure" class="text-xl font-extrabold text-white mt-1">-- hPa</div></div>
+                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Chuva</div><div id="lab-current-rain" class="text-xl font-extrabold text-white mt-1">-- mm</div></div>
+                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Vento / rajadas</div><div id="lab-current-wind" class="text-lg font-extrabold text-white mt-1">-- / --</div></div>
+                    </div>
+                </section>
+
                 <section>
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
                         <div>
@@ -1290,7 +1312,7 @@
         function toggleHistoryPage(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSourcesPage(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSitesModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
-        function toggleTornadoLabModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
+        function toggleTornadoLabModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); if (show) loadLabCurrentWeather(); }
         function toggleModelEfficacyModal(show) {
             if (show && !requireAuthenticatedAccess()) return;
             const m = document.getElementById('model-efficacy-modal');
@@ -1416,6 +1438,32 @@
         function getCardinalDirection(angle) {
             const directions = ['N', 'NE', 'L', 'SE', 'S', 'SO', 'O', 'NO'];
             return directions[Math.round(angle / 45) % 8];
+        }
+
+        async function loadLabCurrentWeather() {
+            const status = document.getElementById('lab-current-status');
+            const updated = document.getElementById('lab-current-updated');
+            if (status) status.textContent = 'Consultando condições meteorológicas atuais de Erechim...';
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,surface_pressure,wind_speed_10m,wind_gusts_10m&timezone=America%2FSao_Paulo`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Open-Meteo respondeu com HTTP ${response.status}`);
+                const data = await response.json();
+                if (!data.current) throw new Error('A API não retornou as condições atuais.');
+                const c = data.current;
+                const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+                set('lab-current-temp', `${Number(c.temperature_2m).toFixed(1)} °C`);
+                set('lab-current-feels', `${Number(c.apparent_temperature).toFixed(1)} °C`);
+                set('lab-current-humidity', `${Number(c.relative_humidity_2m).toFixed(0)}%`);
+                set('lab-current-pressure', `${Number(c.surface_pressure).toFixed(0)} hPa`);
+                set('lab-current-rain', `${Number(c.precipitation).toFixed(1)} mm`);
+                set('lab-current-wind', `${Number(c.wind_speed_10m).toFixed(1)} / ${Number(c.wind_gusts_10m ?? c.wind_speed_10m).toFixed(1)} km/h`);
+                if (updated) updated.textContent = `Atualizado: ${new Date(c.time).toLocaleString('pt-BR')}`;
+                if (status) status.textContent = 'Condições atuais recebidas. Os dados abaixo descrevem o tempo no momento da consulta.';
+            } catch (error) {
+                if (status) status.textContent = error.message || 'Não foi possível carregar os dados atuais.';
+                if (status) status.className = 'text-sm text-amber-300 mb-3';
+            }
         }
 
         async function fetchWeatherData() {
