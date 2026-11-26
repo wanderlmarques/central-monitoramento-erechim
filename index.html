@@ -748,24 +748,76 @@
         </div>
 
         <section class="rounded-2xl border border-emerald-800/70 bg-slate-900 p-4 sm:p-6 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-            <div class="sm:col-span-2">
-              <label for="planting-location" class="block text-xs font-bold text-slate-300 mb-2">Município de referência</label>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <input id="planting-location" type="search" value="Erechim, RS" placeholder="Ex.: Gaurama, RS" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white text-left">
-                <button type="button" onclick="setPlantingLocation()" class="rounded-xl bg-emerald-700 hover:bg-emerald-600 px-5 py-3 text-sm font-bold text-white whitespace-nowrap"><i class="fa-solid fa-location-dot mr-1"></i> Definir local</button>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start text-left">
+            <div class="lg:col-span-8 min-w-0">
+              <label for="planting-location" class="block w-full text-left text-xs font-bold text-slate-300 mb-2">Município de referência</label>
+              <div class="flex flex-col sm:flex-row items-stretch gap-2">
+                <input id="planting-location" type="search" value="Erechim, RS" placeholder="Ex.: Gaurama, RS" class="flex-1 min-w-0 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white text-left">
+                <button type="button" onclick="setPlantingLocation()" class="shrink-0 rounded-xl bg-emerald-700 hover:bg-emerald-600 px-5 py-3 text-sm font-bold text-white whitespace-nowrap"><i class="fa-solid fa-location-dot mr-1"></i> Definir local</button>
               </div>
-              <p id="planting-location-status" class="text-xs text-slate-400 mt-2">Referência regional inicial: Erechim e Alto Uruguai/RS.</p>
+              <p id="planting-location-status" class="w-full text-left text-xs text-slate-400 mt-2">Referência regional inicial: Erechim e Alto Uruguai/RS.</p>
             </div>
-            <div>
-              <label for="planting-year" class="block text-xs font-bold text-slate-300 mb-2">Ano do calendário lunar</label>
-              <select id="planting-year" onchange="renderPlantingCalendar()" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white">
+            <div class="lg:col-span-4 min-w-0">
+              <label for="planting-year" class="block w-full text-left text-xs font-bold text-slate-300 mb-2">Ano do calendário lunar</label>
+              <select id="planting-year" onchange="renderPlantingCalendar()" class="w-full min-h-[46px] rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white text-left">
               </select>
             </div>
           </div>
-          <div class="rounded-xl border border-amber-700/50 bg-amber-950/20 p-3 text-xs text-amber-200 leading-relaxed">
+          <div class="w-full text-left rounded-xl border border-amber-700/50 bg-amber-950/20 p-3 text-xs text-amber-200 leading-relaxed">
             <i class="fa-solid fa-circle-info mr-1"></i> As culturas são referências gerais para o clima do norte do Rio Grande do Sul. A época real depende de cultivar, altitude, solo, irrigação, microclima e zoneamento agrícola (ZARC). Consulte assistência técnica local antes de decisões comerciais.
           </div>
+        </section>
+
+
+        <!-- CLIMATOLOGIA MENSAL: normais históricas para apoiar o planejamento agrícola -->
+        <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-4 text-left">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px]] font-extrabold uppercase tracking-widest text-amber-400">Clima do mês</span>
+              <h3 id="planting-climate-month-title" class="text-lg font-extrabold text-white">Consultando climatologia...</h3>
+            </div>
+            <span class="text-[10px] font-bold rounded-full bg-slate-800 text-slate-300 px-3 py-1">Normais 2015–2024 · média histórica, não previsão</span>
+          </div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="rounded-xl bg-slate-800 p-3">
+              <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase"><i class="fa-solid fa-sun"></i> Insolação média</div>
+              <strong id="planting-climate-sun" class="block mt-2 text-lg font-extrabold font-mono text-white">-- h/dia</strong>
+            </div>
+            <div class="rounded-xl bg-slate-800 p-3">
+              <div class="flex items-center gap-2 text-sky-400 text-xs font-bold uppercase"><i class="fa-solid fa-cloud-rain"></i> Precipitação média</div>
+              <strong id="planting-climate-rain" class="block mt-2 text-lg font-extrabold font-mono text-white">-- mm</strong>
+            </div>
+            <div class="rounded-xl bg-slate-800 p-3">
+              <div class="flex items-center gap-2 text-sky-300 text-xs font-bold uppercase"><i class="fa-solid fa-temperature-low"></i> Mínima média</div>
+              <strong id="planting-climate-min" class="block mt-2 text-lg font-extrabold font-mono text-white">-- °C</strong>
+            </div>
+            <div class="rounded-xl bg-slate-800 p-3">
+              <div class="flex items-center gap-2 text-rose-400 text-xs font-bold uppercase"><i class="fa-solid fa-temperature-high"></i> Máxima média</div>
+              <strong id="planting-climate-max" class="block mt-2 text-lg font-extrabold font-mono text-white">-- °C</strong>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div class="rounded-xl bg-slate-800 p-3 flex items-center gap-2">
+              <i class="fa-solid fa-snowflake text-sky-400"></i>
+              <div><div class="text-xs font-bold text-white">Geada</div><div id="planting-climate-frost" class="text-[11px] text-slate-300">--</div></div>
+            </div>
+            <div class="rounded-xl bg-slate-800 p-3 flex items-center gap-2">
+              <i class="fa-solid fa-fire text-rose-400"></i>
+              <div><div class="text-xs font-bold text-white">Calor</div><div id="planting-climate-heat" class="text-[11px] text-slate-300">--</div></div>
+            </div>
+            <div class="rounded-xl bg-slate-800 p-3 flex items-center gap-2">
+              <i class="fa-solid fa-temperature-empty text-emerald-400"></i>
+              <div><div class="text-xs font-bold text-white">Frio</div><div id="planting-climate-cold" class="text-[11px] text-slate-300">--</div></div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            <span><i class="fa-solid fa-square text-sky-500 mr-1"></i> Chuva (mm)</span>
+            <span><i class="fa-solid fa-circle text-rose-500 mr-1"></i> Máxima (°C)</span>
+            <span><i class="fa-solid fa-circle text-sky-400 mr-1"></i> Mínima (°C)</span>
+            <span><i class="fa-solid fa-square text-amber-400 mr-1"></i> Mês atual</span>
+          </div>
+          <div class="relative w-full h-64 sm:h-72"><canvas id="planting-climate-chart"></canvas></div>
+          <p id="planting-climate-source" class="rounded-xl bg-slate-800 p-3 text-[11px] leading-relaxed text-slate-400"><i class="fa-solid fa-circle-info text-sky-400 mr-1"></i> Carregando médias históricas...</p>
         </section>
 
         <section class="space-y-4">
@@ -2126,6 +2178,88 @@
           }
           return results.sort((a,b)=>a.date-b.date);
         }
+
+        // Climatologia mensal baseada em dados históricos diários do Open-Meteo Archive (ERA5).
+        let plantingClimateChart = null;
+        let plantingClimateCoords = { latitude: -27.6346, longitude: -52.2734, label: 'Erechim, RS' };
+        let plantingClimateLoaded = false;
+        const plantingClimateMonthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+        async function loadPlantingClimate() {
+          const title = document.getElementById('planting-climate-month-title');
+          const source = document.getElementById('planting-climate-source');
+          if (!title || !source) return;
+          title.textContent = 'Consultando climatologia...';
+          source.textContent = 'Buscando dados históricos diários de 2015 a 2024 no Open-Meteo Archive.';
+          try {
+            const {latitude, longitude} = plantingClimateCoords;
+            const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=2015-01-01&end_date=2024-12-31&daily=sunshine_duration,precipitation_sum,temperature_2m_min,temperature_2m_max&timezone=America%2FSao_Paulo`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Open-Meteo Archive respondeu com HTTP ${response.status}.`);
+            const data = await response.json();
+            if (!data.daily?.time || !data.daily?.precipitation_sum || !data.daily?.temperature_2m_min || !data.daily?.temperature_2m_max) throw new Error('A API não retornou todos os dados históricos necessários.');
+            const buckets = Array.from({length:12},()=>({rainByYear:{},sun:[],min:[],max:[],frostByYear:{},heatByYear:{},coldByYear:{}}));
+            data.daily.time.forEach((date,i)=>{
+              const month = Number(date.slice(5,7))-1;
+              const year = date.slice(0,4);
+              const b = buckets[month];
+              const rain = data.daily.precipitation_sum[i];
+              const sun = data.daily.sunshine_duration?.[i];
+              const min = data.daily.temperature_2m_min[i];
+              const max = data.daily.temperature_2m_max[i];
+              if (Number.isFinite(rain)) b.rainByYear[year]=(b.rainByYear[year]||0)+rain;
+              if (Number.isFinite(sun)) b.sun.push(sun/3600);
+              if (Number.isFinite(min)) b.min.push(min);
+              if (Number.isFinite(max)) b.max.push(max);
+              if (Number.isFinite(min) && min<=2) b.frostByYear[year]=(b.frostByYear[year]||0)+1;
+              if (Number.isFinite(max) && max>=30) b.heatByYear[year]=(b.heatByYear[year]||0)+1;
+              if (Number.isFinite(max) && max<=18) b.coldByYear[year]=(b.coldByYear[year]||0)+1;
+            });
+            const mean = arr => arr.length ? arr.reduce((a,v)=>a+v,0)/arr.length : null;
+            const meanObject = obj => mean(Object.values(obj));
+            const stats = buckets.map(b=>({
+              rain: mean(Object.values(b.rainByYear)),
+              sun: mean(b.sun),
+              min: mean(b.min),
+              max: mean(b.max),
+              frost: meanObject(b.frostByYear)||0,
+              heat: meanObject(b.heatByYear)||0,
+              cold: meanObject(b.coldByYear)||0
+            }));
+            const month = new Date().getMonth();
+            const current = stats[month];
+            title.textContent = plantingClimateMonthNames[month];
+            const fmt = (v,d=1) => Number.isFinite(v) ? v.toFixed(d).replace('.',',') : '--';
+            document.getElementById('planting-climate-sun').textContent = `${fmt(current.sun)} h/dia`;
+            document.getElementById('planting-climate-rain').textContent = `${fmt(current.rain,0)} mm`;
+            document.getElementById('planting-climate-min').textContent = `${fmt(current.min)} °C`;
+            document.getElementById('planting-climate-max').textContent = `${fmt(current.max)} °C`;
+            document.getElementById('planting-climate-frost').textContent = current.frost<0.05 ? 'Nenhuma geada na média' : `${fmt(current.frost)} dias/ano com mínima ≤ 2 °C`;
+            document.getElementById('planting-climate-heat').textContent = current.heat<0.05 ? 'Calor raro' : `${fmt(current.heat)} dias/ano com máxima ≥ 30 °C`;
+            document.getElementById('planting-climate-cold').textContent = current.cold<0.05 ? 'Frio raro' : `${fmt(current.cold)} dias/ano com máxima ≤ 18 °C`;
+            const canvas=document.getElementById('planting-climate-chart');
+            if (canvas && typeof Chart!=='undefined') {
+              if (plantingClimateChart) plantingClimateChart.destroy();
+              plantingClimateChart = new Chart(canvas.getContext('2d'),{
+                data:{
+                  labels:plantingClimateMonthNames.map(n=>n.slice(0,3)),
+                  datasets:[
+                    {type:'bar',label:'Chuva (mm)',data:stats.map(x=>x.rain),backgroundColor:stats.map((x,i)=>i===month?'#facc15':'#0ea5e9'),borderRadius:4,yAxisID:'yRain',order:3},
+                    {type:'line',label:'Máxima (°C)',data:stats.map(x=>x.max),borderColor:'#f43f5e',backgroundColor:'#f43f5e',borderWidth:2,tension:.35,pointRadius:0,yAxisID:'yTemp',order:1},
+                    {type:'line',label:'Mínima (°C)',data:stats.map(x=>x.min),borderColor:'#38bdf8',backgroundColor:'#38bdf8',borderWidth:2,tension:.35,pointRadius:0,yAxisID:'yTemp',order:2}
+                  ]
+                },
+                options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Number(c.raw).toFixed(1).replace('.',',')}${c.dataset.yAxisID==='yRain'?' mm':' °C'}`}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{display:false}},yRain:{beginAtZero:true,position:'left',ticks:{color:'#38bdf8',font:{size:9}},grid:{color:'rgba(148,163,184,.10)'}},yTemp:{position:'right',ticks:{color:'#cbd5e1',font:{size:9}},grid:{display:false}}}}
+              });
+            }
+            source.innerHTML = `<i class="fa-solid fa-circle-info text-sky-400 mr-1"></i> Médias históricas calculadas para ${plantingClimateCoords.label}, período 2015–2024. Chuva: média do acumulado mensal por ano; insolação: média diária; temperaturas: médias das mínimas e máximas diárias. Geada considera mínima ≤ 2 °C; calor, máxima ≥ 30 °C; frio, máxima ≤ 18 °C. Fonte: Open-Meteo Historical Weather API (ERA5). São normais históricas, não previsão.`;
+            plantingClimateLoaded = true;
+          } catch (error) {
+            title.textContent = 'Climatologia indisponível';
+            source.textContent = `${error.message || 'Não foi possível consultar os dados históricos.'} Verifique a conexão e tente novamente.`;
+          }
+        }
+
         function togglePlantingCalendar(show) {
           const modal = document.getElementById('planting-calendar-modal');
           if (!modal) return;
@@ -2139,6 +2273,7 @@
               yearSelect.value = String(current);
             }
             renderPlantingCalendar();
+            if (!plantingClimateLoaded) loadPlantingClimate();
           }
         }
         let selectedPlantingMonth = new Date().getMonth();
@@ -2193,7 +2328,12 @@
             if (!data.results?.length) throw new Error('Município não encontrado. Informe também o estado.');
             const place = data.results[0];
             input.value = [place.name,place.admin1,place.country].filter(Boolean).join(', ');
-            status.textContent = `Local definido: ${input.value}. As recomendações agrícolas continuam sendo referências regionais gerais; confirme o ZARC municipal.`;
+            if (Number.isFinite(place.latitude) && Number.isFinite(place.longitude)) {
+              plantingClimateCoords = { latitude: place.latitude, longitude: place.longitude, label: input.value };
+              plantingClimateLoaded = false;
+              loadPlantingClimate();
+            }
+            status.textContent = `Local definido: ${input.value}. A climatologia histórica será consultada para este município; as recomendações agrícolas continuam sendo referências regionais gerais. Confirme o ZARC municipal.`;
           } catch (error) { status.textContent = error.message || 'Não foi possível localizar o município.'; }
         }
 
