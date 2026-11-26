@@ -83,8 +83,8 @@
     <style>
         body {
             transition: background-color 0.3s, color 0.3s;
-            background-color: #f4f4f5;
-            color: #18181b;
+            background-color: #09090b;
+            color: #f8fafc;
         }
         .dark body {
             background-color: #09090b;
@@ -104,15 +104,9 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .light .glass-card {
-            background: #ffffff;
-            border: 1px solid #d4d4d8;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-            backdrop-filter: none;
-        }
-        /* No tema cinza-claro, cartões e cabeçalho permanecem totalmente opacos. */
-        .light header {
-            background: #ffffff !important;
-            backdrop-filter: none !important;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         .pulse-danger {
@@ -244,36 +238,6 @@
             #forecast-3days-container > div { min-height: 155px; }
         }
 
-
-        /* Contraste reforçado do painel público e previsão diária no tema escuro. */
-        .dark #public-weather-panel > div {
-            background-color: #09090b;
-            border-color: #3f3f46;
-            border-top-color: #facc15;
-        }
-        .dark #public-weather-panel #public-weather-status,
-        .dark #public-weather-panel #public-weather-alerts > p {
-            background-color: #18181b;
-            border-color: #52525b;
-            color: #e4e4e7;
-        }
-        .dark #public-weather-panel #public-weather-metrics > div {
-            background-color: #18181b;
-            border-color: #3f3f46;
-        }
-        .dark #public-weather-panel #public-weather-metrics > div > div:first-child,
-        .dark #public-weather-panel #public-weather-metrics > div > div:last-child {
-            color: #cbd5e1;
-        }
-        .dark #forecast-3days-container > div {
-            background-color: #18181b;
-            border-color: #52525b;
-        }
-        #forecast-3days-container > div h3 {
-            font-weight: 800;
-            line-height: 1.4;
-        }
-
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -293,6 +257,14 @@
                             <p class="site-independent-notice">
                                 Plataforma independente de monitoramento meteorológico de Erechim/RS, desenvolvida por iniciativa particular. Não constitui órgão público, não possui caráter institucional e não substitui os avisos do INMET nem os alertas da Defesa Civil.
                             </p>
+                            <div class="text-xs font-mono font-bold dark:text-sky-400 text-sky-600 mt-1.5 flex flex-col sm:flex-row justify-center items-center gap-2">
+                                <span id="header-update-timestamp">Atualizado às --:--:--</span>
+                            </div>
+                            <p class="text-xs dark:text-slate-400 text-slate-500 flex flex-wrap justify-center gap-x-3 gap-y-0.5 mt-2">
+                                <span><i class="fa-solid fa-location-dot text-rose-500"></i> Lat: 27°38'02"S | Lon: 52°16'26"O</span>
+                                <span><i class="fa-solid fa-mountain text-emerald-500"></i> 783m</span>
+                                <span><i class="fa-solid fa-tower-observation text-amber-500"></i> INMET: <strong>A828</strong></span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -309,16 +281,34 @@
                         <span>Lab Tornado</span>
                     </button>
 
+                    <!-- Model Efficacy Modal Button -->
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleModelEfficacyModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                        <i class="fa-solid fa-chart-column text-emerald-400"></i>
+                        <span>Eficácia do Modelo</span>
+                    </button>
+
                     <!-- History Modal Button -->
                     <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleHistoryPage(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
                         <span>Séries & Histórico</span>
                     </button>
 
+                    <!-- Sources Modal Button -->
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleSourcesPage(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
+                        <i class="fa-solid fa-globe text-sky-400"></i>
+                        <span>Fontes</span>
+                    </button>
+
                     <!-- Sites Utilizados Modal Button -->
                     <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleSitesModal(true)" gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-external-link-alt text-emerald-400"></i>
                         <span>Sites Utilizados</span>
+                    </button>
+
+                    <!-- Condições de plantio -->
+                    <button data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 shrink-0" onclick="togglePlantingCalendar(true)">
+                        <i class="fa-solid fa-seedling text-lime-400"></i>
+                        <span>Condições de plantio</span>
                     </button>
 
                     <!-- Theme Toggle -->
@@ -342,71 +332,6 @@
         </div>
     </header>
 
-    <!-- PAINEL PÚBLICO DE CONDIÇÕES E ALERTAS PERSONALIZADOS -->
-    <section id="public-weather-panel" class="w-full px-4 py-6 sm:py-8" aria-labelledby="public-weather-title">
-      <div class="max-w-5xl mx-auto rounded-2xl border border-slate-700 border-t-4 border-t-yellow-400 dark:bg-slate-950 bg-white shadow-lg shadow-yellow-400/10 p-4 sm:p-6">
-        <div class="flex flex-col gap-2 items-center">
-          <span class="text-xs font-bold uppercase tracking-widest text-yellow-500 dark:text-yellow-300">Monitoramento público</span>
-          <h2 id="public-weather-title" class="text-xl sm:text-2xl font-extrabold dark:text-white text-slate-900">Condições meteorológicas e avisos por localização</h2>
-          <p class="text-sm dark:text-slate-300 text-slate-600">Consulte as condições atuais e indicadores de atenção para sua região.</p>
-        </div>
-        <div class="mt-6 flex flex-col items-center gap-3">
-          <label for="public-location-input" class="text-sm font-bold dark:text-slate-100 text-slate-800">Informe sua localização (cidade/município)</label>
-          <div class="w-full flex flex-col sm:flex-row gap-3 justify-center">
-          <input id="public-location-input" type="search" value="" placeholder="Digite sua cidade (ex.: Gaurama, RS). Padrão: Erechim, RS" class="w-full sm:max-w-md rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 text-sm" aria-label="Cidade para monitoramento">
-          <button type="button" onclick="searchPublicLocation()" class="rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold px-5 py-3 text-sm"><i class="fa-solid fa-magnifying-glass mr-2"></i>Consultar</button>
-          <button type="button" onclick="usePublicGeolocation()" class="rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-semibold px-4 py-3 text-sm"><i class="fa-solid fa-location-crosshairs mr-2"></i>Minha localização</button>
-          </div>
-        </div>
-        <div class="mt-6 flex flex-wrap justify-center gap-4 text-xs dark:text-slate-300 text-slate-500">
-          <span id="public-location-label"><i class="fa-solid fa-location-dot mr-1"></i>Erechim, RS</span>
-          <span id="public-update-label">Aguardando consulta...</span>
-        </div>
-        <div id="public-weather-status" class="mt-5 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600" role="status" aria-live="polite">Carregando condições meteorológicas...</div>
-        <div id="public-weather-metrics" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center flex flex-col items-center justify-center gap-2">
-            <div class="text-xs uppercase font-bold text-slate-500">Temperatura</div>
-            <div class="w-full h-16 flex items-center justify-center my-1"><i class="fa-solid fa-temperature-half text-5xl text-rose-500" aria-hidden="true" title="Temperatura"></i></div>
-            <div id="public-temp" class="text-2xl font-extrabold dark:text-white text-slate-900">--°C</div>
-            <div id="public-feels" class="text-xs text-slate-600">Sensação: --</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center flex flex-col items-center justify-center gap-2">
-            <div class="text-xs uppercase font-bold text-slate-500">Chuva nas próximas horas</div>
-            <div class="w-full h-16 flex items-center justify-center my-1"><i class="fa-solid fa-cloud-rain text-5xl text-sky-600" aria-hidden="true" title="Chuva"></i></div>
-            <div id="public-rain" class="text-2xl font-extrabold dark:text-white text-slate-900">--%</div>
-            <div id="public-rain-mm" class="text-xs text-slate-600">Precipitação: --</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center flex flex-col items-center justify-center gap-2">
-            <div class="text-xs uppercase font-bold text-slate-500">Vento</div>
-            <div class="w-full h-16 flex items-center justify-center my-1"><i class="fa-solid fa-wind text-5xl text-emerald-600" aria-hidden="true" title="Vento"></i></div>
-            <div id="public-wind" class="text-2xl font-extrabold dark:text-white text-slate-900">-- km/h</div>
-            <div id="public-gust" class="text-xs text-slate-600">Rajadas: --</div>
-          </div>
-        </div>
-        <div class="mt-6 text-left rounded-xl border-2 border-slate-300 bg-slate-100 p-4 sm:p-5">
-          <h3 class="text-base sm:text-lg font-black text-slate-900 mb-3 flex items-center gap-2"><span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-400 text-slate-950"><i class="fa-solid fa-triangle-exclamation"></i></span>Indicadores automáticos de atenção</h3>
-          <div id="public-custom-alert-heading" class="hidden mb-4 rounded-xl border-2 border-amber-500 bg-amber-100 p-4 text-amber-950 shadow-sm" role="alert" aria-live="polite">
-            <div class="font-black text-base sm:text-lg flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i>Alerta meteorológico para sua região</div>
-            <p class="mt-2 text-sm font-semibold">Elemento(s) de alerta identificado(s): <span id="public-custom-alert-elements"></span></p>
-          </div>
-          <div id="public-weather-alerts" class="space-y-4"><p class="text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg p-3">Os indicadores serão exibidos após a consulta.</p></div>
-          <div class="mt-3 rounded-xl border-2 border-emerald-700 bg-emerald-700 p-4 sm:p-5 text-white shadow-sm text-center">
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-2 border-b border-emerald-300/50 pb-2">
-              <span class="text-sm sm:text-base font-black uppercase tracking-wide flex items-center gap-2 justify-center">
-                <i class="fa-solid fa-clock-rotate-left"></i> Indicador interno — próximas 6 horas
-              </span>
-              <span id="label-6h-span" class="text-xs font-mono font-extrabold px-3 py-1 rounded bg-white text-emerald-900 uppercase">SEM ALERTA</span>
-            </div>
-            <div id="content-6h-alert" class="text-sm sm:text-base font-bold text-white flex flex-wrap justify-center items-center gap-1">
-              <i class="fa-solid fa-spinner fa-spin text-emerald-200 mr-2"></i>
-              <span>Carregando projeção meteorológica detalhada...</span>
-            </div>
-          </div>
-        </div>
-        <p class="mt-5 border-t border-slate-200 pt-3 text-[11px] leading-relaxed text-slate-500">Fonte meteorológica: Open-Meteo. Os indicadores são estimativas automáticas baseadas em dados meteorológicos e não representam alertas oficiais. Para situações de risco, acompanhe o INMET e a Defesa Civil. A localização do dispositivo só é acessada se você clicar em “Minha localização” e autorizar o navegador.</p>
-      </div>
-    </section>
-
     <!-- LOGIN / CADASTRO / RECUPERAÇÃO: Supabase Auth -->
     <div id="login-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[80] hidden flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
         <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl my-auto">
@@ -414,22 +339,18 @@
             <div class="flex flex-col items-center gap-2 mb-5">
                 <span class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-lock text-2xl"></i></span>
                 <h2 id="login-modal-title" class="text-xl font-bold text-white">Acesso restrito</h2>
-                <p class="text-xs text-slate-400">Entre com sua conta administrativa cadastrada no Supabase.</p>
+                <p class="text-xs text-slate-400">Acesso demonstrativo temporário para apresentação do site.</p>
             </div>
             <div class="flex justify-center mb-4">
-                <span class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Login administrativo</span>
+                <span class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">Login de demonstração</span>
             </div>
-            <form id="login-form" class="space-y-3" onsubmit="handleSupabaseLogin(event)">
+            <form id="login-form" class="space-y-3" onsubmit="handleDemoLogin(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="login-email">E-mail</label>
-                <input id="login-email" type="email" autocomplete="username" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left placeholder:text-slate-500" placeholder="seu email">
+                <input id="login-email" type="email" autocomplete="username" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="wander.l.marques@gmail.com">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="login-password">Senha</label>
                 <input id="login-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Sua senha">
-                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Informe o e-mail e a senha cadastrados no Supabase.</p>
+                <p id="login-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Informe o e-mail e a senha temporária de demonstração.</p>
                 <button id="login-submit" type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Entrar</button>
-                <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-1 text-xs">
-                    <button type="button" onclick="showAuthPanel('recover')" class="text-sky-300 hover:text-sky-200 underline">Esqueci minha senha</button>
-                    <button type="button" onclick="showAuthPanel('register')" class="text-emerald-300 hover:text-emerald-200 underline">Criar conta</button>
-                </div>
             </form>
             <form id="register-form" class="hidden space-y-3" onsubmit="handleSupabaseRegister(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="register-email">E-mail</label>
@@ -442,22 +363,12 @@
                 <input id="register-password-confirm" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Repita a senha">
                 <p id="register-message" class="text-xs text-amber-300 text-center" role="status" aria-live="polite">Após o cadastro, confirme seu e-mail e valide o celular por código.</p>
                 <button id="register-submit" type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">Criar cadastro</button>
-                <button type="button" onclick="showAuthPanel('login')" class="w-full text-xs text-slate-300 hover:text-white underline">Voltar ao login</button>
             </form>
             <form id="recover-email-form" class="hidden space-y-3" onsubmit="handleEmailRecovery(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="recover-email">E-mail cadastrado</label>
                 <input id="recover-email" type="email" autocomplete="email" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="seuemail@exemplo.com">
                 <p id="recover-email-message" class="text-xs text-amber-300 text-center" role="status">Enviaremos um link para redefinir sua senha.</p>
                 <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">Enviar link de recuperação</button>
-                <button type="button" onclick="showAuthPanel('login')" class="w-full text-xs text-slate-300 hover:text-white underline">Voltar ao login</button>
-            </form>
-            <form id="update-password-form" class="hidden space-y-3" onsubmit="handlePasswordUpdate(event)">
-                <label class="block text-left text-xs font-semibold text-slate-300" for="new-account-password">Nova senha (mínimo 8 caracteres)</label>
-                <input id="new-account-password" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Digite a nova senha">
-                <label class="block text-left text-xs font-semibold text-slate-300" for="confirm-account-password">Confirmar nova senha</label>
-                <input id="confirm-account-password" type="password" autocomplete="new-password" minlength="8" required class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white text-left" placeholder="Repita a nova senha">
-                <p id="update-password-message" class="text-xs text-amber-300 text-center" role="status">Escolha uma nova senha para sua conta.</p>
-                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">Salvar nova senha</button>
             </form>
             <form id="recover-phone-form" class="hidden space-y-3" onsubmit="handlePhoneRecoveryRequest(event)">
                 <label class="block text-left text-xs font-semibold text-slate-300" for="recover-phone">Celular verificado com DDI</label>
@@ -537,34 +448,7 @@
             </div>
 
             <div class="space-y-8">
-                <section class="rounded-2xl border border-sky-700/50 bg-slate-900 p-5 sm:p-6 shadow-xl">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                        <div>
-                            <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cloud-sun text-sky-400"></i> Condições meteorológicas atuais — Erechim/RS</h3>
-                            <p class="text-xs text-slate-300 mt-1">Dados meteorológicos do momento, consultados automaticamente via Open-Meteo. Não são parâmetros da simulação.</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span id="lab-current-updated" class="text-xs text-slate-400">Aguardando consulta...</span>
-                            <button type="button" onclick="loadLabCurrentWeather()" class="px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold"><i class="fa-solid fa-rotate-right mr-1"></i> Atualizar</button>
-                        </div>
-                    </div>
-                    <div id="lab-current-status" class="text-sm text-slate-300 mb-3" role="status">Carregando dados meteorológicos atuais...</div>
-                    <div id="lab-current-metrics" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Temperatura</div><div id="lab-current-temp" class="text-xl font-extrabold text-white mt-1">-- °C</div></div>
-                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Sensação térmica</div><div id="lab-current-feels" class="text-xl font-extrabold text-white mt-1">-- °C</div></div>
-                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Umidade</div><div id="lab-current-humidity" class="text-xl font-extrabold text-white mt-1">--%</div></div>
-                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Pressão</div><div id="lab-current-pressure" class="text-xl font-extrabold text-white mt-1">-- hPa</div></div>
-                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Chuva</div><div id="lab-current-rain" class="text-xl font-extrabold text-white mt-1">-- mm</div></div>
-                        <div class="rounded-xl bg-slate-800 border border-slate-700 p-3"><div class="text-xs text-slate-400">Vento / rajadas</div><div id="lab-current-wind" class="text-lg font-extrabold text-white mt-1">-- / --</div></div>
-                    </div>
-                    <div id="lab-current-tornado-assessment" class="mt-4 rounded-xl border border-amber-500/50 bg-amber-950/30 p-4" role="status" aria-live="polite">
-                        <div class="flex items-center gap-2 text-amber-300 font-extrabold"><i class="fa-solid fa-triangle-exclamation"></i> Avaliação de possibilidade de tornado</div>
-                        <p id="lab-current-tornado-text" class="mt-2 text-sm text-slate-100">Aguardando dados meteorológicos. Os parâmetros atuais disponíveis não permitem confirmar nem descartar a possibilidade de tornado.</p>
-                        <p class="mt-2 text-xs text-slate-400">Esta consulta não é um detector de tornados. A avaliação confiável exige análise de radar, estrutura da tempestade, instabilidade e cisalhamento do vento. A ausência de indicação não significa ausência de risco.</p>
-                    </div>
-                </section>
-
-                <section class="rounded-2xl border border-indigo-500/40 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
+                <section>
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
                         <div>
                             <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gauge-high text-blue-500"></i> Parâmetros do cenário simulado</h3>
@@ -738,6 +622,51 @@
         </div>
     </div>
 
+    <!-- CALENDÁRIO ANUAL: CONDIÇÕES DE PLANTIO -->
+    <div id="planting-calendar-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col overflow-y-auto p-3 sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="planting-calendar-title">
+        <div class="max-w-7xl mx-auto w-full space-y-5 my-auto text-slate-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-lime-700/30 border border-lime-500/30 flex items-center justify-center"><i class="fa-solid fa-seedling text-lime-300 text-2xl"></i></div>
+                    <div>
+                        <h2 id="planting-calendar-title" class="text-xl sm:text-2xl font-extrabold text-white">Condições de plantio — Erechim / RS</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Calendário agrícola, fases da Lua e referências climáticas mensais</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="planting-year" class="text-xs text-slate-400">Ano</label>
+                    <select id="planting-year" class="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" onchange="renderPlantingCalendar()"></select>
+                    <button onclick="togglePlantingCalendar(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                <div class="rounded-xl border border-sky-500/30 bg-sky-950/20 p-4"><div class="text-xs text-sky-300 font-bold uppercase">Chuva mensal</div><div class="text-sm text-slate-300 mt-1">Média histórica de precipitação, em milímetros</div></div>
+                <div class="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4"><div class="text-xs text-amber-300 font-bold uppercase">Luz do dia</div><div class="text-sm text-slate-300 mt-1">Duração astronômica aproximada do dia; não equivale a horas de céu ensolarado</div></div>
+                <div class="rounded-xl border border-rose-500/30 bg-rose-950/20 p-4"><div class="text-xs text-rose-300 font-bold uppercase">Calor e frio</div><div class="text-sm text-slate-300 mt-1">Faixa climatológica de temperaturas mínimas e máximas</div></div>
+                <div class="rounded-xl border border-lime-500/30 bg-lime-950/20 p-4"><div class="text-xs text-lime-300 font-bold uppercase">Culturas</div><div class="text-sm text-slate-300 mt-1">Sugestões sazonais para a região Norte do RS; confirme cultivar, solo e ZARC</div></div>
+            </div>
+
+            <div class="glass-card rounded-2xl border border-slate-800 p-4 sm:p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div><h3 class="font-extrabold text-white">Calendário anual de plantio e fases da Lua</h3><p class="text-xs text-slate-400">Cada dia mostra a fase lunar aproximada. Selecione um mês para consultar culturas e clima.</p></div>
+                    <div class="flex flex-wrap gap-2 text-[11px] text-slate-300"><span>🌑 Nova</span><span>🌓 Crescente</span><span>🌕 Cheia</span><span>🌗 Minguante</span></div>
+                </div>
+                <div id="planting-month-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+            </div>
+
+            <div id="planting-month-detail" class="glass-card rounded-2xl border border-slate-800 p-4 sm:p-6">
+                <p class="text-sm text-slate-400">Selecione um mês no calendário para ver as recomendações detalhadas.</p>
+            </div>
+
+            <div class="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 space-y-2">
+                <h3 class="font-bold text-amber-200"><i class="fa-solid fa-circle-info mr-2"></i>Nota técnica e limitações</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">As temperaturas e a precipitação são médias climatológicas de referência para Erechim, não uma previsão para o ano selecionado. A duração da luz do dia é calculada astronomicamente para a latitude local e não mede insolação real. As fases lunares são calculadas aproximadamente. O calendário de culturas é orientativo para a região Norte do Rio Grande do Sul; datas efetivas dependem de cultivar, tipo de solo, altitude, manejo, disponibilidade de água e Zoneamento Agrícola de Risco Climático (ZARC). A Lua não substitui critérios agronômicos.</p>
+                <div class="flex flex-wrap gap-3 text-xs"><a class="text-sky-300 hover:underline" target="_blank" rel="noopener noreferrer" href="https://portal.inmet.gov.br/normais">INMET — Normais climatológicas</a><a class="text-sky-300 hover:underline" target="_blank" rel="noopener noreferrer" href="https://www.infoteca.cnptia.embrapa.br/">Embrapa — publicações agrícolas</a><a class="text-sky-300 hover:underline" target="_blank" rel="noopener noreferrer" href="https://www.gov.br/agricultura/pt-br/assuntos/riscos-seguro/programa-nacional-de-zoneamento-agricola-de-risco-climatico">MAPA — ZARC</a><a class="text-sky-300 hover:underline" target="_blank" rel="noopener noreferrer" href="https://www.climatempo.com.br/climatologia/1516/erechim-br">Climatologia de Erechim</a></div>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN CONTAINER -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 space-y-6 flex-grow w-full">
         <!-- EMERGENCY PUBLIC ALERT BANNER -->
@@ -752,6 +681,19 @@
             </div>
         </div>
 
+<!-- INDICADOR DE TENDÊNCIA E ALERTA DAS PRÓXIMAS 6 HORAS -->
+                <div id="header-6h-alert" class="flex-1 max-w-xl mx-auto lg:mx-4 px-4 py-3 rounded-xl bg-emerald-600/20 border-2 border-emerald-500 text-emerald-100 transition shadow-lg text-center">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-1.5 border-b border-emerald-500/30 pb-2">
+                        <span class="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 justify-center">
+                            <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> INDICADOR INTERNO — PRÓXIMAS 6 HORAS:
+                        </span>
+                        <span id="label-6h-span" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 uppercase">SEM ALERTA</span>
+                    </div>
+                    <div id="content-6h-alert" class="text-xs text-emerald-100 flex justify-center items-center">
+                        <i class="fa-solid fa-spinner fa-spin text-emerald-300 mr-2"></i>
+                        <span>Carregando projeção meteorológica detalhada...</span>
+                    </div>
+                </div>
 
                 <!-- CURRENT WEATHER METRICS -->
         <section>
@@ -846,6 +788,7 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Frio Extremo</span>
                     </div>
                     <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-cold" class="dark:text-slate-300 text-slate-700">&lt; 5.0 °C</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-cold" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-cold" class="text-xs font-mono text-slate-400">-- °C</span>
@@ -860,6 +803,7 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Calor Extremo</span>
                     </div>
                     <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-heat" class="dark:text-slate-300 text-slate-700">&gt; 28.0 °C</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-heat" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-heat" class="text-xs font-mono text-slate-400">-- °C</span>
@@ -874,6 +818,7 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Chuva Intensa</span>
                     </div>
                     <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-rain" class="dark:text-slate-300 text-slate-700">&gt; 30mm / 12h</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-rain" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-rain" class="text-xs font-mono text-slate-400">-- mm</span>
@@ -888,6 +833,7 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Vento Forte</span>
                     </div>
                     <div class="mt-2 w-full text-center">
+                        <span class="text-xs text-slate-400 block mb-2">Limite de normalidade: <strong id="lbl-cfg-wind" class="dark:text-slate-300 text-slate-700">&gt; 40 km/h</strong></span>
                         <div class="mt-3 flex flex-col items-center justify-center gap-2 pt-2 border-t dark:border-slate-800 border-slate-200">
                             <span id="badge-wind" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Normal</span>
                             <span id="val-wind" class="text-xs font-mono text-slate-400">-- km/h</span>
@@ -914,7 +860,7 @@
         </section>
 
         <!-- RADAR / EARTH NULLSCHOOL / WIND / SATELLITE -->
-        <section class="space-y-6 mt-10 pt-6 border-t border-slate-800/70">
+        <section class="space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                 <!-- Earth Nullschool map -->
                 <div class="lg:col-span-2 glass-card rounded-2xl p-5 flex flex-col items-center">
@@ -924,23 +870,22 @@
                         </h2>
                         <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-mono">Erechim (RS) — Earth Nullschool</span>
                     </div>
-                    <div class="relative w-full h-[580px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
-                        <iframe id="earth-nullschool-frame" title="Earth Nullschool — visualização global de vento e dinâmica atmosférica sobre Erechim" class="w-full h-full border-0 pointer-events-none" src="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.27,-27.63,3000/loc=-52.27,-27.63" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                        <button type="button" id="earth-nullschool-lock" onclick="toggleMapInteraction('earth-nullschool-frame','earth-nullschool-lock')" class="absolute bottom-3 right-3 z-20 w-11 h-11 rounded-full bg-slate-900/95 text-white border border-slate-500 shadow-lg flex items-center justify-center hover:bg-slate-700" title="Desbloquear interação com o mapa" aria-label="Desbloquear interação com o mapa" aria-pressed="false"><i class="fa-solid fa-lock"></i></button>
+                    <div class="w-full h-[580px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 shadow-inner">
+                        <iframe title="Earth Nullschool — visualização global de vento e dinâmica atmosférica sobre Erechim" class="w-full h-full border-0" src="https://earth.nullschool.net/#current/wind/surface/level/orthographic=-52.27,-27.63,3000/loc=-52.27,-27.63" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                     <p class="text-xs text-slate-400 mt-3 text-center">Visualização interativa externa. Os dados e a atualização são fornecidos pelo Earth Nullschool.</p>
                 </div>
 
                 <!-- Wind direction card on the side -->
-                <div class="glass-card rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-between min-h-[620px] h-full">
-                    <div class="flex flex-col items-center justify-center mb-3 gap-3 w-full">
+                <div class="glass-card rounded-2xl p-5 flex flex-col items-center justify-center">
+                    <div class="flex flex-col items-center justify-center mb-3 gap-2">
                         <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-300 text-slate-700 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-compass text-teal-400 text-base"></i> Direção & Intensidade do Vento
                         </h2>
                         <span id="wind-dir-text" class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-3 py-1 rounded-lg">--° N</span>
                     </div>
-                    <div class="flex flex-1 w-full flex-col items-center justify-center my-4 relative">
-                        <div class="w-52 h-52 sm:w-60 sm:h-60 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
+                    <div class="flex flex-col items-center justify-center my-5 relative">
+                        <div class="w-40 h-40 rounded-full border-2 border-slate-700/80 bg-slate-900/90 relative flex items-center justify-center shadow-inner">
                             <span class="absolute top-2 text-[11px] font-bold text-slate-400">N</span>
                             <span class="absolute right-3 text-[11px] font-bold text-slate-400">L</span>
                             <span class="absolute bottom-2 text-[11px] font-bold text-slate-400">S</span>
@@ -953,14 +898,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-center text-sm mt-4 w-full">
-                        <div class="p-4 sm:p-5 min-h-24 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col justify-center">
-                            <span class="text-slate-300 block text-xs mb-2">Velocidade</span>
-                            <strong id="wind-card-speed" class="text-lg sm:text-xl font-bold text-teal-300">-- km/h</strong>
+                    <div class="grid grid-cols-2 gap-3 text-center text-xs mt-4 w-full">
+                        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <span class="text-slate-400 block text-[11px] mb-1.5">Velocidade</span>
+                            <strong id="wind-card-speed" class="text-base font-bold text-teal-300">-- km/h</strong>
                         </div>
-                        <div class="p-4 sm:p-5 min-h-24 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col justify-center">
-                            <span class="text-slate-300 block text-xs mb-2">Rajada Máx</span>
-                            <strong id="wind-card-gust" class="text-lg sm:text-xl font-bold text-amber-300">-- km/h</strong>
+                        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <span class="text-slate-400 block text-[11px] mb-1.5">Rajada Máx</span>
+                            <strong id="wind-card-gust" class="text-base font-bold text-amber-300">-- km/h</strong>
                         </div>
                     </div>
                 </div>
@@ -975,13 +920,12 @@
                     <span id="sat-mode-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono uppercase inline-block">INFRAVERMELHO</span>
                 </div>
                 <div class="relative w-full h-[420px] rounded-xl overflow-hidden border dark:border-slate-800 border-slate-300 bg-slate-950 flex items-center justify-center group">
-                    <iframe title="Visualização interativa de satélite" referrerpolicy="strict-origin-when-cross-origin" id="sat-iframe-view" class="w-full h-full border-0 hidden pointer-events-none" src="about:blank" loading="lazy"></iframe>
-                    <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Imagem infravermelha do satélite GOES-16 para a região sul da América do Sul" class="w-full h-full object-contain rounded-xl transition duration-300" onerror="handleSatelliteError(this)">
+                    <iframe title="Visualização interativa de satélite" referrerpolicy="strict-origin-when-cross-origin" id="sat-iframe-view" class="w-full h-full border-0 hidden" src="about:blank" loading="lazy"></iframe>
+                    <img id="satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/13/1000x1000.jpg" alt="Imagem infravermelha do satélite GOES-16 para a região sul da América do Sul" class="w-full h-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.02]" onerror="handleSatelliteError(this)">
                     <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-300 backdrop-blur-sm z-10">
                         <span id="sat-status-label" class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> GOES-16 NOAA / CIRA</span>
                         <button onclick="reloadSatelliteImage()" class="hover:text-sky-400 transition" title="Recarregar imagem"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
-                    <button type="button" id="satellite-lock" onclick="toggleMapInteraction('sat-iframe-view','satellite-lock')" class="absolute bottom-3 right-3 z-20 w-11 h-11 rounded-full bg-slate-900/95 text-white border border-slate-500 shadow-lg flex items-center justify-center hover:bg-slate-700" title="Desbloquear interação com o satélite" aria-label="Desbloquear interação com o satélite" aria-pressed="false"><i class="fa-solid fa-lock"></i></button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-xs w-full max-w-3xl">
                     <button onclick="switchSatChannel('ir')" class="py-2 px-3 rounded bg-sky-950 text-sky-200 border border-sky-800 hover:bg-sky-900 transition font-medium text-center">Infravermelho</button>
@@ -1032,6 +976,14 @@
     <footer id="private-footer" class="hidden border-t dark:border-slate-900 border-slate-200 dark:bg-slate-950 bg-white py-8 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4 space-y-6">
             
+            <div class="flex justify-center mb-4">
+                <!-- Refresh Button -->
+                <button id="btn-refresh" onclick="fetchWeatherData()" class="flex items-center gap-2 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-md transition active:scale-95">
+                    <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
+                    <span>Atualizar</span>
+                </button>
+            </div>
+
             <div class="glass-card max-w-2xl mx-auto rounded-2xl p-5 border border-slate-800 shadow-sm text-center">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-address-card text-sky-500"></i> Contatos & Canais Oficiais</h3>
                 <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-medium">
@@ -1052,23 +1004,14 @@
         </div>
     </footer>
 
-    <!-- AUTENTICAÇÃO ADMINISTRATIVA PELO SUPABASE
-         Use somente a Project URL e a chave pública (Publishable/anon).
-         NUNCA coloque Secret key ou service_role neste arquivo. -->
+    <!-- LOGIN TEMPORÁRIO DE DEMONSTRAÇÃO
+         IMPORTANTE: autenticação somente visual, sem segurança real.
+         Remover/substituir por Supabase antes de usar com dados privados. -->
     <script>
-        // PREENCHA estes dois campos com os dados do seu projeto Supabase.
-       const SUPABASE_URL = 'https://kckaadrrxxwscbxohjbg.supabase.co';
-        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XuDB-kpv-oi-ONTpTbze-g_3mz9OMeW';
-
-        const supabaseClient = (() => {
-            const configured = SUPABASE_URL.startsWith('https://')
-                && !SUPABASE_URL.includes('COLE_AQUI')
-                && SUPABASE_PUBLISHABLE_KEY
-                && !SUPABASE_PUBLISHABLE_KEY.includes('COLE_AQUI');
-            if (!configured || !window.supabase?.createClient) return null;
-            return window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-        })();
-
+        const ADMIN_EMAIL = 'wander.l.marques@gmail.com';
+        // Credencial temporária para a apresentação. Não reutilize esta senha em outros serviços.
+        const DEMO_PASSWORD = 'ErechimDemo2026!';
+        const DEMO_SESSION_KEY = 'centralErechimDemoAuth';
         window.__siteAuthenticated = false;
         window.__siteIsAdmin = false;
 
@@ -1076,235 +1019,73 @@
             const el = document.getElementById(id);
             if (el) el.textContent = message;
         }
-
         function showAuthPanel(panel) {
-            const panels = {
-                login: 'login-form',
-                register: 'register-form',
-                recover: 'recover-email-form',
-                update: 'update-password-form'
-            };
-            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form','update-password-form'].forEach(id => {
+            ['login-form','register-form','recover-email-form','recover-phone-form','recover-phone-verify-form'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
-            document.getElementById(panels[panel] || panels.login)?.classList.remove('hidden');
-            const titles = { login: 'Acesso administrativo', register: 'Criar conta', recover: 'Recuperar senha', update: 'Definir nova senha' };
+            document.getElementById('login-form')?.classList.remove('hidden');
             const title = document.getElementById('login-modal-title');
-            if (title) title.textContent = titles[panel] || titles.login;
+            if (title) title.textContent = 'Acesso demonstrativo';
         }
-
-        async function handleSupabaseRegister(event) {
-            event.preventDefault();
-            if (!supabaseClient) {
-                authMessage('register-message', 'Configure a URL e a chave pública do Supabase antes do cadastro.');
-                return;
-            }
-            const email = document.getElementById('register-email').value.trim();
-            const phone = document.getElementById('register-phone').value.trim();
-            const password = document.getElementById('register-password').value;
-            const confirm = document.getElementById('register-password-confirm').value;
-            if (password.length < 8) {
-                authMessage('register-message', 'A senha precisa ter pelo menos 8 caracteres.');
-                return;
-            }
-            if (password !== confirm) {
-                authMessage('register-message', 'As senhas não coincidem.');
-                return;
-            }
-            const submit = document.getElementById('register-submit');
-            if (submit) { submit.disabled = true; submit.textContent = 'Criando conta...'; }
-            try {
-                const redirectTo = window.location.origin + window.location.pathname;
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: { emailRedirectTo: redirectTo, data: { phone } }
-                });
-                if (error) throw error;
-                authMessage('register-message', data.session
-                    ? 'Conta criada. Para acessar a área administrativa, ela também precisa estar autorizada em admin_users.'
-                    : 'Cadastro recebido! Confira seu e-mail e confirme a conta. Depois, um administrador deverá autorizar o acesso em admin_users.');
-            } catch (error) {
-                console.error('Erro no cadastro Supabase:', error);
-                authMessage('register-message', error.message || 'Não foi possível criar a conta.');
-            } finally {
-                if (submit) { submit.disabled = false; submit.textContent = 'Criar cadastro'; }
-            }
-        }
-
-        async function handlePasswordUpdate(event) {
-            event.preventDefault();
-            if (!supabaseClient) return authMessage('update-password-message', 'A integração com o Supabase não está configurada.');
-            const password = document.getElementById('new-account-password').value;
-            const confirm = document.getElementById('confirm-account-password').value;
-            if (password.length < 8) return authMessage('update-password-message', 'A senha precisa ter pelo menos 8 caracteres.');
-            if (password !== confirm) return authMessage('update-password-message', 'As senhas não coincidem.');
-            const { error } = await supabaseClient.auth.updateUser({ password });
-            if (error) {
-                console.error('Erro ao atualizar senha:', error);
-                return authMessage('update-password-message', 'Não foi possível atualizar a senha: ' + error.message);
-            }
-            authMessage('update-password-message', 'Senha alterada com sucesso! Agora você pode entrar com a nova senha.');
-            document.getElementById('new-account-password').value = '';
-            document.getElementById('confirm-account-password').value = '';
-            await supabaseClient.auth.signOut();
-            setAuthenticatedView(false, '');
-            showAuthPanel('login');
-            authMessage('login-message', 'Senha alterada. Entre com sua nova senha.');
-        }
-
         function openLoginModal() {
             document.getElementById('login-modal')?.classList.remove('hidden');
             showAuthPanel('login');
-            authMessage('login-message', supabaseClient
-                ? 'Entre com o e-mail e a senha da conta administrativa cadastrada no Supabase.'
-                : 'A integração ainda precisa receber a Project URL e a chave pública do Supabase.');
+            authMessage('login-message', 'Login temporário habilitado para a apresentação.');
         }
-
         function closeLoginModal() {
             document.getElementById('login-modal')?.classList.add('hidden');
         }
-
-        function setAuthenticatedView(isAuthenticated, email, role = '') {
-            const allowed = !!isAuthenticated && ['owner', 'admin'].includes(role);
-            window.__siteAuthenticated = allowed;
-            window.__siteIsAdmin = allowed;
-
+        function setAuthenticatedView(isAuthenticated, email) {
+            window.__siteAuthenticated = !!isAuthenticated;
+            window.__siteIsAdmin = !!isAuthenticated && String(email || '').trim().toLowerCase() === ADMIN_EMAIL;
             const privateContent = document.getElementById('private-content');
             const privateFooter = document.getElementById('private-footer');
             if (privateContent) {
-                privateContent.classList.toggle('hidden', !allowed);
-                privateContent.setAttribute('aria-hidden', String(!allowed));
+                privateContent.classList.toggle('hidden', !isAuthenticated);
+                privateContent.setAttribute('aria-hidden', String(!isAuthenticated));
             }
-            if (privateFooter) privateFooter.classList.toggle('hidden', !allowed);
-            document.querySelectorAll('[data-auth-required="true"]').forEach(el => el.classList.toggle('hidden', !allowed));
-            document.getElementById('login-open-button')?.classList.toggle('hidden', allowed);
-            document.getElementById('logout-button')?.classList.toggle('hidden', !allowed);
-
+            if (privateFooter) privateFooter.classList.toggle('hidden', !isAuthenticated);
+            document.querySelectorAll('[data-auth-required="true"]').forEach(el => el.classList.toggle('hidden', !isAuthenticated));
+            document.getElementById('login-open-button')?.classList.toggle('hidden', !!isAuthenticated);
+            document.getElementById('logout-button')?.classList.toggle('hidden', !isAuthenticated);
             const label = document.getElementById('auth-user-label');
             if (label) {
-                label.textContent = allowed ? `Administrador (${role}): ${email || ''}` : '';
-                label.classList.toggle('hidden', !allowed);
+                label.textContent = isAuthenticated ? `Administrador (demonstração): ${email || ADMIN_EMAIL}` : '';
+                label.classList.toggle('hidden', !isAuthenticated);
             }
-
-            if (allowed) closeLoginModal();
-            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal'].forEach(id => {
+            if (isAuthenticated) closeLoginModal();
+            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','history-page-modal','planting-calendar-modal'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
-            return allowed;
         }
-
-        async function validateSupabaseAdmin(session) {
-            if (!session?.user || !supabaseClient) {
-                setAuthenticatedView(false, '');
-                return false;
-            }
-
-            const { data, error } = await supabaseClient
-                .from('admin_users')
-                .select('role, active')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-
-            if (error) {
-                console.error('Falha ao verificar administrador no Supabase:', error);
-                setAuthenticatedView(false, '');
-                authMessage('login-message', 'Não foi possível validar seu acesso. Confira se as tabelas e políticas RLS foram criadas no Supabase.');
-                return false;
-            }
-
-            if (!data || data.active !== true || !['owner', 'admin'].includes(data.role)) {
-                await supabaseClient.auth.signOut();
-                setAuthenticatedView(false, '');
-                authMessage('login-message', 'Esta conta não possui autorização administrativa. Solicite a inclusão em admin_users.');
-                return false;
-            }
-
-            setAuthenticatedView(true, session.user.email || '', data.role);
-            return true;
-        }
-
-        async function handleSupabaseLogin(event) {
+        function handleDemoLogin(event) {
             event.preventDefault();
-            if (!supabaseClient) {
-                authMessage('login-message', 'Antes de entrar, preencha SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY neste arquivo.');
-                return;
-            }
-
-            const email = document.getElementById('login-email').value.trim();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
             const password = document.getElementById('login-password').value;
-            const submit = document.getElementById('login-submit');
-            if (submit) { submit.disabled = true; submit.textContent = 'Verificando...'; }
-            authMessage('login-message', 'Conectando ao Supabase...');
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                const authorized = await validateSupabaseAdmin(data.session);
-                if (authorized) document.getElementById('login-password').value = '';
-            } catch (error) {
-                console.error('Erro no login Supabase:', error);
-                authMessage('login-message', error.message || 'Não foi possível entrar. Confira seu e-mail e senha.');
-            } finally {
-                if (submit) { submit.disabled = false; submit.textContent = 'Entrar'; }
-            }
-        }
-
-        async function handleSupabaseLogout() {
-            if (!supabaseClient) return;
-            const { error } = await supabaseClient.auth.signOut();
-            if (error) {
-                authMessage('login-message', 'Não foi possível encerrar a sessão: ' + error.message);
+            if (email !== ADMIN_EMAIL || password !== DEMO_PASSWORD) {
+                authMessage('login-message', 'E-mail ou senha incorretos. Confira os dados de demonstração.');
                 return;
             }
+            try { sessionStorage.setItem(DEMO_SESSION_KEY, email); } catch (e) {}
+            setAuthenticatedView(true, ADMIN_EMAIL);
+            document.getElementById('login-password').value = '';
+        }
+        function handleSupabaseLogout() {
+            try { sessionStorage.removeItem(DEMO_SESSION_KEY); } catch (e) {}
             setAuthenticatedView(false, '');
             openLoginModal();
-            authMessage('login-message', 'Sessão encerrada com segurança.');
+            authMessage('login-message', 'Sessão encerrada.');
         }
-
-        async function handleEmailRecovery(event) {
-            event.preventDefault();
-            if (!supabaseClient) {
-                authMessage('recover-email-message', 'Configure primeiro a URL e a chave pública do Supabase.');
-                return;
-            }
-            const email = document.getElementById('recover-email').value.trim();
-            const redirectTo = window.location.origin + window.location.pathname;
-            try {
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
-                if (error) throw error;
-                authMessage('recover-email-message', 'Solicitação enviada. Abra o e-mail mais recente do Supabase e clique no link uma única vez.');
-            } catch (error) {
-                console.error('Erro ao solicitar recuperação:', error);
-                authMessage('recover-email-message', 'Não foi possível enviar o link: ' + error.message);
-            }
-        }
-
-        // Restaura a sessão existente ao abrir ou atualizar o site.
-        (async function initializeSupabaseAuth() {
-            if (!supabaseClient) {
+        // Recupera a sessão somente nesta aba do navegador, inclusive após atualizar a página.
+        (function initializeDemoAuth() {
+            let savedEmail = '';
+            try { savedEmail = sessionStorage.getItem(DEMO_SESSION_KEY) || ''; } catch (e) {}
+            if (savedEmail.toLowerCase() === ADMIN_EMAIL) {
+                setAuthenticatedView(true, ADMIN_EMAIL);
+            } else {
                 setAuthenticatedView(false, '');
-                authMessage('login-message', 'Integração pendente: insira a Project URL e a chave pública do Supabase.');
-                return;
+                authMessage('login-message', 'Login temporário habilitado para a apresentação.');
             }
-
-            supabaseClient.auth.onAuthStateChange((event) => {
-                if (event === 'SIGNED_OUT') setAuthenticatedView(false, '');
-                if (event === 'PASSWORD_RECOVERY') {
-                    document.getElementById('login-modal')?.classList.remove('hidden');
-                    showAuthPanel('update');
-                    authMessage('update-password-message', 'Link validado. Agora escolha sua nova senha.');
-                }
-            });
-
-            const { data, error } = await supabaseClient.auth.getSession();
-            if (error) {
-                console.error('Erro ao recuperar sessão Supabase:', error);
-                setAuthenticatedView(false, '');
-                return;
-            }
-            if (data.session) await validateSupabaseAdmin(data.session);
-            else setAuthenticatedView(false, '');
         })();
 
         const LAT = -27.634;
@@ -1321,6 +1102,91 @@
             geocolor: ["https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/GEOCOLOR/1000x1000.jpg"],
             interactive: ["https://embed.windy.com/embed.html?lat=-27.634&lon=-52.274&detailLat=-27.634&detailLon=-52.274&width=650&height=300&zoom=7&level=surface&overlay=satellite&product=satellite&menu=&message=&marker=true&calendar=now&pressure=false&type=map&location=coordinates&detail=false&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"]
         };
+
+        // Calendário de plantio para Erechim/RS. Climatologia é referência histórica, não previsão anual.
+        const plantingClimate = [
+            {m:'Janeiro',min:18,max:27,rain:196, crops:'Tomate, abobrinha, pepino, feijão-vagem, milho-verde, alface de verão, cenoura de verão, beterraba, couve-flor de verão, cebolinha, salsa e manjericão.', tasks:'Manter irrigação regular; proteger mudas do calor intenso e monitorar doenças favorecidas pela umidade.'},
+            {m:'Fevereiro',min:18,max:27,rain:179, crops:'Últimas semeaduras de tomate, abobrinha, pepino e feijão-vagem; alface, almeirão, couve, cenoura de verão, brócolis e couve-flor para o outono; temperos.', tasks:'Planejar a transição para culturas de outono; evitar estresse hídrico e acompanhar a previsão de temporais.'},
+            {m:'Março',min:17,max:26,rain:156, crops:'Alface, rúcula, almeirão, couve, cenoura, rabanete, espinafre, nabo, acelga, agrião, brócolis, couve-flor, repolho, cebolinha, salsa e coentro.', tasks:'Boa janela para diversificar hortaliças de clima ameno; preparar canteiros e corrigir o solo conforme análise.'},
+            {m:'Abril',min:14,max:23,rain:145, crops:'Alface, rúcula, couve, rabanete, cenoura, beterraba, nabo, acelga, agrião, brócolis, couve-flor, repolho, ervilha e início do planejamento de cebola e alho.', tasks:'Atenção à queda gradual das temperaturas; organizar cobertura de canteiros e produção de mudas.'},
+            {m:'Maio',min:11,max:20,rain:176, crops:'Alface, rúcula, couve, rabanete, brócolis, couve-flor, repolho, cenoura, beterraba, ervilha, nabo, espinafre, alho, fava e cebola.', tasks:'Priorizar espécies tolerantes ao frio; proteger cultivos sensíveis e acompanhar risco de geada.'},
+            {m:'Junho',min:9,max:18,rain:158, crops:'Alface de inverno, rúcula, espinafre, couve, brócolis, couve-flor, repolho, ervilha, alho e culturas de inverno. Aveia e trigo conforme calendário/ZARC da cultivar.', tasks:'Mês frio: atenção a geadas, drenagem e excesso de umidade. Culturas de grãos exigem consulta ao ZARC.'},
+            {m:'Julho',min:8,max:18,rain:161, crops:'Alface de inverno, rúcula, espinafre, couve, brócolis, couve-flor, repolho, ervilha e alho. Aveia e trigo dentro das janelas técnicas aplicáveis.', tasks:'Risco de geadas e crescimento lento; evitar plantio de espécies sensíveis ao frio sem proteção.'},
+            {m:'Agosto',min:10,max:21,rain:122, crops:'Alface, rúcula, cenoura, beterraba, rabanete, ervilha, couve, brócolis e repolho; iniciar planejamento de mudas de primavera.', tasks:'Transição para a primavera; observar geadas tardias e preparar canteiros para culturas de verão.'},
+            {m:'Setembro',min:12,max:22,rain:191, crops:'Alface, rúcula, cenoura, beterraba, feijão-vagem, abobrinha e mudas de tomate, pimentão e outras espécies de verão após risco de frio intenso.', tasks:'Atenção a frentes frias e geadas tardias; escalonar plantios e usar mudas protegidas quando necessário.'},
+            {m:'Outubro',min:14,max:24,rain:260, crops:'Tomate, milho, feijão, abóbora, moranga, pepino, abobrinha, feijão-vagem, alface de verão, cenoura de verão e temperos.', tasks:'Mês historicamente chuvoso: garantir drenagem, tutoramento e monitoramento de fungos. Seguir ZARC para grãos.'},
+            {m:'Novembro',min:15,max:25,rain:183, crops:'Tomate, milho, feijão, abóbora, moranga, pepino, abobrinha, feijão-vagem, alface de verão, beterraba e temperos.', tasks:'Calor crescente: manter umidade do solo, cobertura morta e monitoramento de pragas.'},
+            {m:'Dezembro',min:17,max:27,rain:187, crops:'Tomate, milho-verde, pepino, abobrinha, feijão-vagem, abóbora, alface de verão, cenoura de verão, beterraba e temperos.', tasks:'Atenção ao calor, pancadas de chuva e temporais; irrigar preferencialmente nos horários mais amenos.'}
+        ];
+        const plantingMoonEpoch = Date.UTC(2000,0,6,18,14);
+        const synodicMonth = 29.530588853;
+        function moonInfo(date) {
+            const age = ((date.getTime() - plantingMoonEpoch) / 86400000 % synodicMonth + synodicMonth) % synodicMonth;
+            const phase = age / synodicMonth;
+            const index = Math.round(phase * 8) % 8;
+            const icons = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
+            const names = ['Lua nova','Lua crescente','Quarto crescente','Crescente gibosa','Lua cheia','Minguante gibosa','Quarto minguante','Lua minguante'];
+            return {icon:icons[index],name:names[index],age};
+        }
+        function dayLengthHours(date, latitude=-27.634) {
+            const rad=Math.PI/180, dayOfYear=Math.floor((Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())-Date.UTC(date.getFullYear(),0,0))/86400000);
+            const decl=23.44*rad*Math.sin(2*Math.PI*(284+dayOfYear)/365.2422);
+            const lat=latitude*rad;
+            const cosH=-Math.tan(lat)*Math.tan(decl);
+            const hourAngle=Math.acos(Math.max(-1,Math.min(1,cosH)));
+            return (24/Math.PI)*hourAngle;
+        }
+        function moonMajorDates(year, month) {
+            const events=[];
+            const start=new Date(year,month,1), end=new Date(year,month+1,0);
+            for(let d=1;d<=end.getDate();d++){
+                const date=new Date(year,month,d), info=moonInfo(date);
+                if([0,2,4,6].includes(Math.round(info.age/synodicMonth*8)%8)){
+                    const prev=moonInfo(new Date(year,month,d-1));
+                    if(Math.round(prev.age/synodicMonth*8)%8!==Math.round(info.age/synodicMonth*8)%8) events.push({day:d,...info});
+                }
+            }
+            return events;
+        }
+        function renderPlantingCalendar() {
+            const yearEl=document.getElementById('planting-year');
+            const grid=document.getElementById('planting-month-grid');
+            if(!yearEl||!grid) return;
+            const year=Number(yearEl.value)||new Date().getFullYear();
+            const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            grid.innerHTML=plantingClimate.map((data,month)=>{
+                const first=new Date(year,month,1).getDay(), days=new Date(year,month+1,0).getDate();
+                let cells='';
+                for(let i=0;i<first;i++) cells+='<span class="h-8"></span>';
+                for(let day=1;day<=days;day++){
+                    const date=new Date(year,month,day), moon=moonInfo(date);
+                    const phaseDay=Math.round(moon.age/synodicMonth*8)%8;
+                    const title=`${day} de ${monthNames[month]}: ${moon.name}`;
+                    cells+=`<span title="${title}" class="h-8 rounded-md bg-slate-800/70 flex flex-col items-center justify-center text-[10px] text-slate-200"><span class="leading-none">${day}</span><span class="text-[9px] leading-none">${['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][phaseDay]}</span></span>`;
+                }
+                const daylight=dayLengthHours(new Date(year,month,15));
+                return `<button type="button" onclick="showPlantingMonth(${month},${year})" class="text-left rounded-xl border border-slate-700 bg-slate-900/70 p-3 hover:border-lime-500/60 hover:bg-slate-800 transition focus:outline-none focus:ring-2 focus:ring-lime-500"><div class="flex items-center justify-between gap-2 mb-2"><h4 class="font-extrabold text-white">${data.m}</h4><span class="text-[10px] text-slate-400">${days} dias</span></div><div class="grid grid-cols-7 gap-1 text-center mb-1">${['D','S','T','Q','Q','S','S'].map(x=>`<span class="text-[9px] text-slate-500">${x}</span>`).join('')}</div><div class="grid grid-cols-7 gap-1">${cells}</div><div class="grid grid-cols-3 gap-1 mt-3 text-[10px]"><span class="text-sky-300">☔ ${data.rain} mm</span><span class="text-rose-300">${data.min}–${data.max}°C</span><span class="text-amber-300">☀ ${daylight.toFixed(1)} h</span></div><div class="text-[10px] text-lime-300 mt-2">Ver culturas e detalhes →</div></button>`;
+            }).join('');
+            showPlantingMonth(new Date().getMonth(),year);
+        }
+        function showPlantingMonth(month,year) {
+            const data=plantingClimate[month], detail=document.getElementById('planting-month-detail');
+            if(!detail) return;
+            const daylight=dayLengthHours(new Date(year,month,15));
+            const events=moonMajorDates(year,month);
+            detail.innerHTML=`<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4"><div><p class="text-xs uppercase tracking-wider text-lime-300 font-bold">Planejamento agrícola mensal</p><h3 class="text-2xl font-extrabold text-white">${data.m} de ${year}</h3></div><span class="text-xs text-slate-400">Referência regional: Erechim / Norte do RS</span></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4"><div class="rounded-lg bg-sky-950/40 border border-sky-800/50 p-3"><div class="text-[10px] text-sky-300 uppercase">Precipitação média</div><div class="text-xl font-bold text-white">${data.rain} mm</div></div><div class="rounded-lg bg-rose-950/40 border border-rose-800/50 p-3"><div class="text-[10px] text-rose-300 uppercase">Temperatura mínima média</div><div class="text-xl font-bold text-white">${data.min} °C</div></div><div class="rounded-lg bg-orange-950/40 border border-orange-800/50 p-3"><div class="text-[10px] text-orange-300 uppercase">Temperatura máxima média</div><div class="text-xl font-bold text-white">${data.max} °C</div></div><div class="rounded-lg bg-amber-950/40 border border-amber-800/50 p-3"><div class="text-[10px] text-amber-300 uppercase">Duração média do dia</div><div class="text-xl font-bold text-white">${daylight.toFixed(1)} h</div></div></div><div class="grid lg:grid-cols-2 gap-4"><section class="rounded-xl bg-slate-900 border border-slate-700 p-4"><h4 class="font-bold text-lime-300 mb-2"><i class="fa-solid fa-seedling mr-2"></i>Culturas indicadas para semeadura/plantio</h4><p class="text-sm text-slate-200 leading-relaxed">${data.crops}</p><p class="text-xs text-slate-400 mt-3"><strong>Cuidados do mês:</strong> ${data.tasks}</p></section><section class="rounded-xl bg-slate-900 border border-slate-700 p-4"><h4 class="font-bold text-violet-300 mb-2"><i class="fa-solid fa-moon mr-2"></i>Fases principais da Lua</h4>${events.length?`<ul class="space-y-2">${events.map(e=>`<li class="flex items-center gap-3 text-sm"><span class="text-xl">${e.icon}</span><span class="text-slate-200">Dia ${e.day}: ${e.name}</span></li>`).join('')}</ul>`:'<p class="text-sm text-slate-400">Fases principais não identificadas neste mês.</p>'}<p class="text-[11px] text-slate-500 mt-3">Datas aproximadas calculadas por ciclo sinódico médio; podem diferir em algumas horas do instante astronômico oficial.</p></section></div><p class="text-[11px] text-slate-500 mt-4">Clima: médias históricas de referência para Erechim. A chuva real, a insolação efetiva e as temperaturas de ${year} podem ser muito diferentes.</p>`;
+        }
+        function togglePlantingCalendar(show) {
+            if(show && !requireAuthenticatedAccess()) return;
+            const modal=document.getElementById('planting-calendar-modal');
+            if(!modal) return;
+            if(show){
+                modal.classList.remove('hidden');
+                const yearEl=document.getElementById('planting-year');
+                if(yearEl&&!yearEl.options.length){const now=new Date().getFullYear();for(let y=now-1;y<=now+3;y++){const opt=document.createElement('option');opt.value=y;opt.textContent=y;if(y===now)opt.selected=true;yearEl.appendChild(opt);}}
+                renderPlantingCalendar();
+            } else modal.classList.add('hidden');
+        }
 
         function toggleTheme() {
             const html = document.documentElement;
@@ -1344,7 +1210,7 @@
         function toggleHistoryPage(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('history-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSourcesPage(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('sources-page-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleSitesModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('sites-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
-        function toggleTornadoLabModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); if (show) loadLabCurrentWeather(); }
+        function toggleTornadoLabModal(show) { if (show && !requireAuthenticatedAccess()) return; const m = document.getElementById('tornado-lab-modal'); show ? m.classList.remove('hidden') : m.classList.add('hidden'); }
         function toggleModelEfficacyModal(show) {
             if (show && !requireAuthenticatedAccess()) return;
             const m = document.getElementById('model-efficacy-modal');
@@ -1355,19 +1221,6 @@
         function switchSatChannel(channel) {
             currentSatChannel = channel;
             reloadSatelliteImage();
-        }
-
-        // Mapas externos iniciam bloqueados para evitar movimentos acidentais.
-        function toggleMapInteraction(frameId, buttonId) {
-            const frame = document.getElementById(frameId);
-            const button = document.getElementById(buttonId);
-            if (!frame || !button) return;
-            const unlocked = frame.style.pointerEvents !== 'auto';
-            frame.style.pointerEvents = unlocked ? 'auto' : 'none';
-            button.innerHTML = unlocked ? '<i class="fa-solid fa-lock-open"></i>' : '<i class="fa-solid fa-lock"></i>';
-            button.title = unlocked ? 'Bloquear interação com o mapa' : 'Desbloquear interação com o mapa';
-            button.setAttribute('aria-label', button.title);
-            button.setAttribute('aria-pressed', String(unlocked));
         }
 
         function updateClock() {
@@ -1483,34 +1336,6 @@
         function getCardinalDirection(angle) {
             const directions = ['N', 'NE', 'L', 'SE', 'S', 'SO', 'O', 'NO'];
             return directions[Math.round(angle / 45) % 8];
-        }
-
-        async function loadLabCurrentWeather() {
-            const status = document.getElementById('lab-current-status');
-            const updated = document.getElementById('lab-current-updated');
-            if (status) status.textContent = 'Consultando condições meteorológicas atuais de Erechim...';
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,surface_pressure,wind_speed_10m,wind_gusts_10m&timezone=America%2FSao_Paulo`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Open-Meteo respondeu com HTTP ${response.status}`);
-                const data = await response.json();
-                if (!data.current) throw new Error('A API não retornou as condições atuais.');
-                const c = data.current;
-                const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-                set('lab-current-temp', `${Number(c.temperature_2m).toFixed(1)} °C`);
-                set('lab-current-feels', `${Number(c.apparent_temperature).toFixed(1)} °C`);
-                set('lab-current-humidity', `${Number(c.relative_humidity_2m).toFixed(0)}%`);
-                set('lab-current-pressure', `${Number(c.surface_pressure).toFixed(0)} hPa`);
-                set('lab-current-rain', `${Number(c.precipitation).toFixed(1)} mm`);
-                set('lab-current-wind', `${Number(c.wind_speed_10m).toFixed(1)} / ${Number(c.wind_gusts_10m ?? c.wind_speed_10m).toFixed(1)} km/h`);
-                if (updated) updated.textContent = `Atualizado: ${new Date(c.time).toLocaleString('pt-BR')}`;
-                if (status) status.textContent = 'Condições atuais recebidas. Os dados abaixo descrevem o tempo no momento da consulta.';
-                const tornadoText = document.getElementById('lab-current-tornado-text');
-                if (tornadoText) tornadoText.textContent = 'Com os dados meteorológicos de superfície consultados neste painel, não é possível determinar se existe possibilidade de tornado neste instante. Esses dados, isoladamente, não confirmam nem descartam tornado.';
-            } catch (error) {
-                if (status) status.textContent = error.message || 'Não foi possível carregar os dados atuais.';
-                if (status) status.className = 'text-sm text-amber-300 mb-3';
-            }
         }
 
         async function fetchWeatherData() {
@@ -1757,28 +1582,28 @@
                     const title6h = header6hBox.querySelector('span.tracking-wider');
 
                     let alertMsg6h = 'NORMAL';
-                    let boxClass = 'bg-emerald-700 border-emerald-900 text-white';
-                    let labelClass = 'bg-white text-emerald-900 border-white';
-                    let iconClass = 'text-white';
-                    let titleClass = 'text-white';
+                    let boxClass = 'bg-emerald-600/20 border-emerald-500 text-emerald-100';
+                    let labelClass = 'bg-emerald-500 text-slate-950 border-emerald-500';
+                    let iconClass = 'text-emerald-400';
+                    let titleClass = 'text-emerald-300';
 
                     // Lógica de Gatilho de Alertas para as próximas 6h
                     if (sumRain6h >= 30 || maxWind6h >= 43 || maxTemp6h >= 32 || minTemp6h <= 5) {
                         alertMsg6h = 'ALERTA SEVERO';
-                        boxClass = 'bg-rose-700 border-rose-900 text-white shadow-rose-900/50';
+                        boxClass = 'bg-rose-900/40 border-rose-500 text-rose-100 shadow-rose-900/50 animate-pulse';
                         labelClass = 'bg-rose-500 text-white border border-rose-400';
-                        iconClass = 'text-white';
-                        titleClass = 'text-white';
+                        iconClass = 'text-rose-400';
+                        titleClass = 'text-rose-300';
                     } else if (sumRain6h >= 15 || maxWind6h >= 30 || maxTemp6h >= 28 || minTemp6h <= 10) {
                         alertMsg6h = 'ATENÇÃO';
-                        boxClass = 'bg-amber-500 border-amber-800 text-slate-950 shadow-amber-900/30';
+                        boxClass = 'bg-amber-900/40 border-amber-500 text-amber-100 shadow-amber-900/50';
                         labelClass = 'bg-amber-500 text-slate-900 border border-amber-400';
-                        iconClass = 'text-slate-950';
-                        titleClass = 'text-slate-950';
+                        iconClass = 'text-amber-400';
+                        titleClass = 'text-amber-300';
                     }
 
                     // Renderiza os valores formatados na barra
-                    content6hEl.innerHTML = `<span class="font-bold">Temperatura:</span> <strong>${minTemp6h.toFixed(1)}° a ${maxTemp6h.toFixed(1)}°</strong> <span class="mx-1">•</span> <span class="font-bold">Chuva:</span> <strong>${sumRain6h.toFixed(1)} mm</strong> <span class="mx-1">•</span> <span class="font-bold">Vento máx.:</span> <strong>${maxWind6h.toFixed(1)} km/h</strong>`;
+                    content6hEl.innerHTML = `Temp: <strong class="text-white">${minTemp6h.toFixed(1)}° a ${maxTemp6h.toFixed(1)}°</strong> &bull; Chuva: <strong class="text-white">${sumRain6h.toFixed(1)} mm</strong> &bull; Vento Máx: <strong class="text-white">${maxWind6h.toFixed(1)} km/h</strong>`;
                     label6hEl.innerText = alertMsg6h;
                     
                     // Aplica as classes dinamicamente
@@ -1899,11 +1724,11 @@
                 
                 html += `
                     <div class="rounded-2xl dark:bg-slate-900 bg-slate-100 border border-slate-800 p-5 shadow">
-                        <span class="text-[10px] font-bold text-sky-600 dark:text-sky-400 block uppercase">Dia +${i}</span>
-                        <h3 class="font-bold text-sm dark:text-white text-slate-900">${weekDays[d.getDay()]} (${d.getDate()}/${d.getMonth()+1})</h3>
+                        <span class="text-[10px] font-bold text-sky-400 block uppercase">Dia +${i}</span>
+                        <h3 class="font-bold text-sm text-white">${weekDays[d.getDay()]} (${d.getDate()}/${d.getMonth()+1})</h3>
                         <div class="mt-3 text-xs font-mono flex justify-between">
-                            <span class="font-semibold text-sky-700 dark:text-sky-400">Min: ${daily.temperature_2m_min[i].toFixed(1)}°C</span>
-                            <span class="font-semibold text-rose-700 dark:text-rose-400">Máx: ${daily.temperature_2m_max[i].toFixed(1)}°C</span>
+                            <span class="text-sky-400">Min: ${daily.temperature_2m_min[i].toFixed(1)}°C</span>
+                            <span class="text-rose-400">Máx: ${daily.temperature_2m_max[i].toFixed(1)}°C</span>
                         </div>
                         <div class="mt-2 pt-2 border-t dark:border-slate-800 border-slate-200 text-[11px] sm:text-xs flex justify-between items-center">
                             <span class="text-slate-500 dark:text-slate-400">Chuva: <strong class="${rainSum > 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}">${willRain}</strong></span>
@@ -1919,97 +1744,8 @@
             document.getElementById('windy-frame').src = `https://embed.windy.com/embed.html?lat=${LAT}&lon=${LON}&detailLat=${LAT}&detailLon=${LON}&width=650&height=600&zoom=9&level=surface&overlay=${layer}&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
         }
 
-        // Consulta pública por cidade/coordenadas, sem alterar a estação usada no painel técnico.
-        let publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS', isCustom: false };
-        const publicEl = (id) => document.getElementById(id);
-        function setPublicStatus(message, isError=false) {
-            const el = publicEl('public-weather-status');
-            if (!el) return;
-            el.className = `mt-5 rounded-xl border p-4 text-sm ${isError ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-600'}`;
-            el.textContent = message;
-        }
-        async function searchPublicLocation() {
-            const query = (publicEl('public-location-input')?.value || '').trim();
-            if (!query) {
-                publicWeatherLocation = { lat: -27.634, lon: -52.274, label: 'Erechim, RS', isCustom: false };
-                await loadPublicWeather();
-                return;
-            }
-            if (query.length < 2) { setPublicStatus('Digite o nome de uma cidade para consultar.', true); return; }
-            setPublicStatus('Localizando cidade...');
-            try {
-                const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=pt&format=json`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Não foi possível consultar o serviço de localização.');
-                const result = await response.json();
-                if (!result.results?.length) throw new Error('Cidade não encontrada. Tente informar também o estado.');
-                const place = result.results[0];
-                const isErechim = /erechim/i.test(place.name || '') && Math.abs(place.latitude - (-27.634)) < 0.15 && Math.abs(place.longitude - (-52.274)) < 0.15;
-                publicWeatherLocation = { lat: place.latitude, lon: place.longitude, label: [place.name, place.admin1, place.country].filter(Boolean).join(', '), isCustom: !isErechim };
-                await loadPublicWeather();
-            } catch (error) { setPublicStatus(error.message || 'Falha ao localizar a cidade.', true); }
-        }
-        function usePublicGeolocation() {
-            if (!navigator.geolocation) { setPublicStatus('Este navegador não oferece geolocalização.', true); return; }
-            setPublicStatus('Aguardando autorização de localização do navegador...');
-            navigator.geolocation.getCurrentPosition(async pos => {
-                publicWeatherLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Sua localização (coordenadas aproximadas)', isCustom: true };
-                await loadPublicWeather();
-            }, err => setPublicStatus(err.code === 1 ? 'Permissão de localização negada. Você pode pesquisar uma cidade manualmente.' : 'Não foi possível obter sua localização. Pesquise uma cidade manualmente.', true), { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
-        }
-        async function loadPublicWeather() {
-            setPublicStatus('Consultando dados meteorológicos...');
-            try {
-                const {lat, lon, label} = publicWeatherLocation;
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_gusts_10m&hourly=precipitation_probability,precipitation&forecast_days=1&timezone=auto`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Serviço meteorológico respondeu com HTTP ${response.status}.`);
-                const data = await response.json();
-                if (!data.current || !data.hourly) throw new Error('A resposta meteorológica está incompleta.');
-                const c = data.current;
-                const now = Date.parse(c.time);
-                let idx = data.hourly.time.findIndex(t => Date.parse(t) >= now);
-                if (idx < 0) idx = 0;
-                const probs = data.hourly.precipitation_probability.slice(idx, idx + 6).map(Number).filter(Number.isFinite);
-                const rain = probs.length ? Math.max(...probs) : 0;
-                const mm = data.hourly.precipitation.slice(idx, idx + 6).map(v => Number(v) || 0).reduce((a,b)=>a+b,0);
-                const wind = Number(c.wind_speed_10m) || 0;
-                const gust = Number(c.wind_gusts_10m) || wind;
-                publicEl('public-location-label').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i>${label.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}`;
-                publicEl('public-update-label').textContent = `Atualizado: ${new Date().toLocaleString('pt-BR')}`;
-                publicEl('public-temp').textContent = `${Number(c.temperature_2m).toFixed(1)}°C`;
-                publicEl('public-feels').textContent = `Sensação: ${Number(c.apparent_temperature).toFixed(1)}°C`;
-                publicEl('public-rain').textContent = `${rain}%`;
-                publicEl('public-rain-mm').textContent = `Precipitação estimada (6h): ${mm.toFixed(1)} mm`;
-                publicEl('public-wind').textContent = `${wind.toFixed(1)} km/h`;
-                publicEl('public-gust').textContent = `Rajadas: ${gust.toFixed(1)} km/h`;
-                publicEl('public-weather-metrics').classList.remove('hidden');
-                const alerts = [];
-                if (gust >= 60) alerts.push(['Atenção para vento forte', `Rajadas estimadas em ${gust.toFixed(0)} km/h. Evite áreas expostas e acompanhe os avisos oficiais.`, 'rose']);
-                else if (gust >= 45) alerts.push(['Vento merece atenção', `Rajadas estimadas em ${gust.toFixed(0)} km/h.`, 'amber']);
-                if (rain >= 70 || mm >= 15) alerts.push(['Atenção para chuva', `Probabilidade máxima nas próximas 6h: ${rain}%; precipitação estimada: ${mm.toFixed(1)} mm.`, 'amber']);
-                if (Number(c.temperature_2m) >= 35) alerts.push(['Temperatura elevada', `Temperatura atual de ${Number(c.temperature_2m).toFixed(1)}°C. Hidrate-se e evite exposição prolongada ao sol.`, 'amber']);
-                const activeAlerts = alerts.filter(([, , color]) => color !== 'emerald');
-                const customAlertHeading = publicEl('public-custom-alert-heading');
-                const customAlertElements = publicEl('public-custom-alert-elements');
-                if (customAlertHeading && customAlertElements) {
-                    if (publicWeatherLocation.isCustom && activeAlerts.length) {
-                        customAlertElements.textContent = activeAlerts.map(([title]) => title).join('; ');
-                        customAlertHeading.classList.remove('hidden');
-                    } else {
-                        customAlertHeading.classList.add('hidden');
-                        customAlertElements.textContent = '';
-                    }
-                }
-                if (!alerts.length) alerts.push(['Sem indicador automático relevante neste momento', 'Os parâmetros consultados não ultrapassaram os limites informativos deste painel. Isso não garante ausência de risco.', 'emerald']);
-                publicEl('public-weather-alerts').innerHTML = alerts.map(([title,desc,color]) => { const danger = color === 'rose'; const warning = color === 'amber'; const style = danger ? 'bg-rose-100 border-rose-500 text-rose-950 ring-2 ring-rose-300' : warning ? 'bg-amber-100 border-amber-500 text-amber-950 ring-2 ring-amber-200' : 'bg-emerald-100 border-emerald-500 text-emerald-950'; const badge = danger ? 'PERIGO' : warning ? 'ATENÇÃO' : 'NORMAL'; const icon = danger ? 'fa-circle-exclamation' : warning ? 'fa-triangle-exclamation' : 'fa-circle-check'; return `<div class="rounded-xl border-l-8 ${style} p-4 shadow-sm"><div class="flex flex-wrap items-center justify-between gap-2"><div class="font-extrabold text-base flex items-center gap-2"><i class="fa-solid ${icon}"></i>${title}</div><span class="text-[11px] font-black tracking-wider px-3 py-1 rounded-full ${danger ? 'bg-rose-700 text-white' : warning ? 'bg-amber-500 text-slate-950' : 'bg-emerald-700 text-white'}">${badge}</span></div><p class="text-sm font-medium mt-2 leading-relaxed">${desc}</p></div>`; }).join('');
-                setPublicStatus('Dados recebidos. Os indicadores abaixo são cálculos informativos, não alertas oficiais.');
-            } catch (error) { setPublicStatus(error.message || 'Não foi possível carregar os dados meteorológicos.', true); }
-        }
-
         window.addEventListener('DOMContentLoaded', function() {
             updateLabSimulation();
-            loadPublicWeather();
             fetchWeatherData();
             if (weatherRefreshTimer) clearInterval(weatherRefreshTimer);
             weatherRefreshTimer = setInterval(fetchWeatherData, 10 * 60 * 1000);
