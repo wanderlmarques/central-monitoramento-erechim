@@ -321,6 +321,12 @@
                         <span>Sites Utilizados</span>
                     </button>
 
+                    <!-- Nova aba pública: Condições de Plantio -->
+                    <button type="button" onclick="togglePlantingCalendar(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-emerald-950 dark:border-emerald-800 dark:hover:bg-emerald-900 dark:text-emerald-200 bg-emerald-50 border-emerald-300 hover:bg-emerald-100 text-emerald-800">
+                        <i class="fa-solid fa-seedling text-emerald-500"></i>
+                        <span>Condições de plantio</span>
+                    </button>
+
                     <!-- Theme Toggle -->
                     <button onclick="toggleTheme()" class="p-2 rounded-xl dark:bg-slate-800 dark:text-amber-400 bg-slate-100 text-slate-700 hover:opacity-80 transition" title="Alternar Tema">
                         <i id="theme-icon" class="fa-solid fa-moon"></i>
@@ -736,6 +742,96 @@
                 <button onclick="toggleHistoryPage(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition border border-slate-700 flex items-center gap-2"><i class="fa-solid fa-xmark text-base"></i> Fechar</button>
             </div>
         </div>
+    </div>
+
+
+    <!-- CONDIÇÕES DE PLANTIO: módulo independente, sem alterar os painéis existentes -->
+    <div id="planting-calendar-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[70] hidden flex-col overflow-y-auto p-4 sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="planting-title">
+      <div class="max-w-7xl mx-auto w-full space-y-6 my-auto text-slate-100">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 glass-card p-4 sm:p-6 rounded-2xl border border-emerald-800">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-emerald-900 flex items-center justify-center"><i class="fa-solid fa-seedling text-emerald-300 text-2xl"></i></div>
+            <div>
+              <h2 id="planting-title" class="text-xl sm:text-2xl font-extrabold text-white">Condições de Plantio</h2>
+              <p class="text-xs sm:text-sm text-slate-400">Calendário agrícola regional, fases da Lua e contexto climático</p>
+            </div>
+          </div>
+          <button type="button" onclick="togglePlantingCalendar(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700"><i class="fa-solid fa-xmark mr-1"></i> Fechar / Voltar</button>
+        </div>
+
+        <section class="rounded-2xl border border-emerald-800/70 bg-slate-900 p-4 sm:p-6 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+            <div class="sm:col-span-2">
+              <label for="planting-location" class="block text-xs font-bold text-slate-300 mb-2">Município de referência</label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input id="planting-location" type="search" value="Erechim, RS" placeholder="Ex.: Gaurama, RS" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white text-left">
+                <button type="button" onclick="setPlantingLocation()" class="rounded-xl bg-emerald-700 hover:bg-emerald-600 px-5 py-3 text-sm font-bold text-white whitespace-nowrap"><i class="fa-solid fa-location-dot mr-1"></i> Definir local</button>
+              </div>
+              <p id="planting-location-status" class="text-xs text-slate-400 mt-2">Referência regional inicial: Erechim e Alto Uruguai/RS.</p>
+            </div>
+            <div>
+              <label for="planting-year" class="block text-xs font-bold text-slate-300 mb-2">Ano do calendário lunar</label>
+              <select id="planting-year" onchange="renderPlantingCalendar()" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white">
+              </select>
+            </div>
+          </div>
+          <div class="rounded-xl border border-amber-700/50 bg-amber-950/20 p-3 text-xs text-amber-200 leading-relaxed">
+            <i class="fa-solid fa-circle-info mr-1"></i> As culturas são referências gerais para o clima do norte do Rio Grande do Sul. A época real depende de cultivar, altitude, solo, irrigação, microclima e zoneamento agrícola (ZARC). Consulte assistência técnica local antes de decisões comerciais.
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 class="text-lg font-extrabold text-white"><i class="fa-solid fa-calendar-days text-emerald-400 mr-2"></i>Calendário anual de plantio</h3>
+              <p class="text-xs text-slate-400">Selecione um mês para consultar culturas, tarefas e fases lunares.</p>
+            </div>
+            <span id="planting-selected-year" class="text-xs font-mono text-emerald-300"></span>
+          </div>
+          <div id="planting-month-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-6 space-y-4">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Mês selecionado</span>
+              <h3 id="planting-month-title" class="text-xl font-extrabold text-white mt-1">Janeiro</h3>
+              <p id="planting-month-summary" class="text-sm text-slate-300 mt-2"></p>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-leaf text-emerald-400 mr-2"></i>Culturas e atividades recomendadas</h4>
+              <div id="planting-crops" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-moon text-indigo-300 mr-2"></i>Fases da Lua neste mês</h4>
+              <div id="planting-moon-phases" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+              <p class="text-[11px] text-slate-500 mt-3">As datas lunares são calculadas astronomicamente e podem variar alguns minutos conforme o fuso. A associação entre fase lunar e sucesso do plantio é tradição popular, não uma recomendação agronômica comprovada.</p>
+            </div>
+          </div>
+
+          <aside class="rounded-2xl border border-sky-800/70 bg-slate-900 p-4 sm:p-6 space-y-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-white"><i class="fa-solid fa-cloud-sun text-sky-400 mr-2"></i>Contexto climático</h3>
+              <p class="text-xs text-slate-400 mt-1">Padrão sazonal geral do Alto Uruguai/RS</p>
+            </div>
+            <div id="planting-climate-summary" class="space-y-3"></div>
+            <div class="rounded-xl border border-slate-700 bg-slate-950 p-3">
+              <p class="text-xs text-slate-300 font-bold mb-1">Importante sobre os dados</p>
+              <p class="text-[11px] text-slate-400 leading-relaxed">Este painel apresenta contexto sazonal qualitativo, não médias mensais numéricas nem previsão meteorológica. Não inventa totais de chuva, horas de sol ou temperaturas. Para condições atuais e previsão de curto prazo, utilize o painel meteorológico principal e fontes oficiais.</p>
+            </div>
+          </aside>
+        </section>
+
+        <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-6">
+          <h3 class="text-base font-extrabold text-white mb-3"><i class="fa-solid fa-book-open text-amber-400 mr-2"></i>Orientações e fontes para planejamento</h3>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc pl-5 text-left">
+            <li>Confirme a janela de semeadura e o risco climático no <a class="text-sky-300 underline" href="https://www.gov.br/agricultura/pt-br/assuntos/riscos-seguro/risco-agropecuario/zoneamento-agricola-de-risco-climatico" target="_blank" rel="noopener noreferrer">ZARC — Ministério da Agricultura</a>, considerando município, cultura, solo e ciclo.</li>
+            <li>Consulte recomendações técnicas, cultivares e sistemas de produção da <a class="text-sky-300 underline" href="https://www.embrapa.br/" target="_blank" rel="noopener noreferrer">Embrapa</a> e da assistência técnica regional.</li>
+            <li>Acompanhe alertas e dados meteorológicos do <a class="text-sky-300 underline" href="https://portal.inmet.gov.br/" target="_blank" rel="noopener noreferrer">INMET</a> e da <a class="text-sky-300 underline" href="https://www.defesacivil.rs.gov.br/" target="_blank" rel="noopener noreferrer">Defesa Civil do RS</a>.</li>
+            <li>As indicações deste calendário são orientativas e não substituem análise de solo, manejo fitossanitário ou recomendação agronômica individual.</li>
+          </ul>
+        </section>
+      </div>
     </div>
 
     <!-- MAIN CONTAINER -->
@@ -2006,6 +2102,114 @@
                 setPublicStatus('Dados recebidos. Os indicadores abaixo são cálculos informativos, não alertas oficiais.');
             } catch (error) { setPublicStatus(error.message || 'Não foi possível carregar os dados meteorológicos.', true); }
         }
+
+
+        // Módulo Condições de Plantio: funções isoladas para não interferir nos módulos existentes.
+        const plantingMonthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const plantingData = [
+          {season:'Verão',summary:'Calor e maior demanda evaporativa. Priorize água disponível, cobertura do solo e atenção a temporais.',sun:'Dias longos; insolação elevada em geral.',rain:'Período normalmente úmido, com pancadas e temporais de verão.',cold:'Frio pouco frequente.',heat:'Maior atenção a ondas de calor e estresse hídrico.',crops:[['Hortaliças','Alface de verão, rúcula, cebolinha, couve e quiabo. Prefira cultivares adaptadas ao calor.'],['Frutíferas','Manutenção de pomares, monitoramento de pragas e colheita de frutas da estação.'],['Grãos e cobertura','Milho e feijão conforme calendário, cultivar e janela ZARC; planeje culturas de cobertura.']]},
+          {season:'Verão',summary:'Ainda é época quente. Planeje a transição para culturas de outono e mantenha irrigação quando necessária.',sun:'Dias longos, com redução gradual ao longo do mês.',rain:'Chuvas de verão ainda comuns; acompanhe previsão de eventos intensos.',cold:'Frio pouco frequente.',heat:'Calor pode persistir, sobretudo no início do mês.',crops:[['Hortaliças','Alface, rúcula, couve, beterraba e cenoura, observando cultivares e manejo da água.'],['Leguminosas','Feijão em janelas tecnicamente indicadas e com atenção ao risco climático.'],['Manejo','Planeje canteiros de outono, adubação verde e rotação de culturas.']]},
+          {season:'Outono',summary:'Transição para temperaturas mais amenas. Boa época para organizar canteiros de outono-inverno.',sun:'Dias progressivamente mais curtos.',rain:'Chuvas variáveis; evitar encharcamento e planejar drenagem.',cold:'Temperaturas em queda; risco de frio aumenta no fim do outono.',heat:'Calor tende a diminuir.',crops:[['Hortaliças','Alface, rúcula, couve, repolho, brócolis, cenoura, beterraba e rabanete.'],['Raízes e folhas','Alho e cebola conforme sistema e calendário técnico; acelga e espinafre.'],['Cobertura do solo','Planeje aveia-preta, ervilhaca e outras coberturas de inverno conforme objetivo e manejo.']]},
+          {season:'Outono',summary:'Condições mais amenas favorecem várias hortaliças de clima fresco. Observe a aproximação das primeiras geadas.',sun:'Dias mais curtos e menor duração de luz.',rain:'Variabilidade de chuva; monitore umidade do solo.',cold:'Frio aumenta; atenção a geadas em baixadas.',heat:'Calor geralmente menos intenso.',crops:[['Hortaliças','Brócolis, couve-flor, repolho, alface, rúcula, cenoura e beterraba.'],['Culturas de inverno','Aveia, trigo, cevada e canola somente conforme zoneamento, cultivar e calendário oficial.'],['Manejo','Implantação de cobertura de solo e proteção de mudas contra frio.']]},
+          {season:'Outono',summary:'Mês de transição para o inverno. O planejamento deve considerar geadas e menor crescimento de culturas sensíveis.',sun:'Dias curtos e menor insolação diária.',rain:'Chuva variável; umidade e drenagem são importantes.',cold:'Frio frequente e possibilidade de geada.',heat:'Calor pouco frequente.',crops:[['Hortaliças de inverno','Alho, cebola, couve, repolho, brócolis, ervilha e folhas resistentes ao frio.'],['Grãos de inverno','Trigo, aveia e cevada conforme ZARC e indicação técnica para o município.'],['Proteção','Use cobertura e proteção de mudas sensíveis em noites com previsão de geada.']]},
+          {season:'Inverno',summary:'Período frio, com risco de geadas. Dê preferência a espécies adaptadas e proteja cultivos sensíveis.',sun:'Dias curtos; menor energia solar disponível.',rain:'Pode haver períodos secos e geadas; acompanhe umidade do solo.',cold:'Maior risco sazonal de frio e geada.',heat:'Calor incomum; atenção a variações bruscas.',crops:[['Hortaliças','Alho, cebola, couve, repolho, brócolis, couve-flor, ervilha e espinafre.'],['Grãos de inverno','Trigo, aveia, cevada e outras culturas de inverno dentro da janela ZARC.'],['Manejo','Evite semeadura de espécies sensíveis antes de períodos frios previstos.']]},
+          {season:'Inverno',summary:'Ainda sujeito a geadas, mas com aumento gradual da duração dos dias ao longo do mês.',sun:'Insolação diária começa a aumentar lentamente.',rain:'Chuva irregular; monitore umidade e previsão de frentes frias.',cold:'Geadas ainda possíveis.',heat:'Calor normalmente limitado.',crops:[['Hortaliças','Folhosas e brássicas de inverno; iniciar planejamento de mudas para primavera.'],['Grãos de inverno','Trigo, aveia e cevada, respeitando calendário e manejo regional.'],['Planejamento','Organize rotação, correção do solo e aquisição de sementes para primavera.']]},
+          {season:'Inverno',summary:'Transição para a primavera. O risco de geada ainda existe, especialmente no início do mês.',sun:'Dias ficam mais longos e a insolação aumenta.',rain:'Frentes frias podem trazer chuva; acompanhe previsões.',cold:'Geadas tardias ainda podem ocorrer.',heat:'Temperaturas começam a subir.',crops:[['Hortaliças','Alface, rúcula, cenoura, beterraba, couve e brássicas; iniciar escalonamento de primavera.'],['Primavera','Preparar canteiros para tomate, pimentão e cucurbitáceas após reduzir o risco de frio.'],['Coberturas','Planeje a dessecação/manejo de coberturas conforme sistema de produção.']]},
+          {season:'Primavera',summary:'Aumento de temperatura e dias mais longos. Atenção a variações bruscas, excesso de chuva e granizo.',sun:'Dias mais longos, com insolação crescente.',rain:'Chuvas e temporais podem aumentar; planeje drenagem e tutoramento.',cold:'Frio diminui, mas não desaparece imediatamente.',heat:'Calor começa a ganhar importância.',crops:[['Hortaliças','Tomate, pimentão, abobrinha, pepino, feijão-vagem e milho-verde conforme condições locais.'],['Hortaliças de folha','Alface, rúcula e couve com cultivares adequadas à estação.'],['Grãos','Culturas de primavera-verão conforme ZARC, cultivar e disponibilidade de água.']]},
+          {season:'Primavera',summary:'Período de crescimento vegetativo intenso. Ajuste irrigação, nutrição e controle fitossanitário.',sun:'Dias longos e boa disponibilidade de luz.',rain:'Chuvas de primavera e temporais; atenção a erosão e doenças fúngicas.',cold:'Frio tende a ser menos frequente, mas pode ocorrer.',heat:'Temperaturas sobem progressivamente.',crops:[['Hortaliças','Tomate, pimentão, pepino, abobrinha, milho-verde, feijão-vagem e folhas.'],['Leguminosas','Feijão conforme janela de semeadura e zoneamento aplicável.'],['Frutíferas','Plantio de mudas de espécies adaptadas, preferencialmente com umidade e manejo adequados.']]},
+          {season:'Primavera',summary:'Aproximação do verão. Calor, chuva intensa e períodos de estiagem podem alternar.',sun:'Dias longos e alta disponibilidade de luz.',rain:'Pancadas e temporais; monitore drenagem e previsão de curto prazo.',cold:'Frio normalmente pouco frequente.',heat:'Aumenta o risco de estresse térmico e hídrico.',crops:[['Hortaliças','Milho-verde, feijão-vagem, abóbora, pepino e cultivares de verão.'],['Hortaliças de folha','Alface e rúcula com cultivares tolerantes ao calor e manejo de sombreamento.'],['Manejo','Cobertura morta, irrigação eficiente e monitoramento de pragas.']]},
+          {season:'Verão',summary:'Início do verão meteorológico. Planeje água, proteção do solo e cultivares tolerantes ao calor.',sun:'Dias longos e insolação elevada.',rain:'Pancadas de verão e temporais; risco de períodos secos entre chuvas.',cold:'Frio muito pouco frequente.',heat:'Atenção a calor intenso e evapotranspiração elevada.',crops:[['Hortaliças','Quiabo, abóbora, pepino, abobrinha, milho-verde e feijão-vagem.'],['Hortaliças de folha','Alface e rúcula apenas com cultivares de verão e manejo adequado.'],['Manejo','Reforce cobertura do solo, irrigação e proteção contra chuva forte e granizo.']]}
+        ];
+
+        // Fases principais calculadas a partir de uma lunação de referência conhecida (UTC).
+        function getPlantingMoonPhases(year, month) {
+          const synodic = 29.530588853;
+          const reference = Date.UTC(2000, 0, 6, 18, 14);
+          const start = Date.UTC(year, month, 1);
+          const end = Date.UTC(year, month + 1, 1);
+          const phaseOffsets = [{name:'Lua Nova',icon:'🌑',phase:0},{name:'Quarto Crescente',icon:'🌓',phase:0.25},{name:'Lua Cheia',icon:'🌕',phase:0.5},{name:'Quarto Minguante',icon:'🌗',phase:0.75}];
+          const results = [];
+          for (const item of phaseOffsets) {
+            let k = Math.floor((start - reference) / (synodic * 86400000) - item.phase) - 1;
+            for (; k < 10000; k++) {
+              const time = reference + (k + item.phase) * synodic * 86400000;
+              if (time >= end) break;
+              if (time >= start) results.push({name:item.name,icon:item.icon,date:new Date(time)});
+            }
+          }
+          return results.sort((a,b)=>a.date-b.date);
+        }
+        function togglePlantingCalendar(show) {
+          const modal = document.getElementById('planting-calendar-modal');
+          if (!modal) return;
+          modal.classList.toggle('hidden', !show);
+          modal.classList.toggle('flex', !!show);
+          if (show) {
+            const yearSelect = document.getElementById('planting-year');
+            if (!yearSelect.options.length) {
+              const current = new Date().getFullYear();
+              for (let y=current-1; y<=current+3; y++) yearSelect.add(new Option(String(y),String(y)));
+              yearSelect.value = String(current);
+            }
+            renderPlantingCalendar();
+          }
+        }
+        let selectedPlantingMonth = new Date().getMonth();
+        function renderPlantingCalendar() {
+          const year = Number(document.getElementById('planting-year')?.value || new Date().getFullYear());
+          const grid = document.getElementById('planting-month-grid');
+          if (!grid) return;
+          document.getElementById('planting-selected-year').textContent = `Calendário ${year}`;
+          grid.innerHTML = plantingMonthNames.map((name,i)=>`
+            <button type="button" onclick="selectPlantingMonth(${i})" class="rounded-xl border p-3 sm:p-4 text-left transition ${i===selectedPlantingMonth?'bg-emerald-900/60 border-emerald-500 ring-1 ring-emerald-500':'bg-slate-950 border-slate-700 hover:border-emerald-700'}">
+              <span class="text-[10px] uppercase tracking-wider ${i===selectedPlantingMonth?'text-emerald-300':'text-slate-500'}">${plantingData[i].season}</span>
+              <span class="block text-sm sm:text-base font-extrabold text-white mt-1">${name}</span>
+              <span class="block text-[10px] text-slate-400 mt-1">${plantingData[i].crops.length} grupos de cultivo</span>
+            </button>`).join('');
+          renderPlantingMonth();
+        }
+        function selectPlantingMonth(month) { selectedPlantingMonth = month; renderPlantingCalendar(); }
+        function renderPlantingMonth() {
+          const year = Number(document.getElementById('planting-year')?.value || new Date().getFullYear());
+          const item = plantingData[selectedPlantingMonth];
+          document.getElementById('planting-month-title').textContent = `${plantingMonthNames[selectedPlantingMonth]} de ${year}`;
+          document.getElementById('planting-month-summary').textContent = item.summary;
+          document.getElementById('planting-crops').innerHTML = item.crops.map(([title,desc])=>`
+            <article class="rounded-xl border border-slate-700 bg-slate-950 p-4 text-left">
+              <h5 class="font-bold text-sm text-emerald-300 mb-2">${title}</h5>
+              <p class="text-xs text-slate-300 leading-relaxed">${desc}</p>
+            </article>`).join('');
+          const phases = getPlantingMoonPhases(year,selectedPlantingMonth);
+          document.getElementById('planting-moon-phases').innerHTML = phases.map(p=>`
+            <div class="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-950 p-3 text-left">
+              <span class="text-2xl">${p.icon}</span>
+              <span><strong class="block text-xs text-white">${p.name}</strong><small class="text-[11px] text-slate-400">${p.date.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',timeZone:'UTC'})}</small></span>
+            </div>`).join('') || '<p class="text-xs text-slate-400">Não foi possível calcular as fases para este mês.</p>';
+          const climate = [
+            ['☀️ Insolação',item.sun],['🌧️ Chuva',item.rain],['❄️ Frio / geada',item.cold],['🌡️ Calor',item.heat]
+          ];
+          document.getElementById('planting-climate-summary').innerHTML = climate.map(([label,desc])=>`
+            <div class="rounded-xl border border-slate-700 bg-slate-950 p-3 text-left">
+              <strong class="block text-xs text-sky-300 mb-1">${label}</strong><p class="text-[11px] leading-relaxed text-slate-300">${desc}</p>
+            </div>`).join('');
+        }
+        async function setPlantingLocation() {
+          const input = document.getElementById('planting-location');
+          const status = document.getElementById('planting-location-status');
+          const query = (input.value || '').trim();
+          if (!query) { status.textContent = 'Informe um município para pesquisar.'; return; }
+          status.textContent = 'Consultando município...';
+          try {
+            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=pt&format=json`);
+            if (!response.ok) throw new Error('Serviço de localização indisponível.');
+            const data = await response.json();
+            if (!data.results?.length) throw new Error('Município não encontrado. Informe também o estado.');
+            const place = data.results[0];
+            input.value = [place.name,place.admin1,place.country].filter(Boolean).join(', ');
+            status.textContent = `Local definido: ${input.value}. As recomendações agrícolas continuam sendo referências regionais gerais; confirme o ZARC municipal.`;
+          } catch (error) { status.textContent = error.message || 'Não foi possível localizar o município.'; }
+        }
+
 
         window.addEventListener('DOMContentLoaded', function() {
             updateLabSimulation();
