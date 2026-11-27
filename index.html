@@ -374,26 +374,6 @@
           <span id="public-update-label">Aguardando consulta...</span>
         </div>
         <div id="public-weather-status" class="mt-5 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600" role="status" aria-live="polite">Carregando condições meteorológicas...</div>
-        <div id="public-weather-metrics" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center flex flex-col items-center justify-center gap-2">
-            <div class="text-xs uppercase font-bold text-slate-500">Temperatura</div>
-            <div class="w-full h-16 flex items-center justify-center my-1"><i class="fa-solid fa-temperature-half text-5xl text-rose-500" aria-hidden="true" title="Temperatura"></i></div>
-            <div id="public-temp" class="text-2xl font-extrabold dark:text-white text-slate-900">--°C</div>
-            <div id="public-feels" class="text-xs text-slate-600">Sensação: --</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center flex flex-col items-center justify-center gap-2">
-            <div class="text-xs uppercase font-bold text-slate-500">Chuva nas próximas horas</div>
-            <div class="w-full h-16 flex items-center justify-center my-1"><i class="fa-solid fa-cloud-rain text-5xl text-sky-600" aria-hidden="true" title="Chuva"></i></div>
-            <div id="public-rain" class="text-2xl font-extrabold dark:text-white text-slate-900">--%</div>
-            <div id="public-rain-mm" class="text-xs text-slate-600">Precipitação: --</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center flex flex-col items-center justify-center gap-2">
-            <div class="text-xs uppercase font-bold text-slate-500">Vento</div>
-            <div class="w-full h-16 flex items-center justify-center my-1"><i class="fa-solid fa-wind text-5xl text-emerald-600" aria-hidden="true" title="Vento"></i></div>
-            <div id="public-wind" class="text-2xl font-extrabold dark:text-white text-slate-900">-- km/h</div>
-            <div id="public-gust" class="text-xs text-slate-600">Rajadas: --</div>
-          </div>
-        </div>
         <div class="mt-6 text-left rounded-xl border-2 border-slate-300 bg-slate-100 p-4 sm:p-5">
           <h3 class="text-base sm:text-lg font-black text-slate-900 mb-3 flex items-center gap-2"><span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-400 text-slate-950"><i class="fa-solid fa-triangle-exclamation"></i></span>Indicadores automáticos de atenção</h3>
           <div id="public-custom-alert-heading" class="hidden mb-4 rounded-xl border-2 border-amber-500 bg-amber-100 p-4 text-amber-950 shadow-sm" role="alert" aria-live="polite">
@@ -889,7 +869,8 @@
         </div>
 
 
-                <!-- CURRENT WEATHER METRICS -->
+                <!-- PAINEL UNIFICADO: condições atuais e indicadores de severidade -->
+        <section id="unified-weather-panel" class="rounded-2xl border border-slate-700 bg-slate-900/60 p-4 sm:p-5 space-y-6">
         <section>
             <div class="flex flex-col items-center justify-center mb-4 text-center gap-2">
                 <h2 class="text-xs uppercase tracking-wider font-bold dark:text-slate-400 text-slate-500 flex items-center justify-center gap-2">
@@ -963,8 +944,7 @@
             </div>
         </section>
 
-        <!-- ÁREA RESTRITA: começa após os indicadores públicos em tempo real -->
-        <div id="private-content" class="hidden" aria-hidden="true">
+        <!-- INDICADORES DE SEVERIDADE: integrados ao painel meteorológico público -->
         <!-- EVENTOS EXTREMOS - THRESHOLDS CHECK -->
         <section id="severity-indicators-section">
             <div class="flex items-center justify-center mb-4 text-center">
@@ -1048,6 +1028,10 @@
 
             </div>
         </section>
+        </section>
+
+        <!-- ÁREA RESTRITA: conteúdo complementar após o painel público -->
+        <div id="private-content" class="hidden" aria-hidden="true">
 
         <!-- RADAR / EARTH NULLSCHOOL / WIND / SATELLITE -->
         <section class="space-y-6 mt-10 pt-6 border-t border-slate-800/70">
@@ -2092,6 +2076,7 @@
                 await loadPublicWeather();
             }, err => setPublicStatus(err.code === 1 ? 'Permissão de localização negada. Você pode pesquisar uma cidade manualmente.' : 'Não foi possível obter sua localização. Pesquise uma cidade manualmente.', true), { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
         }
+        function publicSetText(id, value) { const el = publicEl(id); if (el) el.textContent = value; }
         async function loadPublicWeather() {
             setPublicStatus('Consultando dados meteorológicos...');
             try {
@@ -2112,13 +2097,13 @@
                 const gust = Number(c.wind_gusts_10m) || wind;
                 publicEl('public-location-label').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i>${label.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}`;
                 publicEl('public-update-label').textContent = `Atualizado: ${new Date().toLocaleString('pt-BR')}`;
-                publicEl('public-temp').textContent = `${Number(c.temperature_2m).toFixed(1)}°C`;
-                publicEl('public-feels').textContent = `Sensação: ${Number(c.apparent_temperature).toFixed(1)}°C`;
-                publicEl('public-rain').textContent = `${rain}%`;
-                publicEl('public-rain-mm').textContent = `Precipitação estimada (6h): ${mm.toFixed(1)} mm`;
-                publicEl('public-wind').textContent = `${wind.toFixed(1)} km/h`;
-                publicEl('public-gust').textContent = `Rajadas: ${gust.toFixed(1)} km/h`;
-                publicEl('public-weather-metrics').classList.remove('hidden');
+                publicSetText('public-temp', `${Number(c.temperature_2m).toFixed(1)}°C`);
+                publicSetText('public-feels', `Sensação: ${Number(c.apparent_temperature).toFixed(1)}°C`);
+                publicSetText('public-rain', `${rain}%`);
+                publicSetText('public-rain-mm', `Precipitação estimada (6h): ${mm.toFixed(1)} mm`);
+                publicSetText('public-wind', `${wind.toFixed(1)} km/h`);
+                publicSetText('public-gust', `Rajadas: ${gust.toFixed(1)} km/h`);
+                // Os cartões de temperatura, chuva e vento foram removidos da interface.
                 const alerts = [];
                 if (gust >= 60) alerts.push(['Atenção para vento forte', `Rajadas estimadas em ${gust.toFixed(0)} km/h. Evite áreas expostas e acompanhe os avisos oficiais.`, 'rose']);
                 else if (gust >= 45) alerts.push(['Vento merece atenção', `Rajadas estimadas em ${gust.toFixed(0)} km/h.`, 'amber']);
