@@ -336,6 +336,12 @@
                         <span>Sites Utilizados</span>
                     </button>
 
+
+                    <!-- Análise Avançada: acesso exclusivo a administradores validados -->
+                    <button type="button" data-auth-required="true" class="auth-gated-trigger hidden flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700" onclick="toggleAdvancedAnalysis(true)">
+                        <i class="fa-solid fa-chart-line text-violet-400"></i><span>Análise Avançada</span>
+                    </button>
+
                     <!-- Nova aba pública: Condições de Plantio -->
                     <button type="button" onclick="togglePlantingCalendar(true)" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 dark:text-slate-200 bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700">
                         <i class="fa-solid fa-seedling text-emerald-500"></i>
@@ -733,6 +739,102 @@
                 </ul>
             </div>
         </div>
+    </div>
+
+\n    <!-- ANÁLISE AVANÇADA: painel administrativo; dados externos são consultados sob demanda -->
+    <div id="advanced-analysis-modal" class="auth-gated-modal fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[75] hidden flex-col overflow-y-auto p-4 sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="advanced-analysis-title">
+      <div class="max-w-7xl mx-auto w-full space-y-6 my-auto text-slate-100">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-violet-700/60 bg-slate-900 p-4 sm:p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-violet-950 flex items-center justify-center"><i class="fa-solid fa-chart-line text-violet-300 text-2xl"></i></div>
+            <div class="text-left"><h2 id="advanced-analysis-title" class="text-xl sm:text-2xl font-extrabold text-white">Análise Avançada</h2><p class="text-xs sm:text-sm text-slate-400">Ambiente administrativo · Erechim/RS · análise, histórico e fontes especializadas</p></div>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="refreshAdvancedAnalysis()" class="px-4 py-2 bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs rounded-xl"><i class="fa-solid fa-rotate mr-1"></i> Atualizar dados</button>
+            <button type="button" onclick="toggleAdvancedAnalysis(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-amber-700/50 bg-amber-950/20 p-3 text-left text-xs leading-relaxed text-amber-200">
+          <i class="fa-solid fa-circle-info mr-1"></i><strong>Nota técnica:</strong> esta área reúne dados de APIs públicas, produtos de modelos e links externos. Previsões não são observações; CAPE e demais índices dependem do modelo e da disponibilidade da API. Este painel não emite alertas oficiais nem substitui INMET, Defesa Civil ou monitoramento hidrológico oficial.
+        </div>
+
+        <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-3 text-left">
+          <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-extrabold text-white"><i class="fa-solid fa-signal text-emerald-400 mr-2"></i>Qualidade e disponibilidade dos dados</h3><span id="advanced-last-update" class="text-[11px] text-slate-400">Ainda não consultado</span></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="rounded-xl bg-slate-950 border border-slate-800 p-3"><span class="text-[10px] uppercase text-slate-400">API meteorológica</span><strong id="advanced-api-status" class="block mt-1 text-sm text-amber-300">Aguardando consulta</strong></div>
+            <div class="rounded-xl bg-slate-950 border border-slate-800 p-3"><span class="text-[10px] uppercase text-slate-400">Última atualização desta área</span><strong id="advanced-data-age" class="block mt-1 text-sm text-white">--</strong></div>
+            <div class="rounded-xl bg-slate-950 border border-slate-800 p-3"><span class="text-[10px] uppercase text-slate-400">Referência geográfica</span><strong class="block mt-1 text-sm text-white">Erechim · RS</strong></div>
+          </div>
+          <p id="advanced-quality-detail" class="text-xs text-slate-400">A integridade será verificada durante as consultas. Horários seguem o fuso de São Paulo quando informado pela fonte.</p>
+        </section>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-3 text-left">
+            <h3 class="font-extrabold text-white"><i class="fa-solid fa-code-compare text-sky-400 mr-2"></i>Comparação entre modelos</h3>
+            <p class="text-xs text-slate-400">Comparação automatizada da previsão para as próximas 24 horas. Diferenças entre modelos representam dispersão, não uma probabilidade de ocorrência.</p>
+            <div id="advanced-models-status" class="text-xs text-slate-400">Clique em “Atualizar dados” para consultar ECMWF, GFS e ICON.</div>
+            <div class="overflow-x-auto"><table class="w-full text-xs text-left"><thead class="text-slate-400 border-b border-slate-700"><tr><th class="py-2 pr-3">Modelo</th><th class="py-2 pr-3">Temp. média</th><th class="py-2 pr-3">Chuva acumulada</th><th class="py-2">Rajada máx.</th></tr></thead><tbody id="advanced-models-table" class="text-slate-200"><tr><td colspan="4" class="py-3 text-slate-500">Sem consulta nesta sessão.</td></tr></tbody></table></div>
+          </section>
+
+          <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-3 text-left">
+            <h3 class="font-extrabold text-white"><i class="fa-solid fa-wind text-cyan-400 mr-2"></i>Perfil atmosférico e instabilidade</h3>
+            <p class="text-xs text-slate-400">Campos horários disponibilizados pelo modelo. Não equivalem a uma radiossondagem observada.</p>
+            <div id="advanced-atmosphere" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">CAPE</span><strong class="block text-lg text-white">--</strong></div>
+              <div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">CIN</span><strong class="block text-lg text-white">--</strong></div>
+              <div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Nível de congelamento</span><strong class="block text-lg text-white">--</strong></div>
+              <div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Temperatura</span><strong class="block text-lg text-white">--</strong></div>
+              <div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Ponto de orvalho</span><strong class="block text-lg text-white">--</strong></div>
+              <div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Umidade relativa</span><strong class="block text-lg text-white">--</strong></div>
+            </div>
+            <p id="advanced-atmosphere-note" class="text-[11px] text-slate-500">Valores serão preenchidos se o modelo selecionado disponibilizar os campos.</p>
+          </section>
+
+          <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-3 text-left">
+            <h3 class="font-extrabold text-white"><i class="fa-solid fa-database text-amber-400 mr-2"></i>Histórico meteorológico recente</h3>
+            <p class="text-xs text-slate-400">Consulta ao arquivo meteorológico para os últimos 30 dias completos, com máximas, mínimas e precipitação diária.</p>
+            <div id="advanced-history-summary" class="grid grid-cols-2 sm:grid-cols-3 gap-2"><div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Temp. máxima</span><strong class="block text-lg">--</strong></div><div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Temp. mínima</span><strong class="block text-lg">--</strong></div><div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">Chuva acumulada</span><strong class="block text-lg">--</strong></div></div>
+            <p id="advanced-history-status" class="text-xs text-slate-400">Histórico ainda não consultado.</p>
+          </section>
+
+          <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-3 text-left">
+            <h3 class="font-extrabold text-white"><i class="fa-solid fa-gauge-high text-fuchsia-400 mr-2"></i>Pressão atmosférica</h3>
+            <p class="text-xs text-slate-400">Tendência horária prevista e variação nas últimas horas quando disponível. A pressão isolada não determina a ocorrência de tempo severo.</p>
+            <div id="advanced-pressure" class="rounded-xl bg-slate-950 p-4 text-sm text-slate-300">Aguardando consulta.</div>
+          </section>
+        </div>
+
+        <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-4 text-left">
+          <h3 class="font-extrabold text-white"><i class="fa-solid fa-tower-broadcast text-rose-400 mr-2"></i>Raios, radar e deslocamento de tempestades</h3>
+          <p class="text-xs text-slate-400">A integração automática de descargas elétricas e rastreamento de células exige uma fonte com API/licença e cobertura documentada. Até essa integração, os acessos abaixo abrem produtos externos; não há contagem de raios ou estimativa de chegada calculada por este site.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="https://www.windy.com/" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-slate-700 bg-slate-950 p-4 hover:border-sky-500"><strong class="block text-sm text-sky-300">Radar e satélite Windy</strong><span class="text-xs text-slate-400">Visualização externa de precipitação, satélite e vento</span></a>
+            <a href="https://www.blitzortung.org/" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-slate-700 bg-slate-950 p-4 hover:border-rose-500"><strong class="block text-sm text-rose-300">Blitzortung</strong><span class="text-xs text-slate-400">Rede comunitária de localização de descargas elétricas</span></a>
+            <a href="https://www.inmet.gov.br/portal/" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-slate-700 bg-slate-950 p-4 hover:border-amber-500"><strong class="block text-sm text-amber-300">INMET</strong><span class="text-xs text-slate-400">Produtos meteorológicos e avisos oficiais</span></a>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-4 text-left">
+          <h3 class="font-extrabold text-white"><i class="fa-solid fa-water text-blue-400 mr-2"></i>Monitoramento hidrológico e chuva acumulada</h3>
+          <p class="text-xs text-slate-400">A consulta de níveis de rios e arroios depende de estações fluviométricas próximas, disponibilidade de telemetria e validação dos dados. Os links abaixo são fontes de consulta; este painel ainda não recebe níveis hidrométricos em tempo real.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="https://www.snirh.gov.br/hidroweb/" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-slate-700 bg-slate-950 p-4 hover:border-blue-500"><strong class="block text-sm text-blue-300">ANA · Hidroweb</strong><span class="text-xs text-slate-400">Séries históricas hidrológicas e estações</span></a>
+            <a href="https://www.defesacivil.rs.gov.br/" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-slate-700 bg-slate-950 p-4 hover:border-blue-500"><strong class="block text-sm text-blue-300">Defesa Civil RS</strong><span class="text-xs text-slate-400">Alertas e informações oficiais</span></a>
+            <a href="https://www.cprm.gov.br/" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-slate-700 bg-slate-950 p-4 hover:border-blue-500"><strong class="block text-sm text-blue-300">SGB · CPRM</strong><span class="text-xs text-slate-400">Monitoramento e estudos geocientíficos</span></a>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-5 space-y-3 text-left">
+          <h3 class="font-extrabold text-white"><i class="fa-solid fa-chart-area text-emerald-400 mr-2"></i>Anomalias climáticas e validação de previsão</h3>
+          <p class="text-xs text-slate-400">A comparação climática robusta requer normais oficiais homogêneas e uma série histórica longa. A validação exige armazenar previsões emitidas em cada data e confrontá-las com observações independentes.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="rounded-xl bg-slate-950 border border-slate-800 p-4"><strong class="text-sm text-emerald-300">Anomalias / climatologia</strong><p class="mt-1 text-xs text-slate-400">Não calculadas nesta versão: não há uma normal climatológica oficial vinculada ao mesmo ponto e período de referência. Evita-se comparar períodos incompatíveis.</p></div>
+            <div class="rounded-xl bg-slate-950 border border-slate-800 p-4"><strong class="text-sm text-emerald-300">Eficácia do modelo</strong><p class="mt-1 text-xs text-slate-400">MAE, RMSE e Brier Score só serão apresentados após criar um banco de previsões arquivadas e observações verificadas. Não há métricas fictícias nesta tela.</p></div>
+          </div>
+        </section>
+        <p class="text-[11px] text-slate-500 text-center">Painel experimental para análise técnica. Fontes e horários devem ser conferidos antes de qualquer decisão operacional.</p>
+      </div>
     </div>
 
     <!-- CONDIÇÕES DE PLANTIO: módulo independente, sem alterar os painéis existentes -->
@@ -1201,6 +1303,8 @@
         // PREENCHA estes dois campos com os dados do seu projeto Supabase.
        const SUPABASE_URL = 'https://kckaadrrxxwscbxohjbg.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XuDB-kpv-oi-ONTpTbze-g_3mz9OMeW';
+        // Conta única de proprietário da plataforma. A autorização real também é validada no Supabase (admin_users/RLS).
+        const OWNER_EMAIL = 'wander.l.marques@gmail.com';
 
         const supabaseClient = (() => {
             const configured = SUPABASE_URL.startsWith('https://')
@@ -1230,7 +1334,7 @@
                 document.getElementById(id)?.classList.add('hidden');
             });
             document.getElementById(panels[panel] || panels.login)?.classList.remove('hidden');
-            const titles = { login: 'Acesso administrativo', register: 'Criar conta', recover: 'Recuperar senha', update: 'Definir nova senha' };
+            const titles = { login: 'Acesso do proprietário', register: 'Criar conta', recover: 'Recuperar senha', update: 'Definir nova senha' };
             const title = document.getElementById('login-modal-title');
             if (title) title.textContent = titles[panel] || titles.login;
         }
@@ -1264,8 +1368,8 @@
                 });
                 if (error) throw error;
                 authMessage('register-message', data.session
-                    ? 'Conta criada. Para acessar a área administrativa, ela também precisa estar autorizada em admin_users.'
-                    : 'Cadastro recebido! Confira seu e-mail e confirme a conta. Depois, um administrador deverá autorizar o acesso em admin_users.');
+                    ? 'Conta criada. O acesso de proprietário é exclusivo da conta autorizada. Para os demais usuários, será aplicado o acesso conforme o plano.'
+                    : 'Cadastro recebido! Confira seu e-mail e confirme a conta. Esta conta não recebe privilégios administrativos automaticamente.');
             } catch (error) {
                 console.error('Erro no cadastro Supabase:', error);
                 authMessage('register-message', error.message || 'Não foi possível criar a conta.');
@@ -1299,7 +1403,7 @@
             document.getElementById('login-modal')?.classList.remove('hidden');
             showAuthPanel('login');
             authMessage('login-message', supabaseClient
-                ? 'Entre com o e-mail e a senha da conta administrativa cadastrada no Supabase.'
+                ? 'Entre com o e-mail e a senha da conta única de proprietário.'
                 : 'A integração ainda precisa receber a Project URL e a chave pública do Supabase.');
         }
 
@@ -1308,7 +1412,7 @@
         }
 
         function setAuthenticatedView(isAuthenticated, email, role = '') {
-            const allowed = !!isAuthenticated && ['owner', 'admin'].includes(role);
+            const allowed = !!isAuthenticated && role === 'owner';
             window.__siteAuthenticated = allowed;
             window.__siteIsAdmin = allowed;
 
@@ -1325,12 +1429,12 @@
 
             const label = document.getElementById('auth-user-label');
             if (label) {
-                label.textContent = allowed ? `Administrador (${role}): ${email || ''}` : '';
+                label.textContent = allowed ? `Proprietário: ${email || ''}` : '';
                 label.classList.toggle('hidden', !allowed);
             }
 
             if (allowed) closeLoginModal();
-            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal'].forEach(id => {
+            else ['model-efficacy-modal','tornado-lab-modal','sources-page-modal','sites-modal','advanced-analysis-modal'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
             return allowed;
@@ -1355,10 +1459,10 @@
                 return false;
             }
 
-            if (!data || data.active !== true || !['owner', 'admin'].includes(data.role)) {
+            if (!data || data.active !== true || data.role !== 'owner' || (session.user.email || '').toLowerCase() !== OWNER_EMAIL) {
                 await supabaseClient.auth.signOut();
                 setAuthenticatedView(false, '');
-                authMessage('login-message', 'Esta conta não possui autorização administrativa. Solicite a inclusão em admin_users.');
+                authMessage('login-message', 'Acesso restrito: somente a conta de proprietário autorizada pode acessar esta área.');
                 return false;
             }
 
@@ -2354,6 +2458,88 @@
             }
             status.textContent = `Local definido: ${input.value}. A climatologia histórica será consultada para este município; as recomendações agrícolas continuam sendo referências regionais gerais. Confirme o ZARC municipal.`;
           } catch (error) { status.textContent = error.message || 'Não foi possível localizar o município.'; }
+        }
+
+
+
+        // ANÁLISE AVANÇADA — consultas sob demanda; área liberada somente após validação administrativa.
+        const ADV_LAT = -27.634;
+        const ADV_LON = -52.274;
+        let advancedBusy = false;
+        function toggleAdvancedAnalysis(open) {
+            if (open && window.__siteIsAdmin !== true) { openLoginModal(); return; }
+            const panel = document.getElementById('advanced-analysis-modal');
+            if (!panel) return;
+            panel.classList.toggle('hidden', !open);
+            panel.classList.toggle('flex', !!open);
+            if (open && !advancedBusy && document.getElementById('advanced-api-status')?.textContent === 'Aguardando consulta') refreshAdvancedAnalysis();
+        }
+        async function advancedFetch(url) {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Fonte respondeu HTTP ${response.status}`);
+            return response.json();
+        }
+        function advFmt(value, digits=1, suffix='') { return Number.isFinite(Number(value)) ? `${Number(value).toFixed(digits)}${suffix}` : '—'; }
+        function advSetStatus(id, message) { const el=document.getElementById(id); if(el) el.textContent=message; }
+        async function refreshAdvancedAnalysis() {
+            if (window.__siteIsAdmin !== true || advancedBusy) return;
+            advancedBusy = true;
+            advSetStatus('advanced-api-status','Consultando fontes…');
+            advSetStatus('advanced-quality-detail','Verificando resposta, campos e horários disponibilizados pelas APIs.');
+            const now = new Date();
+            advSetStatus('advanced-last-update',`Consulta iniciada: ${now.toLocaleString('pt-BR')}`);
+            const tasks = await Promise.allSettled([loadAdvancedModels(), loadAdvancedAtmosphere(), loadAdvancedHistory(), loadAdvancedPressure()]);
+            const ok = tasks.filter(x=>x.status==='fulfilled').length;
+            advSetStatus('advanced-api-status',`${ok}/4 módulos consultados com sucesso`);
+            advSetStatus('advanced-data-age',`Consulta ${new Date().toLocaleTimeString('pt-BR')}`);
+            advSetStatus('advanced-last-update',`Última consulta: ${new Date().toLocaleString('pt-BR')}`);
+            const errors = tasks.filter(x=>x.status==='rejected').map(x=>x.reason?.message || 'falha desconhecida');
+            advSetStatus('advanced-quality-detail', errors.length ? `Algumas fontes falharam: ${errors.join(' · ')}. Dados indisponíveis não são substituídos por valores estimados.` : 'Respostas recebidas. Verifique o horário de referência e a natureza prevista/modelada de cada variável.');
+            advancedBusy = false;
+        }
+        async function loadAdvancedModels() {
+            const models=[['ECMWF','ecmwf_ifs025'],['GFS','ncep_gfs_seamless'],['ICON','icon_seamless']];
+            const rows=await Promise.all(models.map(async ([label,model])=>{
+                const url=`https://api.open-meteo.com/v1/forecast?latitude=${ADV_LAT}&longitude=${ADV_LON}&hourly=temperature_2m,precipitation,wind_gusts_10m&forecast_days=2&timezone=America%2FSao_Paulo&models=${model}`;
+                const d=await advancedFetch(url); const h=d.hourly;
+                if(!h?.time?.length) throw new Error(`${label}: sem dados horários`);
+                const start=1, end=Math.min(h.time.length,25);
+                const mean=(a)=>{const v=(a||[]).slice(start,end).filter(Number.isFinite);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null;};
+                const sum=(a)=>{const v=(a||[]).slice(start,end).filter(Number.isFinite);return v.length?v.reduce((x,y)=>x+y,0):null;};
+                return `<tr class="border-b border-slate-800"><td class="py-2 pr-3 font-bold">${label}</td><td class="py-2 pr-3">${advFmt(mean(h.temperature_2m),1,' °C')}</td><td class="py-2 pr-3">${advFmt(sum(h.precipitation),1,' mm')}</td><td class="py-2">${advFmt(Math.max(...(h.wind_gusts_10m||[]).slice(start,end).filter(Number.isFinite)),1,' km/h')}</td></tr>`;
+            }));
+            document.getElementById('advanced-models-table').innerHTML=rows.join('');
+            advSetStatus('advanced-models-status','Consulta concluída. Valores resumem as próximas 24 horas a partir da próxima hora disponível; modelos podem ter horários de atualização diferentes.');
+        }
+        async function loadAdvancedAtmosphere() {
+            const url=`https://api.open-meteo.com/v1/forecast?latitude=${ADV_LAT}&longitude=${ADV_LON}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,pressure_msl,cape,convective_inhibition,freezing_level_height&forecast_days=2&timezone=America%2FSao_Paulo`;
+            const d=await advancedFetch(url), h=d.hourly;
+            if(!h?.time?.length) throw new Error('Perfil atmosférico indisponível');
+            const i=Math.min(1,h.time.length-1);
+            const items=[['CAPE',h.cape?.[i], ' J/kg'],['CIN',h.convective_inhibition?.[i], ' J/kg'],['Nível de congelamento',h.freezing_level_height?.[i], ' m'],['Temperatura',h.temperature_2m?.[i], ' °C'],['Ponto de orvalho',h.dew_point_2m?.[i], ' °C'],['Umidade relativa',h.relative_humidity_2m?.[i], ' %']];
+            document.getElementById('advanced-atmosphere').innerHTML=items.map(([label,value,unit])=>`<div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">${label}</span><strong class="block text-lg text-white">${advFmt(value,0,unit)}</strong></div>`).join('');
+            advSetStatus('advanced-atmosphere-note',`Referência do modelo: ${new Date(h.time[i]).toLocaleString('pt-BR')}. Ausência de valor pode indicar campo não fornecido pelo modelo.`);
+        }
+        async function loadAdvancedHistory() {
+            const end=new Date(); end.setDate(end.getDate()-1);
+            const start=new Date(end); start.setDate(start.getDate()-29);
+            const iso=d=>d.toISOString().slice(0,10);
+            const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${ADV_LAT}&longitude=${ADV_LON}&start_date=${iso(start)}&end_date=${iso(end)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=America%2FSao_Paulo`;
+            const d=await advancedFetch(url), a=d.daily;
+            if(!a?.time?.length) throw new Error('Arquivo histórico sem dados');
+            const max=Math.max(...a.temperature_2m_max.filter(Number.isFinite));
+            const min=Math.min(...a.temperature_2m_min.filter(Number.isFinite));
+            const rain=a.precipitation_sum.filter(Number.isFinite).reduce((x,y)=>x+y,0);
+            document.getElementById('advanced-history-summary').innerHTML=[['Temp. máxima',advFmt(max,1,' °C')],['Temp. mínima',advFmt(min,1,' °C')],['Chuva acumulada',advFmt(rain,1,' mm')]].map(([l,v])=>`<div class="rounded-lg bg-slate-950 p-3"><span class="text-[10px] text-slate-400">${l}</span><strong class="block text-lg text-white">${v}</strong></div>`).join('');
+            advSetStatus('advanced-history-status',`Arquivo consultado: ${iso(start)} a ${iso(end)} · ${a.time.length} dias retornados pela Open-Meteo Archive. Dados de reanálise/arquivo, não leitura direta de estação local.`);
+        }
+        async function loadAdvancedPressure() {
+            const url=`https://api.open-meteo.com/v1/forecast?latitude=${ADV_LAT}&longitude=${ADV_LON}&hourly=pressure_msl&forecast_days=2&timezone=America%2FSao_Paulo`;
+            const d=await advancedFetch(url), h=d.hourly;
+            if(!h?.pressure_msl?.length) throw new Error('Pressão não disponível');
+            const values=h.pressure_msl.slice(0,25).filter(Number.isFinite);
+            const first=values[0], last=values[values.length-1], delta=last-first;
+            document.getElementById('advanced-pressure').innerHTML=`<div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><div><span class="text-xs text-slate-400">Pressão inicial</span><strong class="block text-xl text-white">${advFmt(first,1,' hPa')}</strong></div><div><span class="text-xs text-slate-400">Após 24h</span><strong class="block text-xl text-white">${advFmt(last,1,' hPa')}</strong></div><div><span class="text-xs text-slate-400">Variação prevista</span><strong class="block text-xl ${delta<0?'text-amber-300':'text-emerald-300'}">${delta>0?'+':''}${advFmt(delta,1,' hPa')}</strong></div></div><p class="mt-3 text-[11px] text-slate-500">Série prevista de pressão ao nível médio do mar · Open-Meteo · ${new Date(h.time[0]).toLocaleString('pt-BR')}</p>`;
         }
 
 
