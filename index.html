@@ -214,6 +214,16 @@
         #content-6h-alert { justify-content: center !important; flex-wrap: wrap; }
         canvas, svg { max-width: 100%; }
 
+
+        /* Indicador interno de 6 horas: dados separados e com respiro visual. */
+        #header-6h-alert { margin-top: 1.5rem !important; padding-top: 1rem !important; }
+        #header-6h-alert > div { width: 100%; }
+        #content-6h-alert { display: grid !important; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 12px !important; }
+        #content-6h-alert > div { min-width: 0; min-height: 82px; }
+        @media (min-width: 640px) {
+            #content-6h-alert { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px !important; }
+        }
+
         /* Aviso de independência institucional e melhor espaçamento da previsão */
         .site-independent-notice {
             max-width: 900px;
@@ -381,16 +391,28 @@
             <p class="mt-2 text-sm font-semibold">Elemento(s) de alerta identificado(s): <span id="public-custom-alert-elements"></span></p>
           </div>
           <div id="public-weather-alerts" class="space-y-4"><p class="text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg p-3">Os indicadores serão exibidos após a consulta.</p></div>
-          <div id="header-6h-alert" class="mt-3 rounded-xl border-2 border-emerald-700 bg-emerald-700 p-4 sm:p-5 text-white shadow-sm text-center">
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-2 border-b border-emerald-300/50 pb-2">
-              <span class="text-sm sm:text-base font-black uppercase tracking-wide flex items-center gap-2 justify-center">
-                <i class="fa-solid fa-clock-rotate-left"></i> Indicador interno — próximas 6 horas
-              </span>
-              <span id="label-6h-span" class="text-xs font-mono font-extrabold px-3 py-1 rounded bg-white text-emerald-900 uppercase">SEM ALERTA</span>
-            </div>
-            <div id="content-6h-alert" class="text-sm sm:text-base font-bold text-white flex flex-wrap justify-center items-center gap-1">
-              <i class="fa-solid fa-spinner fa-spin text-emerald-200 mr-2"></i>
-              <span>Carregando projeção meteorológica detalhada...</span>
+          <div id="header-6h-alert" class="mt-6 pt-4 border-t border-slate-300/50 rounded-xl text-white text-center">
+            <div class="rounded-xl border-2 border-emerald-700 bg-emerald-700 p-4 sm:p-5 shadow-sm">
+              <div class="flex flex-wrap items-center justify-center gap-3 mb-4 border-b border-emerald-300/50 pb-3">
+                <span class="text-sm sm:text-base font-black uppercase tracking-wide flex items-center gap-2 justify-center">
+                  <i class="fa-solid fa-clock-rotate-left"></i> Indicador interno — próximas 6 horas
+                </span>
+                <span id="label-6h-span" class="text-xs font-mono font-extrabold px-3 py-1 rounded bg-white text-emerald-900 uppercase">SEM ALERTA</span>
+              </div>
+              <div id="content-6h-alert" class="text-sm sm:text-base font-bold text-white grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 items-stretch">
+                <div class="rounded-lg border border-white/20 bg-black/10 px-3 py-3 flex flex-col justify-center gap-2">
+                  <span class="text-xs uppercase tracking-wide text-emerald-100">Temperatura</span>
+                  <strong class="text-base sm:text-lg">Aguardando dados...</strong>
+                </div>
+                <div class="rounded-lg border border-white/20 bg-black/10 px-3 py-3 flex flex-col justify-center gap-2">
+                  <span class="text-xs uppercase tracking-wide text-emerald-100">Chuva</span>
+                  <strong class="text-base sm:text-lg">Aguardando dados...</strong>
+                </div>
+                <div class="rounded-lg border border-white/20 bg-black/10 px-3 py-3 flex flex-col justify-center gap-2">
+                  <span class="text-xs uppercase tracking-wide text-emerald-100">Vento máximo</span>
+                  <strong class="text-base sm:text-lg">Aguardando dados...</strong>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1897,11 +1919,23 @@
                     }
 
                     // Renderiza os valores formatados na barra
-                    content6hEl.innerHTML = `<span class="font-bold">Temperatura:</span> <strong>${minTemp6h.toFixed(1)}° a ${maxTemp6h.toFixed(1)}°</strong> <span class="mx-1">•</span> <span class="font-bold">Chuva:</span> <strong>${sumRain6h.toFixed(1)} mm</strong> <span class="mx-1">•</span> <span class="font-bold">Vento máx.:</span> <strong>${maxWind6h.toFixed(1)} km/h</strong>`;
+                    content6hEl.innerHTML = `
+                        <div class="rounded-lg border border-white/20 bg-black/10 px-3 py-3 flex flex-col justify-center gap-2">
+                            <span class="text-xs uppercase tracking-wide opacity-90">Temperatura</span>
+                            <strong class="text-base sm:text-lg">${minTemp6h.toFixed(1)}°C a ${maxTemp6h.toFixed(1)}°C</strong>
+                        </div>
+                        <div class="rounded-lg border border-white/20 bg-black/10 px-3 py-3 flex flex-col justify-center gap-2">
+                            <span class="text-xs uppercase tracking-wide opacity-90">Chuva acumulada</span>
+                            <strong class="text-base sm:text-lg">${sumRain6h.toFixed(1)} mm</strong>
+                        </div>
+                        <div class="rounded-lg border border-white/20 bg-black/10 px-3 py-3 flex flex-col justify-center gap-2">
+                            <span class="text-xs uppercase tracking-wide opacity-90">Vento máximo</span>
+                            <strong class="text-base sm:text-lg">${maxWind6h.toFixed(1)} km/h</strong>
+                        </div>`;
                     label6hEl.innerText = alertMsg6h;
                     
                     // Aplica as classes dinamicamente
-                    header6hBox.className = `flex-1 max-w-xl mx-auto lg:mx-4 px-4 py-3 rounded-xl border-2 transition shadow-lg flex flex-row items-center justify-between gap-3 ${boxClass}`;
+                    header6hBox.className = `w-full px-4 py-3 rounded-xl border-2 transition shadow-lg ${boxClass}`;
                     label6hEl.className = `text-[10px] sm:text-xs font-mono font-bold px-2.5 py-1 rounded uppercase shrink-0 border ${labelClass}`;
                     if (icon6h) icon6h.className = `fa-solid fa-clock-rotate-left text-base ${iconClass}`;
                     if (title6h) title6h.className = `text-xs sm:text-sm font-black uppercase tracking-wider ${titleClass}`;
